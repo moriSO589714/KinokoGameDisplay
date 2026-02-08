@@ -13,6 +13,7 @@ public struct GameData
     public string GameDevelopper; //ゲームの作者
     public string GameDriveId; //ゲームのドライブID
     public string GameImageId; //ゲームのサムネのドライブID
+    public string[] GameTags; //ゲームに付与されているタグ
     public GameStatus Status; //ゲームの状態(ダウンロードされているかなど)
 }
 

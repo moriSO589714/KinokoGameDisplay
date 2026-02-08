@@ -24,11 +24,10 @@ public class FirstLoadAwake : MonoBehaviour
     
     
     
-    //ステート変更時に一緒に行う処理(シーンの変更等)
+    //ステート変更時に一緒に行う処理(後処理、シーン遷移アニメーションとか)
     private async UniTask ToMainScene(CancellationToken token)
     {
-        SceneLoader sceneLoader = new SceneLoader();
-        sceneLoader.OnLoadScene("Main");
+
     }
     
 }
