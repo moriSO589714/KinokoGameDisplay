@@ -1,5 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -14,29 +17,57 @@ public class DLData
     public string FileName { get; private set; }
     //分割したファイルの個数
     public long SplitedFileNum { get; private set; }
+    //ファイル群にすべてのデータが揃っているか
+    public bool IsCheckAllRequiredData { get; private set; } = false;
 
-    //クラス生成時にデータを格納するためのコンストラクタ。
+    /// <summary>
+    /// インスタンス時にデータをセットするようのコンストラクタ
+    /// </summary>
+    /// <param name="filesPath"></param>
+    public DLData(string filesPath)
+    {
+        SetDataByPath(filesPath);
+    }
     public DLData(long gameSize, string fileName, long splitedFileNum)
     {
-        SetData(gameSize, fileName, splitedFileNum);
+        SetDataByCustomDatas(gameSize, fileName, splitedFileNum);
     }
     public DLData(byte[] byteData)
     {
         SetDataByByte(byteData);
     }
+    public DLData()
+    {
+
+    }
+
+    /// <summary>
+    /// 分割されたファイル群が入ったフォルダのパスからデータをセットするメソッド
+    /// </summary>
+    /// <param name="filesPath"></param>
+    public void SetDataByPath(string filesPath)
+    {
+        //ファイル群のパスを順番にソートする
+        string[] sortedFiles = new FreezingGeneric().sortingFilesByPath(filesPath);
+    }
 
     /// <summary>
     /// データをセットするメソッド（""の場合はセットしない）
     /// </summary>
-    /// <param name="gameSize"></param>
-    /// <param name="fileName"></param>
-    public void SetData(long gameSize, string fileName,long splitedFileNum)
+    /// <param name="gameSize">ゲームの全体容量(不明時は-1を代入)</param>
+    /// <param name="fileName">ゲームデータが入ったフォルダの名前(不明時は""を代入)</param>
+    /// <param name="splitedFileNum">ゲームが分割された際の分割数(不明時は-1を代入)</param>
+    public void SetDataByCustomDatas(long gameSize, string fileName,long splitedFileNum)
     {
-        if(gameSize != null) GameSize = gameSize;
+        if(gameSize != -1) GameSize = gameSize;
         if(fileName != "") FileName = fileName;
-        if(splitedFileNum != null) SplitedFileNum = splitedFileNum;
+        if(splitedFileNum != -1) SplitedFileNum = splitedFileNum;
     }
 
+    /// <summary>
+    /// バイト配列からデータを取り出しセットする(通常、.00ファイルを読み込む際に利用する)
+    /// </summary>
+    /// <param name="byteData"></param>
     public void SetDataByByte(byte[] byteData)
     {
         string dlData = System.Text.Encoding.UTF8.GetString(byteData);
@@ -56,4 +87,6 @@ public class DLData
         byte[] byteData = System.Text.Encoding.UTF8.GetBytes(toByteData);
         return byteData;
     }
+
+
 }

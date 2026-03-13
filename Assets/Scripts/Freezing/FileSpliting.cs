@@ -12,18 +12,22 @@ public class FileSpliting
     /// <summary>
     /// フォルダを圧縮するメソッド
     /// </summary>
-    /// <param name="folderURL">zip化されるフォルダー</param>
+    /// <param name="gameDataPath">ゲームデータが入ったフォルダのパス</param>
     /// <param name="toFilePath">zip化したファイルのパス</param>
-    public string PackagingFile(string folderURL,string toFilePath)
+    public string PackagingFile(string gameDataPath,string toFilePath)
     {
-        string zipFileName = Path.GetFileName(folderURL) + ".zip";
+        //.zipの拡張子を付けて、圧縮ファイルのファイル名のみを作る（※パスではないため注意！！）
+        string zipFileName = Path.GetFileName(gameDataPath) + ".zip";
+        //toFilePathで指定された場所に圧縮ファイルが置かれるようなパスを生成する。
         string tempFilePath = Path.Combine(toFilePath, zipFileName);
 
         try
         {
+            //すでに圧縮された同名のファイルが存在した場合、そのファイルを削除する
             if(File.Exists(tempFilePath)) File.Delete(tempFilePath);
 
-            ZipFile.CreateFromDirectory(folderURL, tempFilePath, System.IO.Compression.CompressionLevel.Optimal, false, System.Text.Encoding.GetEncoding("shift_jis"));
+            //shift_jisを指定して圧縮
+            ZipFile.CreateFromDirectory(gameDataPath, tempFilePath, System.IO.Compression.CompressionLevel.Optimal, false, System.Text.Encoding.GetEncoding("shift_jis"));
         }
         catch(System.Exception e) 
         {
@@ -37,20 +41,20 @@ public class FileSpliting
     /// <summary>
     /// ZIPファイルを分割するメソッド
     /// </summary>
-    /// <param name="zipFilePath"></param>
     /// <param name="splicedBite">分割する要領の指定(単位はバイト)</param>
-    public void DivideZipFile(int splicedBite ,string zipFilePath, string saveinPath)
+    /// <param name="splicedFilePath">分割されるファイルのパス</param>
+    /// <param name="saveinPath">分割後のファイル群が保存されるフォルダのパス</param>
+    public void DivideZipFile(int splicedBite ,string splicedFilePath, string saveinPath)
     {
         //ファイルサイズ
-        FileInfo fileInfo = new FileInfo(zipFilePath);
+        FileInfo fileInfo = new FileInfo(splicedFilePath);
         long fileSize = fileInfo.Length;
         //ファイル名
-        string fileName = Path.GetFileName(zipFilePath).Split(".")[0];
+        string fileName = Path.GetFileNameWithoutExtension(splicedFilePath);
 
-            
         long chunkIndex = 1;
         //ファイルストリームを開く
-        using (FileStream fs = new FileStream(zipFilePath, FileMode.Open, FileAccess.Read))
+        using (FileStream fs = new FileStream(splicedFilePath, FileMode.Open, FileAccess.Read))
         {
             int bytesRead;
 
@@ -84,6 +88,6 @@ public class FileSpliting
         }
 
         //zipファイルを削除する
-        File.Delete(dlDataPath);
+        File.Delete(splicedFilePath);
     }
 }

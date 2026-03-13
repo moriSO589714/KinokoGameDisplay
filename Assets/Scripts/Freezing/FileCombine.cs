@@ -12,82 +12,52 @@ public class FileCombine
 {
     //不足したファイルがあった際に呼ばれるデリゲート
     public Action<List<long>> IsLackFile;
+    //問題のあるファイルがあった際に呼ばれるデリゲート
+    public Action<List<string>> IsErrorFile;
 
     /// <summary>
-    /// 分割されたZIPファイルを結合するメソッド
+    /// 分割されたZIPファイルを結合して解凍するメソッド
     /// </summary>
     /// <param name="splitedFilesPath">結合されるファイル群が置かれているディレクトリのパス</param>
     public void MergeSplitedFile(string splitedFilesPath, string margedFileInDirPath)
     {
         //対象ディレクトリ内のファイルのパスを取得してくる
         string[] splitedFiles = Directory.GetFiles(splitedFilesPath);
-        //取得したファイルパス群から、語尾の数値でソートを行う(数値以外の部分は共通しているため、単純にソートを行うことが可能)
-        //ToArray()はキャッシュ化してLINQの遅延実行を無視するため
-        string[] sortedFiles = splitedFiles.OrderBy(f => f).ToArray();
 
-
-        //.00のデータからファイル名・データのサイズを取り出す
-        if (Path.GetExtension(sortedFiles[0]) != ".00")
-        {
-            //.00のファイルが無かった際のエラー処理(例外を指定する)
-            throw new Exception();
-        }
-
-        byte[] dlDatabytes = File.ReadAllBytes(sortedFiles[0]);
-        DLData targetDLData = new DLData(dlDatabytes);
-        string dlFileName = targetDLData.FileName;
-        long splitedFileNum = targetDLData.SplitedFileNum;
-
-        //全ての分割されたファイルが揃っているかを結合前に確認する
-        long checkCounter = 0;
-        List<long> lackFileNumber = new List<long>();
-        List<long> passFileIndex = new List<long>();
-        for(int i = 0; i < sortedFiles.Length; i++)
-        {
-            //ファイル名の取得
-            string fileName = Path.GetFileName(sortedFiles[i]);
-            string[] splitedFileName = fileName.Split('.');
-            string gameName = splitedFileName[0];
-            long fileNumber = long.Parse(splitedFileName[1]);
-
-
-            if(gameName != dlFileName)
-            {
-                passFileIndex.Add(i);
-                continue;
-            }
-
-            //同じファイル番号を持つファイルが連続していた場合
-            if(fileNumber < checkCounter)
-            {
-                passFileIndex.Add(i);
-                checkCounter--;
-            }
-            //ファイルが一つ飛んでいる場合
-            else if(fileNumber > checkCounter)
-            {
-                lackFileNumber.Add(fileNumber);
-                i--;
-            }
-            checkCounter++;
-        }
-
-        if(lackFileNumber.Count() != 0)
+        MistakeFiles mistakeFiles = new FreezingGeneric().hasAllRequiredData(splitedFilesPath);
+        if(mistakeFiles.LackFiles.Count() != 0)
         {
             //ファイル欠損時に呼ぶメソッドを呼んで処理を終了
-            IsLackFile.Invoke(lackFileNumber);
+            IsLackFile?.Invoke(mistakeFiles.LackFiles);
             Debug.Log("ファイルの欠損を確認しました");
             return;
         }
+        else if (mistakeFiles.ErrorFilePathes.Count() != 0)
+        {
+            //ファイル欠損以外に問題があるファイルがある場合(ファイルの重複、名前の異なるファイル)
+            IsErrorFile?.Invoke(mistakeFiles.ErrorFilePathes);
+            Debug.Log("ファイル群のあるフォルダに問題のあるファイルがあります。");
+            return;
+        }
 
+        //データ群を拡張子でソート
+        string[] sortedFiles = new FreezingGeneric().sortingFilesByPath(splitedFilesPath);
+        //一番初めに来るファイル(.00)のファイルをバイト配列として取得する
+        byte[] dlDatabytes = File.ReadAllBytes(sortedFiles[0]);
+        //DLDataクラスに上記バイト配列からデータを格納
+        DLData targetDLData = new DLData(dlDatabytes);
+
+        //targetDLDataから結合するゲームの詳細情報を取得する
+        string dlFileName = targetDLData.FileName;
+        long splitedFileNum = targetDLData.SplitedFileNum;
+
+        //結合後にファイルを置くパスを生成
         string margedFilePath = Path.Combine(margedFileInDirPath, dlFileName + ".zip");
         //データを結合する処理
         using (FileStream outFs = new FileStream(margedFilePath, FileMode.Create,FileAccess.Write))
         {
             for (int i = 1; i < sortedFiles.Length; i++)
             {
-                if (passFileIndex.Contains(i)) continue;
-
                 byte[] bytedatas = File.ReadAllBytes(sortedFiles[i]);
                 outFs.Write(bytedatas, 0, bytedatas.Length);
             }
