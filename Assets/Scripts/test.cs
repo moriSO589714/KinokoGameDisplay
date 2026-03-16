@@ -7,13 +7,14 @@ using UnityEngine;
 
 public class test : MonoBehaviour
 {
-    private string path = "C:/Users/souza/Downloads/corocorogame";
+    private string path = "C:/Users/souza/Downloads/jsonParty";
     private string inPath = "C:/Users/souza/Downloads/INcorocorogame";
 
     // Start is called before the first frame update
     void Start()
     {
-        Test2();
+        List<GameData> gameDatas = new JSONandGameDataChanger().JSONDirPathToGameData(path);
+
         Debug.Log("End");
     }
 
