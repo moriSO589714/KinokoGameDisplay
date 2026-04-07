@@ -5,26 +5,35 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public enum CommonStates
+public enum SceneStates
 {
-    Load,
+    First, //アプリ起動時のみ入るシーン
     Library,
     Admin,
 }
+public enum LoadStates 
+{
+    NoLoading,　//ロードを行っていない
+    MainLoading, //パネルを用い全画面を伴うロード
+    MiniLoading, //画面の一部分のみを伴うロード
+    BackLoading,　//画面上では分からないロード
+}
+
+
 public class CommonStateManager : BasedSingleton<CommonStateManager>
 {
     //現在の状態
-    [HideInInspector] public CommonStates _currentState { get; private set; }
+    [HideInInspector] public SceneStates _currentState { get; private set; }
     //ステート切り替え時に実行するメソッド(通常終了処理が記述される)
     private List<Func<CancellationToken, UniTask>> _onChangeActions = new();
 
     protected override void Awake()
     {
         base.Awake();
-        _currentState = CommonStates.Load;
+        _currentState = SceneStates.First;
     }
 
-    public async UniTask SetCurrentState(CommonStates state)
+    public async UniTask SetCurrentState(SceneStates state)
     {
         CancellationTokenSource cts = new CancellationTokenSource();
         
@@ -38,12 +47,12 @@ public class CommonStateManager : BasedSingleton<CommonStateManager>
         //シーン遷移を伴うなら、シーンを遷移させる（シーン遷移はここ以外から行わない）
         switch (state)
         {
-            case CommonStates.Load:
+            case SceneStates.First:
                 break;
-            case CommonStates.Library:
+            case SceneStates.Library:
                 SceneManager.LoadScene("Main");
                 break;
-            case CommonStates.Admin:
+            case SceneStates.Admin:
                 break;
         }
     }

@@ -25,6 +25,7 @@ public class GameData
     public string GameSoftwareType; //使われたゲーム開発環境
     public string GameDriveId; //ゲームのドライブID
     public string GameImageId; //ゲームのサムネのドライブID
+    public string GameImageName; //ゲームのサムネのファイル名(〇〇.png)
     public string[] GameTags; //ゲームに付与されているタグ
     public GameStatus Status; //ゲームの状態(ダウンロードされているかなど)
 }

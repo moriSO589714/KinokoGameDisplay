@@ -1,11 +1,12 @@
 {
   "GameDirName": "aaa",
-  "GameTitle": "AAATitle",
+  "GameTitle": "NonStopTuna2",
   "GameExeName": "aaa.exe",
   "GameDevelopper": "aaaaa",
   "GameDriveId": "",
   "GameImageId": "",
+  "GameImageName": "aaa.png",
   "GameSoftwareType": "Unity",
-  "GameDescription": "",
+  "GameDescription": "マグロになって、大海を駆けるレースゲームです！",
   "GameVersion": 0
 }

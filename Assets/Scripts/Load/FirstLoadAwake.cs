@@ -19,7 +19,7 @@ public class FirstLoadAwake : MonoBehaviour
         
         
         //ステートを変更
-        _commonStateManager.SetCurrentState(CommonStates.Library);
+        _commonStateManager.SetCurrentState(SceneStates.Library);
     }
     
     
