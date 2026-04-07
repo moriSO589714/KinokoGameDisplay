@@ -14,6 +14,7 @@
 /[Aa]ssets/AssetStoreTools/
 /[Aa]ssets/DelicateDatas/
 /[Pp]ackages/com.singularitygroup.hotreload/
+/[Pp]ackages/GoogleAPIs/
 *.log
 
 # By default unity supports Blender asset imports, *.blend1 blender files do not need to be commited to version control.
