@@ -1,4 +1,5 @@
-﻿using Google.Apis.Sheets.v4;
+﻿using Google.Apis.Drive.v3;
+using Google.Apis.Sheets.v4;
 using JetBrains.Annotations;
 using System;
 using System.Collections;
@@ -15,10 +16,17 @@ public class test : MonoBehaviour
     void Start()
     {
         new EachDataLoad().LocalDataLoad();
-        SpreadSheetBasedFunc spreadSheetBasedFunc = new SpreadSheetBasedFunc();
-        SheetsService sheetService =  spreadSheetBasedFunc.CreateSSAPI();
-        List<List<string>> values = spreadSheetBasedFunc.ReturnSSValue(sheetService, new Vector2(1, 1), new Vector2(3, 2));
+        DriveService driveService = new DriveBased().CreateDriveAPI(AllDirs.GetInstance().JsonPathKey);
+        try
+        {
+            new DriveBased().DownloadFromDrive(driveService, "1e0LSKmtMHu2jkT84DfbEKAIojIhcEFqL", "KinokinoAsobitai");
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
+        }
 
+        Debug.Log("end");
         /*
         new EachDataLoad().LocalDataLoad();
         obj.GetComponent<GameBoxsManager>().SetGameBoxsByGameDataList(GameDatasSingleton.Instance.GameDatas);

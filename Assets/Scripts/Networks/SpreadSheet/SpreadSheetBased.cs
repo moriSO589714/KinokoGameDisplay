@@ -7,17 +7,16 @@ using UnityEngine;
 using Google.Apis.Sheets.v4.Data;
 using System.Collections.Generic;
 
-public class SpreadSheetBasedFunc
+public class SpreadSheetBased
 {
     /// <summary>
     /// スプレッドシート接続用のAPIを作成する。
     /// </summary>
     /// <returns></returns>
-    public SheetsService CreateSSAPI()
+    public SheetsService CreateSSAPI(string jsonKeyPath)
     {
         GoogleCredential credential;
-        AllDirs allDirs = AllDirs.GetInstance();
-        using (var stream = new FileStream(allDirs.JsonPathKey, FileMode.Open, FileAccess.Read))
+        using (var stream = new FileStream(jsonKeyPath, FileMode.Open, FileAccess.Read))
         {
             credential = GoogleCredential.FromStream(stream).CreateScoped(SheetsService.ScopeConstants.Spreadsheets);
         }
@@ -38,9 +37,10 @@ public class SpreadSheetBasedFunc
     /// <param name="endCellPosition">値を返す範囲の終わりの(列,行)</param>
     /// <returns>セルの値[0]A1,A2,A3...
     ///                 [1]B2,B2,B3...</returns>
-    public List<List<string>> ReturnSSValue(SheetsService sheetService, Vector2 startCellPosition, Vector2 endCellPosition)
+    public List<List<string>> ReturnSSValue(SheetsService sheetService, string sheetID, Vector2 startCellPosition, Vector2 endCellPosition)
     {
-        var request = sheetService.Spreadsheets.Values.Get(AllDirs.GetInstance().SpreadSheetID,"シート1!" + ChangeR1C1(startCellPosition) + ":" + ChangeR1C1(endCellPosition));
+        if (sheetID == null) throw new Exception("failed to get cell value. dont load ssid");
+        var request = sheetService.Spreadsheets.Values.Get(sheetID,"シート1!" + ChangeToR1C1(startCellPosition) + ":" + ChangeToR1C1(endCellPosition));
         List<List<string>> returnValues = new List<List<string>>();
         try
         {
@@ -70,7 +70,7 @@ public class SpreadSheetBasedFunc
     /// </summary>
     /// <param name="cellValue">(列,行)</param>
     /// <returns></returns>
-    public string ChangeR1C1(Vector2 cellValue)
+    public string ChangeToR1C1(Vector2 cellValue)
     {
         string returnValue = "R" + cellValue.x.ToString() + "C" + cellValue.y.ToString();
         return returnValue;
