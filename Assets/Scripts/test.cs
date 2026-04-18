@@ -1,4 +1,5 @@
-﻿using Google.Apis.Drive.v3;
+﻿using DG.Tweening.Plugins;
+using Google.Apis.Drive.v3;
 using Google.Apis.Sheets.v4;
 using JetBrains.Annotations;
 using System;
@@ -15,21 +16,13 @@ public class test : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        new EachDataLoad().LocalDataLoad();
-        try
-        {
-            List<string> array = new SpreadSheetTools().GetElementTypeArray(AllDirs.GetInstance().JsonPathKey, AllDirs.GetInstance().SpreadSheetID);
-        }
-        catch (Exception e)
-        {
-            Debug.Log(e);
-        }
-
+        new LoadFlexibleDir().SetFlexibleDirByJson();
+        string jsonPathKey = AllDirs.GetInstance().JsonPathKey;
+        string spID = AllDirs.GetInstance().SpreadSheetID;
+        GameData gameData = new GameData();
+        gameData.GameTags = new string[1] {"カードゲーム"};
+        new SpreadSheetDataGet().GetGameDataOfSpreadSheet(gameData, jsonPathKey,spID);
+        
         Debug.Log("end");
-        /*
-        new EachDataLoad().LocalDataLoad();
-        obj.GetComponent<GameBoxsManager>().SetGameBoxsByGameDataList(GameDatasSingleton.Instance.GameDatas);
-        Debug.Log("End");
-        */
     }
 }
