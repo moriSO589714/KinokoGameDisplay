@@ -2,5 +2,6 @@
   "GameFilePath": "KinokinoAsobitai/GameFiles",
   "JsonsDirPath": "KinokinoAsobitai/GameJsons",
   "ImageFolderPath": "KinokinoAsobitai/Images",
-  "SpreadSheetID": "1qq_71O8h-mBCvoGRUf6gTSUTr-8pxn0tP_Dy973wfa8"
+  "SpreadSheetID": "1qq_71O8h-mBCvoGRUf6gTSUTr-8pxn0tP_Dy973wfa8",
+  "SpreadSheetStartCellPos": {"x": 2, "y": 3}
 }

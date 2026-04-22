@@ -58,7 +58,7 @@ public class NetworksSingleton : BasedSingleton<NetworksSingleton>
         //GameIDが記載されている列数を取得する
         int numberofColumns = new SpreadSheetTools().IndextoSSColumn(spreadSheetElementOrder.IndexOf("GameID"));
         Vector2 gameIDStartCell = new Vector2(numberofColumns, allDirs.SpreadSheetStartCellPos.y);
-        SheetsService sheetsService = new SpreadSheetBased().CreateSSAPI(allDirs.JsonPathKey);
+        SheetsService sheetsService = new SpreadSheetBased().CreateSpStAPI(allDirs.JsonPathKey);
         Dictionary<Vector2, string> gameIDColumnValues = new SpreadSheetBased().ScrollCellValueSearch(sheetsService, allDirs.SpreadSheetID, new Vector2(numberofColumns, 3),true);
 
         int liminalRow = -1;

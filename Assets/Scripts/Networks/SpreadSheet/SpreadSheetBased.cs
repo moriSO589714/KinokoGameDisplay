@@ -14,7 +14,7 @@ public class SpreadSheetBased
     /// スプレッドシート接続用のAPIを作成する。
     /// </summary>
     /// <returns></returns>
-    public SheetsService CreateSSAPI(string jsonKeyPath)
+    public SheetsService CreateSpStAPI(string jsonKeyPath)
     {
         GoogleCredential credential;
         using (var stream = new FileStream(jsonKeyPath, FileMode.Open, FileAccess.Read))

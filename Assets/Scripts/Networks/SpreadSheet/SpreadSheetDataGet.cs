@@ -12,14 +12,14 @@ public class SpreadSheetDataGet : SpreadSheetBased
     /// スプレッドシートから要素名(GameDataのjsonと共通)を取り出してきて、スプシにある順番で配列に格納して返す
     /// (重い処理なので複数走らせない)
     /// </summary>
-    public List<string> GetElementTypeArray(string jsonKeyPath, string sheetID)
+    public List<string> GetElementTypeArray(string jsonKeyPath, string spStID)
     {
-        SheetsService sheetService = CreateSSAPI(jsonKeyPath);
+        SheetsService spStService = CreateSpStAPI(jsonKeyPath);
 
         AllDirs allDirs = AllDirs.GetInstance();
         Vector2 targetPos = new Vector2(allDirs.SpreadSheetStartCellPos.x, allDirs.SpreadSheetStartCellPos.y - 1);
         //ScrollCellValueSearchで得られたディクショナリ型のデータを要素のみを取り出してリストに入れる
-        List<string> elementTypeArray = ScrollCellValueSearch(sheetService, sheetID, targetPos, false).Select(x => x.Value).ToList();
+        List<string> elementTypeArray = ScrollCellValueSearch(spStService, spStID, targetPos, false).Select(x => x.Value).ToList();
 
         return elementTypeArray;
     }
@@ -30,18 +30,53 @@ public class SpreadSheetDataGet : SpreadSheetBased
     /// </summary>
     /// <param name="conditions">検索する条件を設定用。絞りこみたい条件を変数として格納したGameDataクラスを渡すことで、その条件にあうゲームの情報のみを返す</param>
     /// <returns></returns>
-    public List<GameData> GetGameDataOfSpreadSheet(GameData condition, string jsonKeyPath, string sheetID)
+    public List<GameData> FilterGameDataFromSpreadSheet(GameData filterGameData, string jsonKeyPath, string spStId)
     {
         AllDirs allDirs = AllDirs.GetInstance();
         //シートの最も上の行(C,*)から条件に合うものだけをゲームデータにして、配列に格納していく
+        Dictionary<string, string> stringDictionaryFilter = GameDataFilterToDictionaryFilter(filterGameData);
 
+        //ディクショナリの要素とスプレッドシートの要素名の列数を変換させる
+        NetworksSingleton networksSingleton = NetworksSingleton.Instance;
+        List<string> spStElementOrder = networksSingleton.ReturnElementOrder();
+
+        SheetsService spStService = CreateSpStAPI(jsonKeyPath);
+
+        //keyがstring型の要素名であったのを、スプレッドシートの列数に変換して値(条件)と一緒にディクショナリに格納する
+        Dictionary<int, string> columnNumAndFilters = new Dictionary<int, string>();
+        foreach (var filters in stringDictionaryFilter)
+        {
+            int columnOrder = StrFieldNameToElementColumnInSpSt(networksSingleton.ReturnElementOrder(),filters.Key);
+            if (columnOrder == -1) continue;
+            columnNumAndFilters[columnOrder] = filters.Value;
+        }
+        //最終的に絞り込まれたゲームの1セル
+        Dictionary<Vector2, string> lastFilterdCellDictionary = RemoveNoGoodElement(columnNumAndFilters, spStService, spStId);
+
+        //条件を満たしているゲームをGameDataクラスに変更する
+        List<GameData> returnList = new List<GameData>();
+        foreach (var lastFilteredCellPair in lastFilterdCellDictionary)
+        {
+            //そのゲームのデータをスプレッドシートから全て取得
+            List<List<string>> getedAllData = ReturnSSValue(spStService, spStId, new Vector2(allDirs.SpreadSheetStartCellPos.x, lastFilteredCellPair.Key.y), new Vector2(new SpreadSheetTools().IndextoSSColumn(spStElementOrder.Count), lastFilteredCellPair.Key.y));
+            //多次元配列のリストをstringのリストに変換
+            List<string> getedAllDataArray = new List<string>(getedAllData[0]);
+
+            GameData createdGameData = SpreadSheetElementArrayToGameData(spStElementOrder, getedAllDataArray);
+            if (createdGameData != null) returnList.Add(createdGameData);
+        }
+        return new List<GameData>(returnList);
+    }
+
+    private Dictionary<string, string> GameDataFilterToDictionaryFilter(GameData filterGameData)
+    {
         FieldInfo[] gameDataFields = typeof(GameData).GetFields();
         //絞り込み条件を<変数名,絞りこむ値>として保存するディクショナリ
-        Dictionary<string, string> conditionsDictionary = new Dictionary<string, string>();
+        Dictionary<string, string> filtersDictionary = new Dictionary<string, string>();
         //まず条件として指定されているものを取得する
         foreach (FieldInfo fi in gameDataFields)
         {
-            var value = fi.GetValue(condition);
+            var value = fi.GetValue(filterGameData);
             if (value == null) continue;
 
             string librarySetStr = "";
@@ -54,70 +89,91 @@ public class SpreadSheetDataGet : SpreadSheetBased
             {
                 librarySetStr += value.ToString();
             }
-            conditionsDictionary[fi.Name] = librarySetStr;
+            filtersDictionary[fi.Name] = librarySetStr;
         }
 
-        //ディクショナリの要素とスプレッドシートの要素名の列数を変換させる
+        return filtersDictionary;
+    }
+
+    /// <summary>
+    /// スプレッドシートの要素名の並び順リストから、string型で指定された要素名がスプレッドシートの何列目にあるかを返す
+    /// </summary>
+    /// <param name="spStElementOrder"></param>
+    /// <param name="convertedStrFieldName"></param>
+    /// <returns>スプレッドシートの列数(配列のindex値ではない)</returns>
+    private int StrFieldNameToElementColumnInSpSt(List<string> spStElementOrder, string convertedStrFieldName)
+    {
+        int elementColumn = spStElementOrder.IndexOf(convertedStrFieldName);
+        if (elementColumn == -1) return elementColumn;
+        elementColumn = new SpreadSheetTools().IndextoSSColumn(elementColumn);
+        return elementColumn;
+    }
+
+    private Dictionary<Vector2, string> RemoveNoGoodElement(Dictionary<int, string> filterDictionary, SheetsService spStService, string spStId)
+    {
+        AllDirs allDirs = AllDirs.GetInstance();
+        int firstCheckColumn = filterDictionary.First().Key;
         NetworksSingleton networksSingleton = NetworksSingleton.Instance;
-        List<string> sheetElementOrder = networksSingleton.ReturnElementOrder();
-
-        SheetsService sheetService = CreateSSAPI(jsonKeyPath);
-
-        Dictionary<int, string> columnNumAndConditions = new Dictionary<int, string>();
-        foreach (var conditions in conditionsDictionary)
-        {
-            int columnOrder = sheetElementOrder.IndexOf(conditions.Key);
-            if (columnOrder == -1) continue;
-            //配列のindexは0から始まるので数字を正す
-            columnOrder = new SpreadSheetTools().IndextoSSColumn(columnOrder);
-
-            columnNumAndConditions[columnOrder] = conditions.Value;
-        }
-
-        Dictionary<Vector2, string> clearConditions = new Dictionary<Vector2, string>();
         int liminulColumns = networksSingleton.ReturnLiminalRow();
-        //絞り込み条件が指定されている最初の列を探していって、条件にあうものがあればその他の条件も一致しているかを確認する
-        foreach (var dicValue in columnNumAndConditions)
+
+        //検索を行う始めの1列をスプレッドシートから取得してくる
+        List<List<string>> firstCheckSpStValues = ReturnSSValue(spStService, spStId, new Vector2(firstCheckColumn, allDirs.SpreadSheetStartCellPos.y), new Vector2(firstCheckColumn, liminulColumns));
+        //多重配列で取得してきた値を座標,値のディクショナリに変換する
+        Dictionary<Vector2, string> firstCheckSpStDic = ConvertWListintoDictionary(firstCheckSpStValues);
+
+        Dictionary<Vector2, string> clearValues = firstCheckSpStDic.Where(x => CheckConditions(filterDictionary[firstCheckColumn], x.Value)).ToDictionary(x => x.Key, x => x.Value);
+        
+        //始めの1列以外の条件にあっているかを確かめる
+        List<Vector2> removeInClearVeluesKey = new List<Vector2>();
+        foreach(var clearedPairs in clearValues)
         {
-            List<List<string>> spreadSheetValue = ReturnSSValue(sheetService, sheetID, new Vector2(dicValue.Key, allDirs.SpreadSheetStartCellPos.y), new Vector2(dicValue.Key, liminulColumns));
-            Dictionary<Vector2, string> getSpreadSheetValue = ConvertWListintoDictionary(spreadSheetValue);
-
-            clearConditions = getSpreadSheetValue.Where(x => CheckConditions(dicValue.Value, x.Value)).ToDictionary(x => x.Key, x => x.Value);
-
-            //他の条件に適していないものを削除する
-            foreach (var clearDicValue in clearConditions)
+            foreach (var filterPairs in filterDictionary)
             {
-                //他に設定されている条件があるか確認、その条件に合っているかを確かめる
-                foreach (var conditions in columnNumAndConditions)
-                {
-                    if (conditions.Key == dicValue.Key) continue;
-
-                    //検索されるセルの座標
-                    Vector2 searchedCellPos = new Vector2(conditions.Key, clearDicValue.Key.y);
-                    string checkedCellValue = ReturnSSValue(sheetService, sheetID, searchedCellPos, searchedCellPos)[0][0];
-
-                    bool isClearCondition = CheckConditions(conditions.Value, checkedCellValue);
-                    if (!isClearCondition) clearConditions.Remove(clearDicValue.Key); break;
-                }
+                //一度確認している列は検索しない
+                if (filterPairs.Key == firstCheckColumn) continue;
+                //セルの値を取得
+                Vector2 searchedCellPos = new Vector2(filterPairs.Key, clearedPairs.Key.y);
+                List<List<string>> getedValue = ReturnSSValue(spStService, spStId, searchedCellPos, searchedCellPos);
+                string checkedCellValue = "";
+                bool isClear = CheckConditions(filterPairs.Value, checkedCellValue);
+                if(!isClear) removeInClearVeluesKey.Add(clearedPairs.Key); break;
             }
-
-            break;
         }
 
-
-        //条件を満たしているゲームをGameDataクラスに変更する
-        List<GameData> returnList = new List<GameData>();
-        foreach (var lastClearValue in clearConditions)
+        //clearValuesから他条件に適合しない要素を削除する
+        foreach (var removePairs in removeInClearVeluesKey)
         {
-            //そのゲームのデータをスプレッドシートから全て取得
-            List<List<string>> getedAllData = ReturnSSValue(sheetService, sheetID, new Vector2(allDirs.SpreadSheetStartCellPos.x, lastClearValue.Key.y), new Vector2(new SpreadSheetTools().IndextoSSColumn(sheetElementOrder.Count), lastClearValue.Key.y));
-            //多次元配列のリストをstringのリストに変換
-            List<string> getedAllDataArray = new List<string>(getedAllData[0]);
-
-            GameData createdGameData = SpreadSheetElementArrayToGameData(sheetElementOrder, getedAllDataArray);
-            if (createdGameData != null) returnList.Add(createdGameData);
+            clearValues.Remove(removePairs);
         }
-        return new List<GameData>(returnList);
+
+        return clearValues;
+    }
+
+    /// <summary>
+    /// 対象のセルが条件に合っているかを確認するメソッド
+    /// </summary>
+    /// <returns>条件に適している場合trueを返す</returns>
+    private bool CheckConditions(string condition, string cellValue)
+    {
+        string[] splitCondition = condition.Split('#', StringSplitOptions.RemoveEmptyEntries);
+        string[] splitCellValue = cellValue.Split("#", StringSplitOptions.RemoveEmptyEntries);
+        if (splitCondition.Length == 1)
+        {
+            if (splitCellValue.Contains(splitCondition[0])) return true;
+        }
+        //配列型で条件が複数存在する場合(タグなど)
+        else
+        {
+            int counter = 0;
+            //条件が全て合致するかを確認する
+            foreach (string str in splitCondition)
+            {
+                if (splitCellValue.Contains(str)) counter++;
+            }
+            if (counter == splitCondition.Count()) return true;
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -126,7 +182,7 @@ public class SpreadSheetDataGet : SpreadSheetBased
     /// <param name="sheetElementOrder"></param>
     /// <param name="SpreadSheetValue">1行ぶんの値が入ったリスト。取得していない要素・値が代入されていない要素も("")として代入する必要がある</param>
     /// <returns></returns>
-    public GameData SpreadSheetElementArrayToGameData(List<string> sheetElementOrder, List<string> SpreadSheetValue)
+    private GameData SpreadSheetElementArrayToGameData(List<string> sheetElementOrder, List<string> SpreadSheetValue)
     {
         GameData returnGameData = new GameData();
         if (sheetElementOrder.Count != SpreadSheetValue.Count)
@@ -156,30 +212,4 @@ public class SpreadSheetDataGet : SpreadSheetBased
         return returnGameData;
     }
 
-    /// <summary>
-    /// 対象のセルが条件に合っているかを確認するメソッド
-    /// </summary>
-    /// <returns>条件に適している場合trueを返す</returns>
-    public bool CheckConditions(string condition, string cellValue)
-    {
-        string[] splitCondition = condition.Split('#', StringSplitOptions.RemoveEmptyEntries);
-        string[] splitCellValue = cellValue.Split("#", StringSplitOptions.RemoveEmptyEntries);
-        if (splitCondition.Length == 1)
-        {
-            if (splitCellValue.Contains(splitCondition[0])) return true;
-        }
-        //配列型で条件が複数存在する場合(タグなど)
-        else
-        {
-            int counter = 0;
-            //条件が全て合致するかを確認する
-            foreach (string str in splitCondition)
-            {
-                if (splitCellValue.Contains(str)) counter++;
-            }
-            if (counter == splitCondition.Count()) return true;
-        }
-
-        return false;
-    }
 }
