@@ -11,6 +11,9 @@ using UnityEngine.UIElements;
 /// </summary>
 public class NetworksSingleton : BasedSingleton<NetworksSingleton>
 {
+    //インターネット接続を行わずにテスト実行する
+    public const bool isTestOnNet = true;
+
     private List<string> SpreadSheetElementOrder = new List<string>();
     private int LiminalRow = -1;
 
@@ -30,7 +33,17 @@ public class NetworksSingleton : BasedSingleton<NetworksSingleton>
     public void GetElementOrder()
     {
         AllDirs allDirs = AllDirs.GetInstance();
-        List<string> sheetElementOrder = new CollectivelyGetFromSpSt().GetElementTypeArray(allDirs.JsonPathKey, allDirs.SpreadSheetID);
+        SheetsService sheetsService = new CreateAPIService(allDirs.JsonPathKey).CreateSheetAPIService();
+        OnNetGameInfo onNetGameInfo = null;
+        if (!CheckInEnvironment.CheckInEditor() || CheckInEnvironment.CheckDoingNet())
+        {
+            onNetGameInfo = new OnNetGameInfoFromSpSt(sheetsService, allDirs.SpreadSheetID);
+        }
+        else if (!CheckInEnvironment.CheckInEditor() && !CheckInEnvironment.CheckDoingNet())
+        {
+            onNetGameInfo = new OnNetGameInfoFromSpSt(sheetsService, allDirs.SpreadSheetID);
+        }
+        List<string> sheetElementOrder = new CollectivelyGetFromSpSt().GetElementTypeArray(onNetGameInfo);
         if (sheetElementOrder == null || sheetElementOrder.Count <= 0) throw new System.Exception("failed to get sheetElement");
 
         SpreadSheetElementOrder = new List<string>(sheetElementOrder);
@@ -56,11 +69,22 @@ public class NetworksSingleton : BasedSingleton<NetworksSingleton>
         AllDirs allDirs = AllDirs.GetInstance();
 
         //GameIDが記載されている列数を取得する
-        int numberofColumns = new SpreadSheetTools().IndextoSSColumn(spreadSheetElementOrder.IndexOf("GameID"));
+        int numberofColumns = SpStTools.IndextoSSColumn(spreadSheetElementOrder.IndexOf("GameID"));
         Vector2 gameIDStartCell = new Vector2(numberofColumns, allDirs.SpreadSheetStartCellPos.y);
-        SheetsService sheetsService = new SpreadSheetBased().CreateSpStAPI(allDirs.JsonPathKey);
-        int liminalRow = new SpreadSheetBased().ReturnRowTableLastCell(sheetsService, allDirs.SpreadSheetID, new Vector2(numberofColumns, 3),(int)SearchUnit.LargeRange);
-
+        string jsonPathKey = allDirs.JsonPathKey;
+        SheetsService sheetsService = new CreateAPIService(jsonPathKey).CreateSheetAPIService();
+        OnNetGameInfo onNetGameInfo = null;
+        if(!CheckInEnvironment.CheckInEditor() || CheckInEnvironment.CheckDoingNet())
+        {
+            onNetGameInfo = new OnNetGameInfoFromSpSt(sheetsService, allDirs.SpreadSheetID);
+        }
+        else if (!CheckInEnvironment.CheckInEditor() && !CheckInEnvironment.CheckDoingNet())
+        {
+            onNetGameInfo = new OnNetGameInfoFromSpSt(sheetsService, allDirs.SpreadSheetID);
+        }
+        LastCellManager lastCellManager = new LastCellManager();
+        //第二引数のマジックナンバー"3"は調べるセル(GameID)を指定してる。要修正
+        int liminalRow = lastCellManager.ReturnLastCellPos(onNetGameInfo, new Vector2(numberofColumns, 3), SearchUnit.LargeRange, DirectionOnSpSt.row, null);
         LiminalRow = liminalRow;
     }
 }

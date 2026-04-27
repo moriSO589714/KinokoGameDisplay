@@ -20,10 +20,12 @@ public class test : MonoBehaviour
         string jsonPathKey = AllDirs.GetInstance().JsonPathKey;
         string spID = AllDirs.GetInstance().SpreadSheetID;
         
-        SpreadSheetBased spreadSheetBased = new SpreadSheetBased();
-        SheetsService sheetService = spreadSheetBased.CreateSpStAPI(jsonPathKey);
-        spreadSheetBased.ReturnRowTableLastCell(sheetService, spID, new Vector2(2,1), 10);
-        
+       
+        SheetsService sheetService = new CreateAPIService(jsonPathKey).CreateSheetAPIService();
+        OnNetGameInfo onNetGameInfo = new TestOnNetGameInfo();
+
+        CollectivelyGetFromSpSt collectivelyGetFromSpSt = new CollectivelyGetFromSpSt();
+        List<GameData> gotGameData = collectivelyGetFromSpSt.AllGameDataFromSpSt(onNetGameInfo);
 
         //List<GameData> getData = new SpreadSheetDataGet().AllGameDataFromSpSt(jsonPathKey, spID);
         //new GameDataManager().OverallGameDataLoad();

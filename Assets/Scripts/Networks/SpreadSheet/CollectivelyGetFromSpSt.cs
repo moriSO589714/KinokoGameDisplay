@@ -5,23 +5,22 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-public class CollectivelyGetFromSpSt : SpreadSheetBased
+public class CollectivelyGetFromSpSt
 {
+
     /// <summary>
     /// スプレッドシートから要素名(GameDataのjsonと共通)を取り出してきて、スプシにある順番で配列に格納して返す
     /// (重い処理なので複数走らせない)
     /// </summary>
-    public List<string> GetElementTypeArray(string jsonKeyPath, string spStID)
+    public List<string> GetElementTypeArray(OnNetGameInfo onNetGameInfo)
     {
-        SheetsService spStService = CreateSpStAPI(jsonKeyPath);
-
         AllDirs allDirs = AllDirs.GetInstance();
         Vector2 targetPos = new Vector2(allDirs.SpreadSheetStartCellPos.x, allDirs.SpreadSheetStartCellPos.y - 1);
         //ScrollCellValueSearchで得られたディクショナリ型のデータを要素のみを取り出してリストに入れる
-        int lastColumnNum = ReturnColumnTableLastCell(spStService, spStID, targetPos, (int)SearchUnit.NarrowRange);
-        //返り値の型で１列リストで取得して返す。（返り値が別のメソッドを別で作ってもいいかも）
+        List<string> elementTypeArray = new List<string>();
+        int lastColumnNum = new LastCellManager().ReturnLastCellPos(onNetGameInfo,targetPos, SearchUnit.NarrowRange, DirectionOnSpSt.column,elementTypeArray);
 
-        return null;
+        return elementTypeArray;
     }
 
     /// <summary>
@@ -30,15 +29,14 @@ public class CollectivelyGetFromSpSt : SpreadSheetBased
     /// <param name="jsonKeyPath"></param>
     /// <param name="spStId"></param>
     /// <returns></returns>
-    public List<GameData> AllGameDataFromSpSt(string jsonKeyPath, string spStId)
+    public List<GameData> AllGameDataFromSpSt(OnNetGameInfo onNetGameInfo)
     {
         AllDirs allDirs = AllDirs.GetInstance();
-        SheetsService spStService = CreateSpStAPI(jsonKeyPath);
         NetworksSingleton networksSingleton = NetworksSingleton.Instance;
         List<string> spStElementOrder = networksSingleton.ReturnElementOrder();
 
-        Vector2 searchSpStEndPos = new Vector2(new SpreadSheetTools().IndextoSSColumn(spStElementOrder.Count - 1), networksSingleton.ReturnLiminalRow());
-        List<List<string>> spStValue = ReturnSSValue(spStService, spStId, allDirs.SpreadSheetStartCellPos, searchSpStEndPos);
+        Vector2 searchSpStEndPos = new Vector2(SpStTools.IndextoSSColumn(spStElementOrder.Count - 1), networksSingleton.ReturnLiminalRow());
+        List<List<string>> spStValue = onNetGameInfo.GetGameInfoFromNet(allDirs.SpreadSheetStartCellPos, searchSpStEndPos);
         List<GameData> returnList = new List<GameData>();
         //1行ずつGameDataクラスにする
         foreach(List<string> strList in spStValue)
@@ -55,10 +53,9 @@ public class CollectivelyGetFromSpSt : SpreadSheetBased
     /// </summary>
     /// <param name="conditions">検索する条件を設定用。絞りこみたい条件を変数として格納したGameDataクラスを渡すことで、その条件にあうゲームの情報のみを返す</param>
     /// <returns></returns>
-    public List<GameData> FilterGameDataFromSpreadSheet(GameData filterGameData, string jsonKeyPath, string spStId)
+    public List<GameData> FilterGameDataFromSpreadSheet(GameData filterGameData, OnNetGameInfo onNetGameInfo)
     {
         AllDirs allDirs = AllDirs.GetInstance();
-        SheetsService spStService = CreateSpStAPI(jsonKeyPath);
 
         //フィルタリング内容をディクショナリに入れる
         Dictionary<string, string> stringDictionaryFilter = GameDataFilterToDictionaryFilter(filterGameData);
@@ -76,14 +73,14 @@ public class CollectivelyGetFromSpSt : SpreadSheetBased
             columnNumAndFilters[columnOrder] = filters.Value;
         }
         //最終的に絞り込まれたゲームの1セル
-        Dictionary<Vector2, string> lastFilterdCellDictionary = RemoveNoGoodElement(columnNumAndFilters, spStService, spStId);
+        Dictionary<Vector2, string> lastFilterdCellDictionary = RemoveNoGoodElement(columnNumAndFilters, onNetGameInfo);
 
         //条件を満たしているゲームをGameDataクラスに変更する
         List<GameData> returnList = new List<GameData>();
         foreach (var lastFilteredCellPair in lastFilterdCellDictionary)
         {
             //そのゲームのデータをスプレッドシートから全て取得
-            List<List<string>> gotAllData = ReturnSSValue(spStService, spStId, new Vector2(allDirs.SpreadSheetStartCellPos.x, lastFilteredCellPair.Key.y), new Vector2(new SpreadSheetTools().IndextoSSColumn(spStElementOrder.Count - 1), lastFilteredCellPair.Key.y));
+            List<List<string>> gotAllData = onNetGameInfo.GetGameInfoFromNet(new Vector2(allDirs.SpreadSheetStartCellPos.x, lastFilteredCellPair.Key.y), new Vector2(SpStTools.IndextoSSColumn(spStElementOrder.Count - 1), lastFilteredCellPair.Key.y));
             //多次元配列のリストをstringのリストに変換
             List<string> gotAllDataArray = new List<string>(gotAllData[0]);
 
@@ -135,11 +132,11 @@ public class CollectivelyGetFromSpSt : SpreadSheetBased
     {
         int elementColumn = spStElementOrder.IndexOf(convertedStrFieldName);
         if (elementColumn == -1) return elementColumn;
-        elementColumn = new SpreadSheetTools().IndextoSSColumn(elementColumn);
+        elementColumn = SpStTools.IndextoSSColumn(elementColumn);
         return elementColumn;
     }
 
-    private Dictionary<Vector2, string> RemoveNoGoodElement(Dictionary<int, string> filterDictionary, SheetsService spStService, string spStId)
+    private Dictionary<Vector2, string> RemoveNoGoodElement(Dictionary<int, string> filterDictionary, OnNetGameInfo onNetGameInfo)
     {
         AllDirs allDirs = AllDirs.GetInstance();
         int firstCheckColumn = filterDictionary.First().Key;
@@ -147,9 +144,9 @@ public class CollectivelyGetFromSpSt : SpreadSheetBased
         int liminulColumns = networksSingleton.ReturnLiminalRow();
 
         //検索を行う始めの1列をスプレッドシートから取得してくる
-        List<List<string>> firstCheckSpStValues = ReturnSSValue(spStService, spStId, new Vector2(firstCheckColumn, allDirs.SpreadSheetStartCellPos.y), new Vector2(firstCheckColumn, liminulColumns));
+        List<List<string>> firstCheckSpStValues = onNetGameInfo.GetGameInfoFromNet(new Vector2(firstCheckColumn, allDirs.SpreadSheetStartCellPos.y), new Vector2(firstCheckColumn, liminulColumns));
         //多重配列で取得してきた値を座標,値のディクショナリに変換する
-        Dictionary<Vector2, string> firstCheckSpStDic = ConvertWListintoDictionary(firstCheckSpStValues);
+        Dictionary<Vector2, string> firstCheckSpStDic = SpStValuesConverter.ConvertSpStIntoDictionary(firstCheckSpStValues);
 
         Dictionary<Vector2, string> clearValues = firstCheckSpStDic.Where(x => CheckConditions(filterDictionary[firstCheckColumn], x.Value)).ToDictionary(x => x.Key, x => x.Value);
         
@@ -163,7 +160,7 @@ public class CollectivelyGetFromSpSt : SpreadSheetBased
                 if (filterPairs.Key == firstCheckColumn) continue;
                 //セルの値を取得
                 Vector2 searchedCellPos = new Vector2(filterPairs.Key, clearedPairs.Key.y);
-                List<List<string>> getedValue = ReturnSSValue(spStService, spStId, searchedCellPos, searchedCellPos);
+                List<List<string>> getedValue = onNetGameInfo.GetGameInfoFromNet(searchedCellPos, searchedCellPos);
                 string checkedCellValue = "";
                 bool isClear = CheckConditions(filterPairs.Value, checkedCellValue);
                 if(!isClear) removeInClearVeluesKey.Add(clearedPairs.Key); break;

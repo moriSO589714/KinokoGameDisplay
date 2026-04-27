@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Google.Apis.Sheets.v4;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -54,12 +55,24 @@ public class GameDataManager
         //条件をもとにスプレッドシートからGameDataを取得してくる
         else
         {
-            CollectivelyGetFromSpSt spreadSheetDataGet = new CollectivelyGetFromSpSt();
+            CollectivelyGetFromSpSt collectivelyGetFromSpSt = new CollectivelyGetFromSpSt();
             string jsonPathKey = AllDirs.GetInstance().JsonPathKey;
             string spId = AllDirs.GetInstance().SpreadSheetID;
+            OnNetGameInfo onNetGameInfo = null;
+            if (!CheckInEnvironment.CheckDoingNet())
+            {
+                onNetGameInfo = new TestOnNetGameInfo();
+            }
+            else
+            {
+                CreateAPIService createAPIService = new CreateAPIService(jsonPathKey);
+                SheetsService sheetsService = createAPIService.CreateSheetAPIService();
+                onNetGameInfo = new OnNetGameInfoFromSpSt(sheetsService, spId);
+            }
+
             foreach(GameData g in filterObjects)
             {
-                List<GameData> getDatas = spreadSheetDataGet.FilterGameDataFromSpreadSheet(g, jsonPathKey, spId);
+                List<GameData> getDatas = collectivelyGetFromSpSt.FilterGameDataFromSpreadSheet(g, onNetGameInfo);
                 gameDatasSingleton.AddGameDataList(getDatas);
             }
         }
