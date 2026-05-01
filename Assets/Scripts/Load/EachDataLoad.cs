@@ -19,9 +19,11 @@ public class EachDataLoad : MonoBehaviour
     /// <summary>
     /// ローカルのみでmain画面を構成するためのデータをロードする
     /// </summary>
-    public void LocalDataLoad()
+    public void LoadLocalData()
     {
-        new GameDataManager().OverallGameDataLoad();
+        new GameDataManager().LoadGameDataFromJsons();
+        List<GameData> gameDatas = GameDatasSingleton.Instance.GameDatas;
+        gameBoxsManager.SetGameBoxsByGameDataList(gameDatas);
     }
 
     public void LoadInternetGameDatas()

@@ -7,8 +7,7 @@ using UnityEngine.SceneManagement;
 
 public enum SceneStates
 {
-    First, //アプリ起動時のみ入るシーン
-    Library,
+    Main,
     Admin,
 }
 public enum LoadStates 
@@ -24,13 +23,22 @@ public class CommonStateManager : BasedSingleton<CommonStateManager>
 {
     //現在の状態
     [HideInInspector] public SceneStates _currentState { get; private set; }
+    [HideInInspector] public LoadStates _currentLoadState { get; private set; }
+
     //ステート切り替え時に実行するメソッド(通常終了処理が記述される)
-    private List<Func<CancellationToken, UniTask>> _onChangeActions = new();
+    private List<Func<CancellationToken, UniTask>> _onChangeFuncs = new();
+
+    //ロードに入る際に実行するメソッド
+    private List<Func<CancellationToken, UniTask>> _onMainLoadingFuncs = new();
+    private List<Func<CancellationToken, UniTask>> _onMiniLoadingFuncs = new();
+    private List<Func<CancellationToken, UniTask>> _onBackLoadingFuncs = new();
+
+    //ロードから出る時に実行するメソッド
+    private List<Func<CancellationToken, UniTask>> _outLoadFuncs = new();
 
     protected override void Awake()
     {
         base.Awake();
-        _currentState = SceneStates.First;
     }
 
     public async UniTask SetCurrentState(SceneStates state)
@@ -38,27 +46,50 @@ public class CommonStateManager : BasedSingleton<CommonStateManager>
         CancellationTokenSource cts = new CancellationTokenSource();
         
         //現在のステートの終了処理をする。
-        await UniTask.WhenAll(_onChangeActions.Select(f => f(cts.Token)));
+        await UniTask.WhenAll(_onChangeFuncs.Select(f => f(cts.Token)));
         //タスクの破棄
         cts.Cancel();
-        _onChangeActions = new();
+        _onChangeFuncs = new();
 
 
         //シーン遷移を伴うなら、シーンを遷移させる（シーン遷移はここ以外から行わない）
         switch (state)
         {
-            case SceneStates.First:
-                break;
-            case SceneStates.Library:
+            case SceneStates.Main:
                 SceneManager.LoadScene("Main");
                 break;
             case SceneStates.Admin:
                 break;
         }
+
+        _currentState = state;
     }
-    
+
+    public async UniTask SetCurrentLoad(LoadStates state)
+    {
+        CancellationTokenSource cts = new CancellationTokenSource();
+        switch (state) 
+        {
+            case LoadStates.MainLoading:
+                await UniTask.WhenAll(_onMainLoadingFuncs.Select(f => f(cts.Token)));
+                break;
+            case LoadStates.MiniLoading:
+                await UniTask.WhenAll(_onMiniLoadingFuncs.Select(f => f(cts.Token)));
+                break;
+            case LoadStates.BackLoading:
+                await UniTask.WhenAll(_onBackLoadingFuncs.Select(f => f(cts.Token)));
+                break;
+            case LoadStates.NoLoading:
+                await UniTask.WhenAll(_outLoadFuncs.Select(f => f(cts.Token)));
+                break;
+        }
+
+        cts.Cancel();
+        _currentLoadState = state;
+    }
+
     public void AddOnChangeAction(Func<CancellationToken, UniTask> action)
     {
-        _onChangeActions.Add(action);
+        _onChangeFuncs.Add(action);
     }
 }

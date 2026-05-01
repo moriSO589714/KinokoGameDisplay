@@ -8,20 +8,11 @@ using UnityEngine;
 public class GameDataManager
 {
     /// <summary>
-    /// 全パターンのシングルトンへのゲームデータ登録を行う(ほとんどの場合このメソッドからロードを行う)
-    /// </summary>
-    public void OverallGameDataLoad()
-    {
-        new GameDatasSingleton().ResetGameDataList();
-        LoadGameDataFromJsons();
-    }
-
-
-    /// <summary>
     /// jsonデータが入っているディレクトリからGameData群をロード(シングルトンに追加)する
     /// </summary>
     public void LoadGameDataFromJsons()
     {
+        new GameDatasSingleton().ResetGameDataList();
         //jsonファイルが入っているディレクトリのパスを取得してくる
         AllDirs allDirs = AllDirs.GetInstance();
         string jsonsDirPath = allDirs.JsonsDirPath;

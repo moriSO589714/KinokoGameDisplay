@@ -16,16 +16,6 @@ public class test : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        new LoadFlexibleDir().SetFlexibleDirByJson();
-        AllDirs allDirs = AllDirs.GetInstance();
-        string jsonPathKey = allDirs.JsonPathKey;
-        string spStId = allDirs.SpreadSheetID;
-        SheetsService sheetsService = new CreateAPIService(jsonPathKey).CreateSheetAPIService();
-        NetworksSingleton networksSingleton = NetworksSingleton.Instance;
-        GameData g = new GameData();
-        g.GameTags = new string[1] { "アクションゲーム" };
-        List<GameData> gameDatas = new CollectivelyGetFromSpSt().AllGameDataFromSpSt();
-        
-        Debug.Log("last");
+
     }
 }
