@@ -14,9 +14,6 @@ public class GameDataManager
     {
         new GameDatasSingleton().ResetGameDataList();
         LoadGameDataFromJsons();
-        GameData testGameData = new GameData();
-        testGameData.GameTitle = "2DGolf";
-        LoadGameDataFromSpSt(new List<GameData>() { testGameData });
     }
 
 
@@ -47,21 +44,26 @@ public class GameDataManager
     {
         List<GameData> gameDatas = new List<GameData>();
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
+        CollectivelyGetFromSpSt collectivelyGetFromSpSt = new CollectivelyGetFromSpSt();
+        
         //スプレッドシートから全てのGameDataを取得してくる
         if(filterObjects == null)
         {
+            string jsonPathKey = AllDirs.GetInstance().JsonPathKey;
+            string spId = AllDirs.GetInstance().SpreadSheetID;
 
+            List<GameData> gotGameDatas = collectivelyGetFromSpSt.AllGameDataFromSpSt();
+            gameDatasSingleton.AddGameDataList(gotGameDatas);
         }
         //条件をもとにスプレッドシートからGameDataを取得してくる
         else
         {
-            CollectivelyGetFromSpSt collectivelyGetFromSpSt = new CollectivelyGetFromSpSt();
             string jsonPathKey = AllDirs.GetInstance().JsonPathKey;
             string spId = AllDirs.GetInstance().SpreadSheetID;
             OnNetGameInfo onNetGameInfo = null;
             if (!CheckInEnvironment.CheckDoingNet())
             {
-                onNetGameInfo = new TestOnNetGameInfo();
+                onNetGameInfo = new OnNetGameInfoFromTest();
             }
             else
             {
@@ -72,41 +74,9 @@ public class GameDataManager
 
             foreach(GameData g in filterObjects)
             {
-                List<GameData> getDatas = collectivelyGetFromSpSt.FilterGameDataFromSpreadSheet(g, onNetGameInfo);
+                List<GameData> getDatas = collectivelyGetFromSpSt.FilterGameDataFromSpSt(g);
                 gameDatasSingleton.AddGameDataList(getDatas);
             }
         }
     }
-
-    //============================================================================================================
-    //一旦利用しないものとする。最終実装まで必要なければ消すこと。(自動でソフトが追加するよりも利用者が能動的に追加したほうが良いため)
-    //============================================================================================================
-    /// <summary>
-    /// ゲームデータのフォルダが入っているフォルダから、ゲームをシングルトンにロードする
-    /// このメソッドはJsonで登録されたゲームデータのロードの後に実行される必要がある。
-    /// </summary>
-    public void LoadGameDataFromGameDir()
-    {
-        //ゲームデータが入っているフォルダのパスを取得してくる
-        AllDirs allDirs = AllDirs.GetInstance();
-        string gameFilePath = allDirs.GameFilePath;
-        //パス上に存在する全てのフォルダを取得する
-        string[] dirs = Directory.GetDirectories(gameFilePath);
-
-        GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
-        List<GameData> gameDatasinSingleton = gameDatasSingleton.GameDatas;
-        foreach(string str in dirs)
-        {
-            string fileName = Path.GetFileName(str);
-            //同じファイル名のゲームが既にシングルトンに追加されていた場合処理をスキップする
-            if (gameDatasinSingleton.Any(x => x.GameDirName == fileName)) continue;
-
-            //GamaDataクラスにして、シングルトンに追加する
-            GameData gameData = new GameData();
-            gameData.GameDirName = fileName;
-            gameDatasSingleton.AddGameData(gameData);
-        }
-    }
-
-
 }

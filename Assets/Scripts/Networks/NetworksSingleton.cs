@@ -1,6 +1,7 @@
 ﻿using Google.Apis.Sheets.v4;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -11,15 +12,13 @@ using UnityEngine.UIElements;
 /// </summary>
 public class NetworksSingleton : BasedSingleton<NetworksSingleton>
 {
-    //インターネット接続を行わずにテスト実行する
-    public const bool isTestOnNet = true;
-
-    private List<string> SpreadSheetElementOrder = new List<string>();
+    private List<string> SpreadSheetElementOrder = null;
+    private List<List<string>> GameInfoAllData = null;
     private int LiminalRow = -1;
 
-    public List<string> ReturnElementOrder()
+    public List<string> ReturnElementOrder(bool forceLoad)
     {
-        if (SpreadSheetElementOrder.Count != 0)
+        if (SpreadSheetElementOrder != null && !forceLoad)
         {
             return new List<string>(SpreadSheetElementOrder);
         }
@@ -30,7 +29,7 @@ public class NetworksSingleton : BasedSingleton<NetworksSingleton>
         }
     }
 
-    public void GetElementOrder()
+    private void GetElementOrder()
     {
         AllDirs allDirs = AllDirs.GetInstance();
         SheetsService sheetsService = new CreateAPIService(allDirs.JsonPathKey).CreateSheetAPIService();
@@ -41,7 +40,7 @@ public class NetworksSingleton : BasedSingleton<NetworksSingleton>
         }
         else if (CheckInEnvironment.CheckInEditor() && !CheckInEnvironment.CheckDoingNet())
         {
-            onNetGameInfo = new TestOnNetGameInfo();
+            onNetGameInfo = new OnNetGameInfoFromTest();
         }
         List<string> sheetElementOrder = new CollectivelyGetFromSpSt().GetElementTypeArray(onNetGameInfo);
         if (sheetElementOrder == null || sheetElementOrder.Count <= 0) throw new System.Exception("failed to get sheetElement");
@@ -49,9 +48,9 @@ public class NetworksSingleton : BasedSingleton<NetworksSingleton>
         SpreadSheetElementOrder = new List<string>(sheetElementOrder);
     }
 
-    public int ReturnLiminalRow()
+    public int ReturnLiminalRow(bool forceLoad)
     {
-        if(LiminalRow != -1)
+        if(LiminalRow != -1 && !forceLoad)
         {
             return LiminalRow;
         }
@@ -62,29 +61,68 @@ public class NetworksSingleton : BasedSingleton<NetworksSingleton>
         }
     }
 
-    public void GetLiminalRow()
+    private void GetLiminalRow()
     {
-        NetworksSingleton networksSingleton = NetworksSingleton.Instance;
-        List<string> spreadSheetElementOrder = networksSingleton.ReturnElementOrder();
+        List<string> spreadSheetElementOrder = ReturnElementOrder(false);
         AllDirs allDirs = AllDirs.GetInstance();
 
         //GameIDが記載されている列数を取得する
-        int numberofColumns = SpStTools.IndextoSSColumn(spreadSheetElementOrder.IndexOf("GameID"));
+        int num = spreadSheetElementOrder.IndexOf("GameID");
+        int numberofColumns = SpStTools.IndextoSpStColumn(spreadSheetElementOrder.IndexOf("GameID"));
         Vector2 gameIDStartCell = new Vector2(numberofColumns, allDirs.SpreadSheetStartCellPos.y);
         string jsonPathKey = allDirs.JsonPathKey;
         SheetsService sheetsService = new CreateAPIService(jsonPathKey).CreateSheetAPIService();
         OnNetGameInfo onNetGameInfo = null;
-        if(!CheckInEnvironment.CheckInEditor() || CheckInEnvironment.CheckDoingNet())
+
+        if (CheckInEnvironment.CheckDoingNet())
         {
             onNetGameInfo = new OnNetGameInfoFromSpSt(sheetsService, allDirs.SpreadSheetID);
         }
-        else if (!CheckInEnvironment.CheckInEditor() && !CheckInEnvironment.CheckDoingNet())
+        else
         {
-            onNetGameInfo = new OnNetGameInfoFromSpSt(sheetsService, allDirs.SpreadSheetID);
+            onNetGameInfo = new OnNetGameInfoFromTest();
         }
         LastCellManager lastCellManager = new LastCellManager();
         //第二引数のマジックナンバー"3"は調べるセル(GameID)を指定してる。要修正
-        int liminalRow = lastCellManager.ReturnLastCellPos(onNetGameInfo, new Vector2(numberofColumns, 3), SearchUnit.LargeRange, DirectionOnSpSt.row, null);
+        int liminalRow = lastCellManager.ReturnLastCellPos(onNetGameInfo, gameIDStartCell, SearchUnit.LargeRange, DirectionOnSpSt.row, null);
         LiminalRow = liminalRow;
+    }
+
+
+    public List<List<string>> ReturnGameInfoAllData(bool forceLoad)
+    {
+        if(GameInfoAllData != null && !forceLoad)
+        {
+            return GameInfoAllData;
+        }
+        else
+        {
+            GetGameInfoAllData();
+            return GameInfoAllData;
+        }
+    }
+
+    private void GetGameInfoAllData()
+    {
+        int liminalRow = ReturnLiminalRow(true);
+        List<string> elementOrder = ReturnElementOrder(false);
+        AllDirs allDirs = AllDirs.GetInstance();
+
+        string jsonPathKey = allDirs.JsonPathKey;
+        SheetsService sheetsService = new CreateAPIService(jsonPathKey).CreateSheetAPIService();
+        OnNetGameInfo onNetGameInfo = null;
+        if (CheckInEnvironment.CheckDoingNet())
+        {
+            onNetGameInfo = new OnNetGameInfoFromSpSt(sheetsService, allDirs.SpreadSheetID);
+        }
+        else
+        {
+            onNetGameInfo = new OnNetGameInfoFromTest();
+        }
+        Vector2 searchEndPos = new Vector2(SpStTools.IndextoSpStColumn(SpStTools.LengthToLastIndex(elementOrder.Count)), liminalRow);
+        List<List<string>> spStValue = onNetGameInfo.GetGameInfo(allDirs.SpreadSheetStartCellPos, searchEndPos);
+        //空セルを埋める
+        List<List<string>> filledList = SpStTools.FillInEmptyIndex(spStValue, allDirs.SpreadSheetStartCellPos, searchEndPos, DirectionOnSpSt.column);
+        GameInfoAllData = filledList;
     }
 }

@@ -30,7 +30,6 @@ public class GameBoxsManager : MonoBehaviour
         foreach(GameData gameData in gameDatas)
         {
             Vector2 createPos = new Vector2(0,-(count * BoxInterval));
-            Debug.Log(createPos);
             //UIのInstantiateはrecttransformでやってくれる
             GameObject gameBox = Instantiate(GameBox, createPos, Quaternion.identity);
             //拡大率が変わってしまうためSetParent()の第二引数はfalse、そのためInstantiate()の座標は相対座標で指定する

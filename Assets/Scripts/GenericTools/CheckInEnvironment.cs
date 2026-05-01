@@ -8,7 +8,7 @@ using UnityEngine;
 public static class CheckInEnvironment
 {
     //インターネット利用時に実際に通信を行うか
-    private const bool isOnNet = false;
+    private const bool isOnNet = true;
 
     /// <summary>
     /// 実行環境がUnityEditorかどうか、Editorならtrueを返す

@@ -16,7 +16,7 @@ public class OnNetGameInfoFromSpSt : OnNetGameInfo
         _spStId = spStId;
     }
 
-    public List<List<string>> GetGameInfoFromNet(Vector2 startPos, Vector2 endPos)
+    public List<List<string>> GetGameInfo(Vector2 startPos, Vector2 endPos)
     {
         if (_spStId == null) throw new Exception("failed to get cell. sheet id is null");
         //リクエストの作成
@@ -35,7 +35,7 @@ public class OnNetGameInfoFromSpSt : OnNetGameInfo
             List<string> strList = new List<string>();
             foreach(var invalue in value)
             {
-                strList.Add(value.ToString());
+                strList.Add(invalue.ToString());
             }
             getValues.Add(strList);
         }

@@ -16,25 +16,19 @@ public class test : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Vector2 startPos = new Vector2(20,20);
-        Vector2 endPos = new Vector2(30,30);
-        List<List<string>> listlist = new TestOnNetGameInfo().GetGameInfoFromNet(startPos,endPos);
-
-        /*
         new LoadFlexibleDir().SetFlexibleDirByJson();
-        string jsonPathKey = AllDirs.GetInstance().JsonPathKey;
-        string spID = AllDirs.GetInstance().SpreadSheetID;
-        
-       
-        SheetsService sheetService = new CreateAPIService(jsonPathKey).CreateSheetAPIService();
-        OnNetGameInfo onNetGameInfo = new TestOnNetGameInfo();
+        AllDirs allDirs = AllDirs.GetInstance();
+        string jsonPathKey = allDirs.JsonPathKey;
+        string spStId = allDirs.SpreadSheetID;
+        SheetsService sheetsService = new CreateAPIService(jsonPathKey).CreateSheetAPIService();
+        NetworksSingleton networksSingleton = NetworksSingleton.Instance;
 
-        CollectivelyGetFromSpSt collectivelyGetFromSpSt = new CollectivelyGetFromSpSt();
-        List<GameData> gotGameData = collectivelyGetFromSpSt.AllGameDataFromSpSt(onNetGameInfo);
+        networksSingleton.ReturnElementOrder(true);
+        /*
+        GameData g = new GameData();
+        g.GameTags = new string[1] { "アクション" };
+        List<GameData> gameDatas =  new CollectivelyGetFromSpSt().FilterGameDataFromSpSt(g);
         */
-        //List<GameData> getData = new SpreadSheetDataGet().AllGameDataFromSpSt(jsonPathKey, spID);
-        //new GameDataManager().OverallGameDataLoad();
-        //GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
-        Debug.Log("end");
+        Debug.Log("last");
     }
 }

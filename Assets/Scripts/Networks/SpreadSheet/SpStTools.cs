@@ -7,14 +7,22 @@ using UnityEngine;
 
 public static class SpStTools
 {
-    public static int IndextoSSColumn(int indexNum)
+    public static int IndextoSpStColumn(int indexNum)
     {
         return indexNum + (int)AllDirs.GetInstance().SpreadSheetStartCellPos.x;
     }
 
-    public static int IndextoSSRow(int indexNum)
+    public static int IndextoSpStRow(int indexNum)
     {
         return indexNum + (int)AllDirs.GetInstance().SpreadSheetStartCellPos.y;
+    }
+
+    /// <summary>
+    /// 配列・リストの要素数から最後のインデックス値にして返す
+    /// </summary>
+    public static int LengthToLastIndex(int length)
+    {
+        return length - 1;
     }
 
     /// <summary>
@@ -51,23 +59,12 @@ public static class SpStTools
     /// <param name="fillMode">列方向に満たすか、行方向に満たすか。trueだと行方向に満たす</param>
     public static List<List<string>> FillInEmptyIndex(List<List<string>> targetList, Vector2 startPos, Vector2 endPos, DirectionOnSpSt direction)
     {
-        List<List<string>> filledList = new List<List<string>>(targetList);
+        List<List<string>> filledList = targetList.Select(x => new List<string>(x)).ToList();
 
-        if (direction == DirectionOnSpSt.row)
+        if (direction == DirectionOnSpSt.column)
         {
             //必要な長さを取得
             int needlyLengthOfColumn = CalcCellsLength((int)startPos.x, (int)endPos.x);
-            foreach(List<string> strsList in targetList)
-            {
-                if(strsList.Count < needlyLengthOfColumn)
-                {
-                    for(int i = 0; i < needlyLengthOfColumn - strsList.Count; i++)
-                    {
-
-                    }
-                }
-            }
-
             for(int i = 0; i < targetList.Count; i++)
             {
                 if (targetList[i].Count < needlyLengthOfColumn)
@@ -79,7 +76,7 @@ public static class SpStTools
                 }
             }
         }
-        else if(direction == DirectionOnSpSt.column)
+        else if(direction == DirectionOnSpSt.row)
         {
             int needlyLengthOfRow = CalcCellsLength((int)startPos.y, (int)endPos.y);
             int columnLength = CalcCellsLength((int)startPos.x, (int)endPos.x);
@@ -94,6 +91,53 @@ public static class SpStTools
         }
 
         return new List<List<string>>(filledList);
+    }
+
+    /// <summary>
+    /// 範囲指定(Vector2)を行い２次元配列のリストから値を切り出す
+    /// 範囲指定は0,0で始まる配列のindex値での指定
+    /// </summar>
+    public static List<List<string>> SearchLocalSpStDataByPos(List<List<string>> allData, Vector2 startPos, Vector2 endPos)
+    {
+        int lowestColumnNum = Math.Min((int)startPos.x, (int)endPos.x);
+        int lowestRowNum = Math.Min((int)startPos.y, (int)endPos.y);
+        int highestColumnNum = Math.Max((int)startPos.x, (int)endPos.x);
+        int highestRowNum = Math.Max((int)startPos.y, (int)endPos.y);
+        int allDataLastIndex = LengthToLastIndex(allData.Count);
+        //指定された範囲のデータがテスト用のデータに無かった場合nullを返す
+        if (allDataLastIndex < lowestRowNum) return null;
+        int maxListsLength = 0;
+        foreach (List<string> list in allData)
+        {
+            maxListsLength = maxListsLength < list.Count ? list.Count : maxListsLength;
+        }
+        if (LengthToLastIndex(maxListsLength) < lowestColumnNum) return null;
+
+        List<List<string>> UsedDataList = new List<List<string>>();
+        //リストの２次元配列から指定範囲を切り取る
+        for (int i = lowestRowNum; i <= highestRowNum; i++)
+        {
+            //i列のデータが存在しない場合
+            if (allDataLastIndex < i || i == -1)
+            {
+                break;
+            }
+            List<string> addDataList = new List<string>();
+            for (int i2 = lowestColumnNum; i2 <= highestColumnNum; i2++)
+            {
+                if (LengthToLastIndex(allData[i].Count) < i2)
+                {
+                    continue;
+                }
+                else
+                {
+                    addDataList.Add(allData[i][i2]);
+                }
+            }
+            UsedDataList.Add(addDataList);
+        }
+
+        return UsedDataList;
     }
 }
 

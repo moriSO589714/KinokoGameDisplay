@@ -14,7 +14,7 @@ public class LastCellManager
     /// <summary>
     /// 指定セルから指定方向にテーブルの終了点がどこかを検索する
     /// </summary>
-    /// <param name="targetPos">始点となるセルの座標</param>
+    /// <param name="targetPos">始点となるスプレッドシートでのセルの座標(1から始まる)</param>
     /// <param name="oneTimeSearchUnit">一度に検索をかける範囲</param>
     /// <param name="direction">検索方向</param>
     /// <param name="returnValuesList">値を保存しておきたい場合。必要なければnull</param>
@@ -39,41 +39,46 @@ public class LastCellManager
             if (!SpStTools.isInLine(targetPos, endSearchPos)) throw new Exception("range is not in one line");
 
             //スプレッドシートからデータを取得
-            List<List<string>> spStValues = onNetGameInfo.GetGameInfoFromNet(targetPos, endSearchPos);
+            List<List<string>> spStValues = onNetGameInfo.GetGameInfo(targetPos, endSearchPos);
             
             //セルの値を保存しておく場合
-            if(direction == DirectionOnSpSt.row && returnValuesList != null)
+            if(direction == DirectionOnSpSt.row && returnValuesList != null && spStValues != null)
             {
                 foreach(List<string> valueList in spStValues)
                 {
                     returnValuesList.Add(valueList[0]);
                 }
             }
-            else if(direction == DirectionOnSpSt.column && returnValuesList != null)
+            else if(direction == DirectionOnSpSt.column && returnValuesList != null && spStValues != null)
             {
                 returnValuesList.AddRange(spStValues[0]);
             }
 
             //セルの範囲がstartPos～endPosの範囲に収まっているかの確認
-            if (spStValues == null) //検索する範囲の倍数に要素数が重なった場合nullが帰ってくる
+            if (spStValues == null) //前回のループで範囲がぴったり収まってしまっていた場合
             {
                 lastListLength = 0;
                 loopFlag = false;
             }
             //収まっている場合
-            if(isInRange(spStValues.Count, (int)targetPos.y, (int)endSearchPos.y))
+            else if (direction == DirectionOnSpSt.row && isInRange(spStValues.Count, (int)targetPos.y, (int)endSearchPos.y))
             {
                 lastListLength = spStValues.Count;
+                loopFlag = false;
+            }
+            else if (direction == DirectionOnSpSt.column && isInRange(spStValues[0].Count, (int)targetPos.x, (int)endSearchPos.x))
+            {
+                lastListLength = spStValues[0].Count;
                 loopFlag = false;
             }
             //収まっていない場合(まだ値が入っている範囲が続いている場合)
             else
             {
-                if(direction == DirectionOnSpSt.row)
+                if (direction == DirectionOnSpSt.row)
                 {
                     targetPos = new Vector2(endSearchPos.x, endSearchPos.y + 1);
                 }
-                else if(direction == DirectionOnSpSt.column)
+                else if (direction == DirectionOnSpSt.column)
                 {
                     targetPos = new Vector2(endSearchPos.x + 1, endSearchPos.y);
                 }

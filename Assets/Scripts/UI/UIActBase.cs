@@ -3,9 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-abstract class UIActBase : MonoBehaviour
+public class UIActBase : MonoBehaviour
 {
-    public abstract void OnClickAct();
-    public abstract void OnPointerEnter();
-    public abstract void OnPointerExit();
+    public Action ClickAct;
+    public Action PointerEnterAct;
+    public Action PointerExitAct;
+
+    public virtual void OnClickAct()
+    {
+        ClickAct();
+    }
+    public virtual void OnPointerEnter()
+    {
+        PointerEnterAct();
+    }
+    public virtual void OnPointerExit()
+    {
+        PointerExitAct();
+    }
 }
