@@ -88,12 +88,12 @@ public class FreezingTools
             //ファイルが一つ飛んでいる場合
             else if (fileNumber > checkCounter)
             {
-                lackFileNumber.Add(fileNumber);
+                lackFileNumber.Add(checkCounter);
                 i--;
             }
             checkCounter++;
         }
-        MistakeFiles mistakeFiles = new MistakeFiles(lackFileNumber,errorFilesList);
+        MistakeFiles mistakeFiles = new MistakeFiles(usedDLData.FileName ,lackFileNumber,errorFilesList);
         return mistakeFiles;
     }
 
@@ -120,18 +120,21 @@ public class FreezingTools
 /// </summary>
 public class MistakeFiles
 {
+    //拡張子以外のファイル名部分
+    public string FileName { private set; get; }
     //不足しているファイルの番号(拡張子部分の数字)
     public List<long> LackFiles { private set; get; }
     //問題のあるファイルのパス(ファイル名が異なる、番号が重複している等)
     public List<string> ErrorFilePathes { private set; get; }
 
-    public MistakeFiles(List<long> lack, List<string> error)
+    public MistakeFiles(string fileName ,List<long> lack, List<string> error)
     {
-        SetDatas(lack, error);
+        SetDatas(fileName,lack, error);
     }
 
-    public void SetDatas(List<long> lack, List<string> error)
+    public void SetDatas(string fileName ,List<long> lack, List<string> error)
     {
+        FileName = fileName;
         LackFiles = lack;
         ErrorFilePathes = error;
     }

@@ -28,7 +28,7 @@ public class GameDLProc
         AllDirs allDirs = AllDirs.GetInstance();
 
         //他のゲームがダウンロードされているディレクトリに同じIDのゲームが保存されていないか確認する処理
-        if(File.Exists(Path.Combine(allDirs.GameFilePath, gameId)))
+        if (File.Exists(Path.Combine(allDirs.GameFilePath, gameId)))
         {
             throw new System.Exception("既にダウンロードフォルダに同じIDのゲームが保存されています。削除し、再度実行してください。ID >>>" + gameId);
         }
@@ -47,7 +47,7 @@ public class GameDLProc
         {
             mistakeFiles = new FreezingTools().hasAllRequiredData(tempSlicedGameDLPath);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             //エラーが帰ってきた場合、フォルダを削除して再生成する
             RefleshDir(tempSlicedGameDLPath);
@@ -55,20 +55,32 @@ public class GameDLProc
 
         //ドライブからメタデータを取得してくる
         Dictionary<string, string> metaDic = _onNetDriveMetaData.GetFileList(driveId);
+        Dictionary<string, string> needDlFileDic = new Dictionary<string, string>();
         DLData gameDLData = GetDLDataFromDrive(metaDic, tempSlicedGameDLPath);
 
         //前回ダウンロードした際と全体の容量が変わっている場合は、アップデートが入ったとみなし、全てダウンロードし直す
-        if(mistakeFiles != null)
+        if (mistakeFiles != null)
         {
-            DLData oldGameDLData = new DLData(tempSlicedGameDLPath);
-            if(CheckUpdated(oldGameDLData, gameDLData, tempSlicedGameDLPath))
+            //.000ファイルのパスを作る
+            string dlDataFilePath = Path.Combine(tempSlicedGameDLPath, mistakeFiles.FileName + ".000");
+            DLData oldGameDLData = new DLData(dlDataFilePath);
+            if (CheckUpdated(oldGameDLData, gameDLData, tempSlicedGameDLPath))
             {
-                //アップデートが存在する
+                //ディレクトリを削除してダウンロードし直す
+                RefleshDir(tempSlicedGameDLPath);
+                needDlFileDic = metaDic;
             }
             else
             {
-                //アップデートが存在しない(途中からのDLを行う)
+                //アップデートが存在しない
+                //ダウンロードするファイルのディクショナリを作成
+                needDlFileDic = CreateLackDic(mistakeFiles, metaDic);
             }
+        }
+        else
+        {
+            RefleshDir(tempSlicedGameDLPath);
+            needDlFileDic = metaDic;
         }
 
         //ダウンロードするファイルの数を取得
@@ -76,13 +88,14 @@ public class GameDLProc
         //ダウンロード済みのファイルの数
         long nowDLedFileCounts = 0;
         //拡張子が.000以外のファイルを進捗を表示させながら保存する
-        foreach(var pair in metaDic)
+        foreach (var pair in needDlFileDic)
         {
             if (pair.Key.EndsWith(".000")) continue;
             _onNetDriveFetFile.GetFile(pair.Value, pair.Key, tempSlicedGameDLPath);
             nowDLedFileCounts++;
-            Debug.Log(nowDLedFileCounts + "まで終了");
+            Debug.Log(nowDLedFileCounts + "まで終了" + "ダウンロードしたファイル>>>" + pair.Key);
         }
+
 
         //保存したファイル群をマージする(FileCombineに不足ファイルが合った際に呼ぶ処理を登録できる)
         string gameTempPath = new FileCombine().MergeSplitedFile(tempSlicedGameDLPath, tempGameDLPath);
@@ -130,12 +143,24 @@ public class GameDLProc
 
     }
 
-    private Dictionary<string,string> CreateLackDic(MistakeFiles mistakeFiles, Dictionary<string, string> metaDic, string fileName)
+    private Dictionary<string,string> CreateLackDic(MistakeFiles mistakeFiles, Dictionary<string, string> metaDic)
     {
+        string fileName = mistakeFiles.FileName;
         //不足しているファイルをlong型のリストからstring型のファイル名に変更する
-        //List<string> lackStrList = mistakeFiles.LackFiles.Select(x => )
-        //Dictionary<string, string> LackDic = metaDic.Where(x => mistakeFiles.LackFiles.Contains(Path.GetExtension(x.Key))).
-        return null;
+        List<string> lackStrList = mistakeFiles.LackFiles.Select(x => string.Format("{0}.{1:D3}", fileName, x)).ToList();
+        Dictionary<string, string> lackFilesDic = new Dictionary<string, string>();
+        foreach(string lackFileName in lackStrList)
+        {
+            if (metaDic.ContainsKey(lackFileName))
+            {
+                lackFilesDic[lackFileName] = metaDic[lackFileName];
+            }
+            else
+            {
+                throw new Exception("ドライブに必要なファイルが保存されていないため、結合できません");
+            }
+        }
+        return lackFilesDic;
     }
 
     /// <summary>

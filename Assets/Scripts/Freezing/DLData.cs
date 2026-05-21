@@ -26,7 +26,7 @@ public class DLData
     /// <param name="filesPath"></param>
     public DLData(string filesPath)
     {
-        SerializeDataByPath(filesPath);
+        DeserializeDataByFilePath(filesPath);
     }
     public DLData(long gameSize, string fileName, long splitedFileNum)
     {
