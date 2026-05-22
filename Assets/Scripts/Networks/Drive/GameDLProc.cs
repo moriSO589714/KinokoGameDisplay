@@ -11,6 +11,7 @@ public class GameDLProc
 {
     private OnNetDriveMetaData _onNetDriveMetaData = null;
     private OnNetDriveGetFile _onNetDriveFetFile = null;
+    private GameData _gameData;
 
     /// <summary>
     /// 対象のゲームの現在の状態を表す列挙型
@@ -23,23 +24,30 @@ public class GameDLProc
         None//全くダウンロードされていない
     }
 
-    public GameDLProc(OnNetDriveMetaData metaData, OnNetDriveGetFile onNetDriveFetFile)
+    public GameDLProc(OnNetDriveMetaData metaData, OnNetDriveGetFile onNetDriveFetFile, GameData gameData)
     {
+        _gameData = gameData;
         _onNetDriveMetaData = metaData;
         _onNetDriveFetFile = onNetDriveFetFile;
+    }
+
+    public async UniTask DLGameInUniTask()
+    {
+        //ダウンロードタスクをスレッドプールで実行
+        await UniTask.RunOnThreadPool(DLGame);
     }
 
     /// <summary>
     /// 固有IDからゲームデータをローカルに保存する
     /// </summary>
-    public void DLGame(GameData gamedata)
+    public void DLGame()
     {
-        string gameId = gamedata.GameID;
-        string driveId = gamedata.GameDriveId;
+        string gameId = _gameData.GameID;
+        string driveId = _gameData.GameDriveId;
         AllDirs allDirs = AllDirs.GetInstance();
 
         //使用するパスの定義
-        string tempDirPath = AllDirs.GetInstance().TempPath;
+        string tempDirPath = AllDirs.GetInstance().TmpDLPath;
         string tempGameDLPath = Path.Combine(tempDirPath, gameId);
         string tempSlicedGameDLPath = Path.Combine(tempGameDLPath, "sliced");
 
@@ -123,10 +131,10 @@ public class GameDLProc
         //保存したファイル群をマージする(FileCombineに不足ファイルが合った際に呼ぶ処理を登録できる)
         new FileCombine().MergeSplitedFile(tempSlicedGameDLPath, newGamePath);
         
-        gamedata.Status = GameStatus.Downloaded;
+        _gameData.Status = GameStatus.Downloaded;
         string thisGameJsonPath = Path.Combine(allDirs.JsonsDirPath, gameId + ".json");
         //ダウンロード済みデータとしてjsonに保存
-        JSONTools.SerializeJson(gamedata, thisGameJsonPath);
+        JSONTools.SerializeJson(_gameData, thisGameJsonPath);
 
         //ダウンロードに利用した一時保存関係のファイル・フォルダを全て削除する
         DirectoryActs.CompleteDirDelete(tempGameDLPath);

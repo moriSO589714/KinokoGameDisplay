@@ -20,6 +20,7 @@ public class test : MonoBehaviour
         AllDirs allDirs = AllDirs.GetInstance();
 
         DLGame();
+        Debug.Log("end");
     }
 
     private void DLGame()
@@ -34,8 +35,8 @@ public class test : MonoBehaviour
         testGameData.GameID = "1t2e3s4t5g6a7m8e9I10D11";
         testGameData.GameDriveId = "1OYVPHDX4IPq2r4ZVWzQI3cyjLGPS_36o";
 
-        GameDLProc gameDLProc = new GameDLProc(onNetDriveMetaData, onNetDriveGetFile);
-        gameDLProc.DLGame(testGameData);
+        GameDLProc gameDLProc = new GameDLProc(onNetDriveMetaData, onNetDriveGetFile, testGameData);
+        gameDLProc.DLGameInUniTask();
     }
 
     private void DLTestGame()
@@ -46,8 +47,8 @@ public class test : MonoBehaviour
         GameData testGameData = new GameData();
         testGameData.GameID = "aaaaaaaaaaaaaa";
         testGameData.GameDirName = "test";
-        GameDLProc gameDLProc = new GameDLProc(onNetDriveMetaData, onNetDriveGetFile);
-        gameDLProc.DLGame(testGameData);
+        GameDLProc gameDLProc = new GameDLProc(onNetDriveMetaData, onNetDriveGetFile, testGameData);
+        gameDLProc.DLGameInUniTask();
         Debug.Log("endDLGame");
     }
 }
