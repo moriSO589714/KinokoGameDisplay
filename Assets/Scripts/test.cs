@@ -1,4 +1,5 @@
-﻿using DG.Tweening.Plugins;
+﻿using Cysharp.Threading.Tasks;
+using DG.Tweening.Plugins;
 using Google.Apis.Drive.v3;
 using Google.Apis.Sheets.v4;
 using JetBrains.Annotations;
@@ -17,16 +18,36 @@ public class test : MonoBehaviour
     {
         new LoadFlexibleDir().SetFlexibleDirByJson();
         AllDirs allDirs = AllDirs.GetInstance();
+
+        DLGame();
+    }
+
+    private void DLGame()
+    {
+        AllDirs allDirs = AllDirs.GetInstance();
         DriveService service = new CreateAPIService(allDirs.JsonPathKey).CreateDriveAPIService();
+
         OnNetDriveMetaData onNetDriveMetaData = new OnNetDriveMetaDatafromDv(service);
-        OnNetDriveGetFile onNetDriveGetFile = new OnNetDriveGetFilefromDV(service);
-        string driveId = "1OYVPHDX4IPq2r4ZVWzQI3cyjLGPS_36o";
+        OnNetDriveGetFile onNetDriveGetFile = new OnNetDriveGetFilefromDv(service);
+
         GameData testGameData = new GameData();
-        testGameData.GameDriveId = driveId;
-        testGameData.GameID = "aaaaaaaaaaaaaa";
+        testGameData.GameID = "1t2e3s4t5g6a7m8e9I10D11";
+        testGameData.GameDriveId = "1OYVPHDX4IPq2r4ZVWzQI3cyjLGPS_36o";
 
         GameDLProc gameDLProc = new GameDLProc(onNetDriveMetaData, onNetDriveGetFile);
         gameDLProc.DLGame(testGameData);
-        Debug.Log("end");
+    }
+
+    private void DLTestGame()
+    {
+        AllDirs allDirs = AllDirs.GetInstance();
+        OnNetDriveMetaData onNetDriveMetaData = new OnNetDriveMetaDatafromTest();
+        OnNetDriveGetFile onNetDriveGetFile = new OnNetDriveGetFilefromTest();
+        GameData testGameData = new GameData();
+        testGameData.GameID = "aaaaaaaaaaaaaa";
+        testGameData.GameDirName = "test";
+        GameDLProc gameDLProc = new GameDLProc(onNetDriveMetaData, onNetDriveGetFile);
+        gameDLProc.DLGame(testGameData);
+        Debug.Log("endDLGame");
     }
 }

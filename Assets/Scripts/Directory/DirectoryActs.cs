@@ -6,13 +6,14 @@ using UnityEngine;
 
 /// <summary>
 /// ディレクトリー関係のアクションをまとめるクラス
+/// 別スレッドで呼び出すのが望ましい
 /// </summary>
-public class DirectoryActs
+public static class DirectoryActs
 {
     /// <summary>
     /// 特定のパスのディレクトリが存在しているかを確認して、していない場合作成する
     /// </summary>
-    public bool CreateAndCheckDir(string path)
+    public static bool CreateAndCheckDir(string path)
     {
         if (Directory.Exists(path))
         {
@@ -26,7 +27,7 @@ public class DirectoryActs
     /// <summary>
     /// 指定されたディレクトリを中身のファイルごと全て削除する
     /// </summary>
-    public void CompleteDirDelete(string dirPath)
+    public static void CompleteDirDelete(string dirPath)
     {
         if (!Directory.Exists(dirPath)) return;
 
@@ -49,5 +50,14 @@ public class DirectoryActs
         //中身に何も無い状態になった場合、自身も削除する
         //パスには直接子要素を削除する際のパスを指定できるが、今回のメソッドでは行わないためfalse
         Directory.Delete(dirPath, false);
+    }
+
+    /// <summary>
+    /// 指定のディレクトリを削除後、新規に作り直す
+    /// </summary>
+    public static void RefleshDir(string path)
+    {
+        CompleteDirDelete(path);
+        CreateAndCheckDir(path);
     }
 }

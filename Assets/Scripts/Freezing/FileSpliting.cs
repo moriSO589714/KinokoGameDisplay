@@ -80,14 +80,11 @@ public class FileSpliting
         //上記ループだと、実際に追加されているchunkIndexよりも一つ多く足されてしまうので、修正
         chunkIndex--;
 
-        //チャンクインデックス00(.00)にDL情報のファイル（容量、ZIPファイル名等）を置いておく
         DLData createdDLData = new DLData(fileSize, fileName, chunkIndex);
-        string dlDataFileName = $"{fileName}.000";
+        string dlDataFileName = fileName + createdDLData.DLDataFileExtention;
         string dlDataPath = Path.Combine(saveinPath, dlDataFileName);
-        using (FileStream dlDataFs = new FileStream(dlDataPath, FileMode.Create, FileAccess.Write))
-        {
-            dlDataFs.Write(createdDLData.ReturnByteData());
-        }
+        //.000となるファイルにDLDataをシリアライズして保存する
+        createdDLData.SerializeDLData(dlDataPath);
 
         //全てのデータが揃っているか確認しておく
         MistakeFiles mistakeFiles = new FreezingTools().hasAllRequiredData(saveinPath);

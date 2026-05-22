@@ -14,16 +14,16 @@ public class FreezingTools
     /// <summary>
     /// 指定されたフォルダに必要な全てのファイル群が揃っているかを確認するメソッド
     /// </summary>
-    /// <param name="splitedFilesPath">分割されたファイル群が入っているフォルダのパス</param>
+    /// <param name="splitFilesPath">分割されたファイル群が入っているフォルダのパス</param>
     /// <param name="dlData">DLDataクラスに確認したかを代入する必要のある場合(代入が不必要な場合nullで可能)</param>
     /// <returns>不足しているデータのインデックス値の配列が返される。揃っている場合は要素数0の配列を返す</returns>
-    public MistakeFiles hasAllRequiredData(string splitedFilesPath)
+    public MistakeFiles hasAllRequiredData(string splitFilesPath)
     {
         //不足しているファイルのインデックス値を格納するリスト
         List<long> lackFilesList = new List<long>();
         //不足以外に問題のあるファイル(フォルダ内に存在するが、存在するべきでないファイル)の"パス"を格納するリスト
         List<string> errorFilesList = new List<string>();
-        string[] files = sortingFilesByPath(splitedFilesPath);
+        string[] files = sortingFilesByPath(splitFilesPath);
 
         //拡張子の最後が0で終わるファイルをLINQで検索
         var dLDataFiles = files.Where(x => {
@@ -42,7 +42,7 @@ public class FreezingTools
         }
         else if(dLDataFiles.Count() == 0)
         {
-            return null;
+            throw new Exception("DLDataファイルが存在しません");
         }
 
         //ファイルチェック時に使用するゲーム名を格納するためのDLDataクラスを作成して、.00ファイルのバイト配列からデータを入れる。

@@ -11,14 +11,16 @@ using UnityEngine;
 /// </summary>
 public class DLData
 {
-    //zipファイルの容量
+    //zipファイルのサイズ(Bite)
     public long GameSize { get; private set; }
     //zipファイルの名前
     public string FileName { get; private set; }
     //分割したファイルの個数
-    public long SplitedFileNum { get; private set; }
+    public long SplitFileNum { get; private set; }
     //ファイル群にすべてのデータが揃っているか
     public bool IsCheckAllRequiredData { get; private set; } = false;
+
+    public readonly string DLDataFileExtention = ".000";
 
     /// <summary>
     /// インスタンス時にデータをセットするようのコンストラクタ
@@ -28,9 +30,9 @@ public class DLData
     {
         DeserializeDataByFilePath(filesPath);
     }
-    public DLData(long gameSize, string fileName, long splitedFileNum)
+    public DLData(long gameSize, string fileName, long splitFileNum)
     {
-        SerializeDataByCustomDatas(gameSize, fileName, splitedFileNum);
+        SerializeDataByCustomDatas(gameSize, fileName, splitFileNum);
     }
     public DLData(byte[] byteData)
     {
@@ -56,12 +58,12 @@ public class DLData
     /// </summary>
     /// <param name="gameSize">ゲームの全体容量(不明時は-1を代入)</param>
     /// <param name="fileName">ゲームデータが入ったフォルダの名前(不明時は""を代入)</param>
-    /// <param name="splitedFileNum">ゲームが分割された際の分割数(不明時は-1を代入)</param>
-    public void SerializeDataByCustomDatas(long gameSize, string fileName,long splitedFileNum)
+    /// <param name="splitFileNum">ゲームが分割された際の分割数(不明時は-1を代入)</param>
+    public void SerializeDataByCustomDatas(long gameSize, string fileName,long splitFileNum)
     {
         if(gameSize != -1) GameSize = gameSize;
         if(fileName != "") FileName = fileName;
-        if(splitedFileNum != -1) SplitedFileNum = splitedFileNum;
+        if(splitFileNum != -1) SplitFileNum = splitFileNum;
     }
 
     /// <summary>
@@ -75,7 +77,7 @@ public class DLData
         string[] splitedDatas = dlData.Split(",");
         GameSize = long.Parse(splitedDatas[0]);
         FileName = splitedDatas[1];
-        SplitedFileNum = long.Parse(splitedDatas[2]);
+        SplitFileNum = long.Parse(splitedDatas[2]);
     }
 
     public void DeserializeDataByFilePath(string filePath)
@@ -91,11 +93,20 @@ public class DLData
     /// </summary>
     public byte[] ReturnByteData()
     {
-        string toByteData = GameSize.ToString() + "," + FileName + "," + SplitedFileNum.ToString();
+        string toByteData = GameSize.ToString() + "," + FileName + "," + SplitFileNum.ToString();
         byte[] byteData = System.Text.Encoding.UTF8.GetBytes(toByteData);
         if (byteData == null) throw new Exception("converted byteArray is null.");
         return byteData;
     }
 
-
+    /// <summary>
+    /// 自身をファイルとして指定のパスに保存する
+    /// </summary>
+    public void SerializeDLData(string savePath)
+    {
+        using (FileStream fs = new FileStream(savePath, FileMode.Create, FileAccess.Write))
+        {
+            fs.Write(this.ReturnByteData());
+        }
+    }
 }

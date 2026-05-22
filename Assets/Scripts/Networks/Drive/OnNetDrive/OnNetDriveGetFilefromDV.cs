@@ -1,14 +1,15 @@
-﻿
-
-using Google.Apis.Drive.v3;
+﻿using Google.Apis.Drive.v3;
 using System.IO;
 using Unity.IO.LowLevel.Unsafe;
 
-public class OnNetDriveGetFilefromDV : OnNetDriveGetFile
+/// <summary>
+/// APIを利用してドライブにデータ保存リクエストを送る
+/// </summary>
+public class OnNetDriveGetFilefromDv : OnNetDriveGetFile
 {
     private DriveService _driveService;
 
-    public OnNetDriveGetFilefromDV(DriveService driveService)
+    public OnNetDriveGetFilefromDv(DriveService driveService)
     {
         _driveService = driveService;
     }
