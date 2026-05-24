@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.IO.Compression;
 
 /// <summary>
@@ -30,12 +31,14 @@ public class OnNetDriveGetFilefromTest : OnNetDriveGetFile
             }
             string onlyFileName = Path.GetFileName(filePath);
             string zipFilePath = Path.Combine(dledPath, onlyFileName + ".zip");
-            //作成したファイルをzip化する
-            try
+
+            //空のzip書庫を作成する
+            using (ZipArchive zipArc = ZipFile.Open(zipFilePath, ZipArchiveMode.Create))
             {
-                ZipFile.CreateFromDirectory(filePath, zipFilePath, System.IO.Compression.CompressionLevel.Optimal, false, System.Text.Encoding.GetEncoding("shift_jis"));
+                //CreateEntryFromFileで空のzip書庫にファイルを追加する
+                ZipArchiveEntry e = zipArc.CreateEntryFromFile(filePath, Path.GetFileName(filePath));
             }
-            catch { }
+
             //もとファイルの削除
             File.Delete(filePath);
             //拡張子の変更

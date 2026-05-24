@@ -19,7 +19,7 @@ public class test : MonoBehaviour
         new LoadFlexibleDir().SetFlexibleDirByJson();
         AllDirs allDirs = AllDirs.GetInstance();
 
-        DLGame();
+        DLTestGame();
         Debug.Log("end");
     }
 
