@@ -15,6 +15,16 @@ public class EachDataLoad : MonoBehaviour
     {
 
     }
+
+    /// <summary>
+    /// ソフトウェア起動時に必要とするロード
+    /// </summary>
+    public void InitLoad()
+    {
+        //ディレクトリの場所を読み込み
+        new LoadFlexibleDir().SetFlexibleDirByJson();
+    }
+
     /// <summary>
     /// ローカルのみでmain画面を構成するためのデータをロードする
     /// </summary>

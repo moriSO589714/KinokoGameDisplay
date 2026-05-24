@@ -10,7 +10,9 @@ using UnityEngine;
 public class FirstLoadMain : MonoBehaviour
 {
     [SerializeField] EachDataLoad _eachDataLoad;
+    [SerializeField] ManageMainUI _managedMainUI;
     private CommonStateManager _commonStateManager;
+
     //Mainシーンに入った時に行う処理
     private void Awake()
     {
@@ -23,10 +25,12 @@ public class FirstLoadMain : MonoBehaviour
 
         //==========================================================
 
-        //ディレクトリ系の初期化
-        new LoadFlexibleDir().SetFlexibleDirByJson();
+        //FirstLoad画面を作成するならそっちに移植する
+        _eachDataLoad.InitLoad();
         //ローカルで保存されているゲームのロード＋UI反映
         _eachDataLoad?.LoadLocalData();
+        //UI関係のロード
+        _managedMainUI?.InitMainUI();
     }
     
     
@@ -36,5 +40,4 @@ public class FirstLoadMain : MonoBehaviour
     {
 
     }
-    
 }

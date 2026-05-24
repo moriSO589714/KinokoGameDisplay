@@ -11,25 +11,23 @@ public class ManageMainUI : MonoBehaviour
     [SerializeField] private GameBoxsManager _gameBoxManager;
     [SerializeField] private GameObject _wifiMrkObj;
     [SerializeField] private GameObject _filterMrkObj;
-    private void Awake()
-    {
-        Init();
-    }
+    [SerializeField] private GameObject _canvas;
 
-    private void Init()
+    public void InitMainUI()
     {
         CommonStateManager commonStateManager = CommonStateManager.Instance;
 
         //Wifiボタンのデリゲート設定======================================================
-        DownTab wifiMrkDownTab = _wifiMrkObj.GetComponent<DownTab>();
-        if(wifiMrkDownTab != null)
+        NetWorkTab netWorkTab = _wifiMrkObj.GetComponent<NetWorkTab>();
+        if(netWorkTab != null)
         {
-            Vector2 moveDistance = wifiMrkDownTab.ReturnMoveDis();
-            float moveSeconds = wifiMrkDownTab.ReturnMoveSeconds();
-            float removeSeconds = wifiMrkDownTab.ReturnRemoveSeconds();
+            Vector2 moveDistance = netWorkTab.ReturnMoveDis();
+            float moveSeconds = netWorkTab.ReturnMoveSeconds();
+            float removeSeconds = netWorkTab.ReturnRemoveSeconds();
             SimpleDownAndUp simpleDownAndUp = new SimpleDownAndUp(_wifiMrkObj, moveDistance, moveSeconds, removeSeconds);
-            wifiMrkDownTab.PointerEnterAct = simpleDownAndUp.MoveObject;
-            wifiMrkDownTab.PointerExitAct = simpleDownAndUp.RemoveObject;
+            netWorkTab.PointerEnterAct = simpleDownAndUp.MoveObject;
+            netWorkTab.PointerExitAct = simpleDownAndUp.RemoveObject;
+            netWorkTab.InstancePanel = CreatePanel;
         }
         //================================================================================
 
@@ -58,7 +56,20 @@ public class ManageMainUI : MonoBehaviour
             commonStateManager.AddOutLoadingFunc(() => { _monitorPlayerInput.onMouseScroll += act; });
         }
         //================================================================================
-
-
     }
+
+    private void CreatePanel(GameObject pref)
+    {
+        GameObject instance = InstantiatePref(pref);
+        instance.GetComponent<UIPanel>()?.InitPanel();
+    }
+
+    /// <summary>
+    /// プレハブをcanvas下に生成する
+    /// </summary>
+    private GameObject InstantiatePref(GameObject pref)
+    {
+        return Instantiate(pref, parent:_canvas.transform);
+    }
+
 }
