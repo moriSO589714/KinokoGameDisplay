@@ -2,24 +2,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DownTab : SimpleUI
+public class DownTab : UIActBase
 {
     [SerializeField] Vector2 _moveDistance;
     [SerializeField] float _moveSeconds;
     [SerializeField] float _removeSeconds;
 
-    public Vector2 ReturnMoveDis()
+    SimpleDownAndUp simpleDownAndUp;
+    private void Awake()
     {
-        return _moveDistance;
+        simpleDownAndUp = new SimpleDownAndUp(gameObject, _moveDistance, _moveSeconds, _removeSeconds);
     }
 
-    public float ReturnMoveSeconds()
+    public override void OnPointerEnter()
     {
-        return _moveSeconds;
+        simpleDownAndUp.MoveObject();
+        base.OnPointerEnter();
     }
 
-    public float ReturnRemoveSeconds()
+    public override void OnPointerExit()
     {
-        return _moveSeconds;
+        simpleDownAndUp.RemoveObject();
+        base.OnPointerExit();
     }
 }

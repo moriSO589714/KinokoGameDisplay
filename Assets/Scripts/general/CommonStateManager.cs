@@ -18,7 +18,7 @@ public enum LoadStates
 }
 
 
-public class CommonStateManager : BasedSingleton<CommonStateManager>
+public class CommonStateManager : BasedSingletonInMono<CommonStateManager>
 {
     //現在の状態
     [HideInInspector] public SceneStates _currentState { get; private set; }

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
+/// Monoを継承した
 /// シングルトン用の基底クラス
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class BasedSingleton<T> : MonoBehaviour where T : MonoBehaviour
+public class BasedSingletonInMono<T> : MonoBehaviour where T : MonoBehaviour
 {
     //シングルトンのインスタンス
     private static T instance;

@@ -6,9 +6,10 @@ public class UIPanel : MonoBehaviour
 {
     CommonStateManager stateManager;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         stateManager = CommonStateManager.Instance;
+        InitPanel();
     }
 
     //パネルを作成した時に実行する処理

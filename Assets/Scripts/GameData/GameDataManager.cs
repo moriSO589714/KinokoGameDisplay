@@ -31,43 +31,42 @@ public class GameDataManager
     /// インターネット上(スプレッドシート)からGameData群をロード(シングルトンに追加)する
     /// </summary>
     /// <param name="filterObjects">絞りこみを行う場合、条件を代入したGameDataクラス,nullの場合絞りこみを行わない</param>
-    public void LoadGameDataFromSpSt(List<GameData> filterObjects)
+    public void LoadGameDataFromSpSt()
     {
         List<GameData> gameDatas = new List<GameData>();
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
         CollectivelyGetFromSpSt collectivelyGetFromSpSt = new CollectivelyGetFromSpSt();
         
         //スプレッドシートから全てのGameDataを取得してくる
-        if(filterObjects == null)
-        {
-            string jsonPathKey = AllDirs.GetInstance().JsonPathKey;
-            string spId = AllDirs.GetInstance().SpreadSheetID;
+        string jsonPathKey = AllDirs.GetInstance().JsonPathKey;
+        string spId = AllDirs.GetInstance().SpreadSheetID;
 
-            List<GameData> gotGameDatas = collectivelyGetFromSpSt.AllGameDataFromSpSt();
-            gameDatasSingleton.AddGameDataList(gotGameDatas);
-        }
+        List<GameData> gotGameDatas = collectivelyGetFromSpSt.AllGameDataFromSpSt();
+        gameDatasSingleton.AddGameDataList(gotGameDatas);
+
+
         //条件をもとにスプレッドシートからGameDataを取得してくる
+        //(最終使わないなら消す)
+        /*
+        string jsonPathKey = AllDirs.GetInstance().JsonPathKey;
+        string spId = AllDirs.GetInstance().SpreadSheetID;
+        OnNetGameInfo onNetGameInfo = null;
+        if (!CheckInEnvironment.CheckDoingNet())
+        {
+            onNetGameInfo = new OnNetGameInfoFromTest();
+        }
         else
         {
-            string jsonPathKey = AllDirs.GetInstance().JsonPathKey;
-            string spId = AllDirs.GetInstance().SpreadSheetID;
-            OnNetGameInfo onNetGameInfo = null;
-            if (!CheckInEnvironment.CheckDoingNet())
-            {
-                onNetGameInfo = new OnNetGameInfoFromTest();
-            }
-            else
-            {
-                CreateAPIService createAPIService = new CreateAPIService(jsonPathKey);
-                SheetsService sheetsService = createAPIService.CreateSheetAPIService();
-                onNetGameInfo = new OnNetGameInfoFromSpSt(sheetsService, spId);
-            }
-
-            foreach(GameData g in filterObjects)
-            {
-                List<GameData> getDatas = collectivelyGetFromSpSt.FilterGameDataFromSpSt(g);
-                gameDatasSingleton.AddGameDataList(getDatas);
-            }
+            CreateAPIService createAPIService = new CreateAPIService(jsonPathKey);
+            SheetsService sheetsService = createAPIService.CreateSheetAPIService();
+            onNetGameInfo = new OnNetGameInfoFromSpSt(sheetsService, spId);
         }
+
+        foreach(GameData g in filterObjects)
+        {
+            List<GameData> getDatas = collectivelyGetFromSpSt.FilterGameDataFromSpSt(g);
+            gameDatasSingleton.AddGameDataList(getDatas);
+        }
+        */
     }
 }
