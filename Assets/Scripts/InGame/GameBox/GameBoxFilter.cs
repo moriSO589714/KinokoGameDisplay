@@ -1,0 +1,164 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+
+/// <summary>
+/// GameDatasSingletonにあるGameDatasからフィルタリングしたものをGameBoxManagerにセットしてUI反映する
+/// </summary>
+public class GameBoxFilter
+{
+
+    public List<GameData> FilteringGameDatas(FilterCondition filterCondition)
+    {
+        return filtering(filterCondition);
+    }
+
+    /// <summary>
+    /// GameDataクラスを利用してフィルタリングを行う。インスタンス1つに格納されたものはandだが、複数インスタンスはorで絞られる
+    /// </summary>
+    private List<GameData> filtering(FilterCondition filterCondition)
+    {
+        GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
+        List<GameData> allData = new List<GameData>(gameDatasSingleton.AllGameDatas);
+
+        //フィルタリングされたゲームデータが入るクラス
+        List<GameData> filterdGames = new List<GameData>(allData);
+        
+        //ゲームのステータス
+        List<GameData> statusCandidate = new List<GameData>();
+        foreach(GameStatus status in filterCondition.Statuses)
+        {
+            statusCandidate.AddRange(filterStatus(status, filterdGames));
+        }
+        filterdGames = new List<GameData>(statusCandidate);
+
+
+        //ゲームのソフトウェア種類
+        List<GameData> softwareCandidate = new List<GameData>();
+        if (filterCondition.Softs.Count == 0)
+        {
+            softwareCandidate = filterdGames;
+        }
+        foreach(string soft in filterCondition.Softs)
+        {
+            softwareCandidate.AddRange(filterSoft(soft, filterdGames));
+        }
+        filterdGames = new List<GameData>(softwareCandidate);
+
+
+        //ゲームのタイトル名
+        List<GameData> gameNamesCandidate = new List<GameData>();
+        if(filterCondition.GameNames.Count == 0)
+        {
+            gameNamesCandidate = filterdGames;
+        }
+        foreach(string gameName in filterCondition.GameNames)
+        {
+            gameNamesCandidate.AddRange(filterGameName(gameName, filterdGames));
+        }
+        filterdGames = new List<GameData>(gameNamesCandidate);
+
+
+        //ゲームの開発者
+        List<GameData> devCandidate = new List<GameData>();
+        if (filterCondition.GameDevs.Count == 0)
+        {
+            devCandidate = filterdGames;
+        }
+        foreach (List<string> devs in filterCondition.GameDevs)
+        {
+            devCandidate.AddRange(filterGameDev(devs, filterdGames));
+        }
+        filterdGames = new List<GameData>(devCandidate);
+
+
+        //ゲームのタグ
+        List<GameData> tagCandidate = new List<GameData>();
+        if(filterCondition.GameTags.Count == 0)
+        {
+            tagCandidate = filterdGames;
+        }
+        foreach(List<string> tags in filterCondition.GameTags)
+        {
+            tagCandidate.AddRange(filterTag(tags, filterdGames));
+        }
+        filterdGames = new List<GameData>(tagCandidate);
+
+        //重複したGameDataクラスを削除する
+        filterdGames = filterdGames.Distinct().ToList();
+        return filterdGames;
+    }
+
+
+    /// <summary>
+    /// ゲームタイトルは部分一致でもリストに追加する
+    /// </summary>
+    private List<GameData> filterGameName(string gameName, List<GameData> currentGameDatas)
+    {
+        if (gameName == null || gameName == "")
+        {
+            return currentGameDatas;
+        }
+        else
+        {
+            List<GameData> returnList = currentGameDatas.Where(x => x.GameTitle.Contains(gameName)).ToList();
+            return returnList;
+        }
+    }
+
+    /// <summary>
+    /// 開発者名は完全一致
+    /// </summary>
+    private List<GameData> filterGameDev(List<string> devs, List<GameData> currentGameDatas)
+    {
+        if(devs.Count() == 0)
+        {
+            return currentGameDatas;
+        }
+        else
+        {
+            foreach(string dev in devs)
+            {
+                currentGameDatas = currentGameDatas.Where(x => x.GameDevelopper.Contains(dev)).ToList();
+            }
+        }
+        return currentGameDatas;
+    }
+
+    /// <summary>
+    /// ソフトウェアでのフィルタリング
+    /// </summary>
+    private List<GameData> filterSoft(string soft, List<GameData> currentGameDatas)
+    {
+        if(soft == null || soft == "")
+        {
+            return currentGameDatas;
+        }
+        else
+        {
+            List<GameData> returnList = currentGameDatas.Where(x => x.GameSoftwareType == soft).ToList();
+            return returnList;
+        }
+    }
+
+    private List<GameData> filterTag(List<string> tags, List<GameData> currentGameDatas)
+    {
+        if(tags.Count() == 0)
+        {
+            return currentGameDatas;
+        }
+        else
+        {
+            foreach(string tag in tags)
+            {
+                currentGameDatas = currentGameDatas.Where(x => x.GameTags.Contains(tag)).ToList();
+            }
+            return currentGameDatas;
+        }
+    }
+
+    private List<GameData> filterStatus(GameStatus status, List<GameData> currentGameDatas)
+    {
+        currentGameDatas = currentGameDatas.Where(x => x.Status == status).ToList();
+        return currentGameDatas;
+    }
+}

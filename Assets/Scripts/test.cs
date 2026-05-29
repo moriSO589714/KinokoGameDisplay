@@ -16,14 +16,7 @@ public class test : MonoBehaviour
 
     void Start()
     {
-        testgg();
         Debug.Log("end");
-    }
-
-    private async UniTask testgg()
-    {
-        await UniTask.WaitForSeconds(5);
-        Debug.Log("end2");
     }
 
     private void DLGame()

@@ -8,13 +8,17 @@ using UnityEngine;
 /// </summary>
 public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
 {
-    public List<GameData> GameDatas { get; private set; } = new List<GameData>();
+    public List<GameData> AllGameDatas { get; private set; } = new List<GameData>();
+
+    //現在GameBoxとして表示されているゲームとその条件指定用のGameDataインスタンス
+    public List<GameData> CurrentDisplayGames { get; private set; } = new List<GameData>();
+    public List<GameData> CurrentFilterConditions { get; private set; } = new List<GameData>();
     
     //ゲームデータをリストにセット
     public void AddGameData(GameData gameData)
     {
         //追加
-        if(CheckGameData(gameData)) GameDatas.Add(gameData);
+        if(CheckGameData(gameData)) AllGameDatas.Add(gameData);
     }
     public void AddGameDataList(List<GameData> gameDatas)
     {
@@ -23,12 +27,24 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
         {
             if(CheckGameData(gameData)) addGameDataList.Add(gameData);
         }
-        GameDatas.AddRange(addGameDataList);
+        AllGameDatas.AddRange(addGameDataList);
+    }
+
+    //リストのリセット
+    public void ResetGameDataList()
+    {
+        AllGameDatas = new List<GameData>();
+    }
+
+    public void SetCurrentDisplayGames(List<GameData> currentGameDatas, List<GameData> currentFilterConditions)
+    {
+        CurrentDisplayGames = currentGameDatas;
+        CurrentFilterConditions = currentFilterConditions;
     }
 
     private bool CheckGameData(GameData gameData)
     {
-        foreach(GameData singletonGameData in GameDatas)
+        foreach(GameData singletonGameData in AllGameDatas)
         {
             //シングルトンに既に同じゲームIDのゲーム情報が登録されている場合
             if(singletonGameData.GameID == gameData.GameID)
@@ -45,14 +61,6 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
         //ゲーム情報として扱う最低要件を満たせていない場合は追加しない
         if (!GameDataQualityCheck.CheckQuality(gameData)) return false;
         return true;
-    }
-
-
-
-    //リストのリセット
-    public void ResetGameDataList()
-    {
-        GameDatas = new List<GameData>();
     }
 }
 

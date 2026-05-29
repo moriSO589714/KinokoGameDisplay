@@ -20,14 +20,14 @@ public class SetGameBoxs
     public async UniTask SetAllGameBoxfromLocal()
     {
         await UniTask.RunOnThreadPool(_gameDataManager.LoadGameDataFromJsons);
-        List<GameData> gameDatas = _gameDatasSingleton.GameDatas;
+        List<GameData> gameDatas = _gameDatasSingleton.AllGameDatas;
         _gameBoxsManager.SetGameBoxsByGameDataList(gameDatas);
     }
 
     public async UniTask SetAllGameBoxfromNet()
     {
         await UniTask.RunOnThreadPool(_gameDataManager.LoadGameDataFromSpSt);
-        List<GameData> gameDatas = _gameDatasSingleton.GameDatas;
+        List<GameData> gameDatas = _gameDatasSingleton.AllGameDatas;
         _gameBoxsManager.SetGameBoxsByGameDataList(gameDatas);
     }
 }
