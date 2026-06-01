@@ -13,12 +13,22 @@ using UnityEngine.UIElements;
 public class test : MonoBehaviour
 {
     [SerializeField] GameObject obj;
+    [SerializeField] CandidateBoxManager manager;
 
     void Start()
     {
+        Vector2 testPos = new Vector2(668, 58);
+        manager.InstCandidateBoxs(new List<string>(10) { "aaa", "bbb", "ccc", "ddd", "eee", "fff" }, testPos);
         Debug.Log("end");
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            manager.SlidePerUnit(true);
+        }
+    }
     private void DLGame()
     {
         AllDirs allDirs = AllDirs.GetInstance();
