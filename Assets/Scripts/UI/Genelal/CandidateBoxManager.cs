@@ -12,9 +12,13 @@ public class CandidateBoxManager : MonoBehaviour
     private Vector2 _startAnchoredPos = Vector2.zero;
 
     private List<string> _currentEstimateWordsList = new List<string>();
+    //oneTimeWordsずつ分割したワードリスト(1ページぶんづつ)
+    private List<List<string>> _pages = new List<List<string>>();
+    private int _currentPageIndex = -1;
     private int _currentFirstDisplayIndex = -1;
+    private int _currentSelectBoxIndex = -1;
     private List<CandidateBox> _createdBoxPool = new List<CandidateBox>();
-    
+
     /// <summary>
     /// 初めてbox群を生成する時に実行する処理
     /// </summary>
@@ -23,37 +27,72 @@ public class CandidateBoxManager : MonoBehaviour
         _startAnchoredPos = createPos;
         _currentEstimateWordsList = estimateWords;
         _currentFirstDisplayIndex = 0;
+        _currentPageIndex = 0;
+        _pages = DivisionWordsList(estimateWords);
 
-        CreateCandidateBox(estimateWords);
+        CreateCandidateBox(_pages[0]);
     }
     
     /// <summary>
-    /// 表示している要素を１つずらす
+    /// 選択状態の語をずらしていく
     /// </summary>
-    /// <param name="pn">true = indexの深いほうへずらす false = indexの浅いほうへ</param>
-    public void SlidePerUnit(bool pn)
+    /// <param name="pn">true = 下の語へ false = 上の語へ</param>
+    public void MovePerSelectBox(bool pn)
     {
-        int slide = 0;
+        int move = 0;
         if (pn)
         {
-            slide = 1;
+            move = 1;
         }
         else
         {
-            slide = -1;
+            move = 1;
         }
 
-        SlideDisplayRange(slide);
+        MoveSelectBox(move);
+    }
+
+    /// <summary>
+    /// 表示している要素を１つずらす
+    /// </summary>
+    /// <param name="pn">true = 下の語へ false = 上の語へ</param>
+    public void MovePerPage(bool pn)
+    {
+        int move = 0;
+        if (pn)
+        {
+            move = 1;
+        }
+        else
+        {
+            move = -1;
+        }
+
+        MovePage(move);
+    }
+
+    /// <summary>
+    /// 現在選択中のboxに割り当てられているテキストを返す
+    /// </summary>
+    /// <returns></returns>
+    public string ReturnSelectedTxt()
+    {
+        if(_currentSelectBoxIndex == -1)
+        {
+            return null;
+        }
+
+        return _createdBoxPool[_currentSelectBoxIndex]._pureTxt;
     }
 
     /// <summary>
     /// firstPosを基点にボックス群を生成する
     /// </summary>
-    private void CreateCandidateBox(List<string> estimateWords)
+    private void CreateCandidateBox(List<string> page)
     {
         int currentCreateCounts = 0;
         //与えられたリストの最初から表示するぶんboxを生成する
-        for(int i = 0; i < _oneTimeWords && i < estimateWords.Count; i++)
+        for(int i = 0; i < page.Count; i++)
         {
             if(_createdBoxPool.Count - 1 >= i)
             {
@@ -72,11 +111,11 @@ public class CandidateBoxManager : MonoBehaviour
                     GameObject previousObject = _createdBoxPool[i - 1].gameObject;
                     RectTransform previousRectTransform = previousObject.GetComponent<RectTransform>();
                     Vector2 previousPos = previousRectTransform.anchoredPosition;
-                    previousFloorPos = new Vector2(previousPos.x ,previousPos.y - previousRectTransform.sizeDelta.y);
+                    previousFloorPos = new Vector2(previousPos.x ,previousPos.y - previousRectTransform.sizeDelta.y * previousRectTransform.transform.localScale.y);
                 }
                 InstCandidateBox(previousFloorPos);
             }
-            _createdBoxPool[i].SetLabel(estimateWords[i]);
+            _createdBoxPool[i].SetLabel(page[i]);
             currentCreateCounts++;
         }
 
@@ -98,29 +137,75 @@ public class CandidateBoxManager : MonoBehaviour
         _createdBoxPool.Add(inst.GetComponent<CandidateBox>());
     }
 
-    /// <summary>
-    /// 指定の個数表示している範囲をずらす
-    /// </summary>
-    private void SlideDisplayRange(int slideRange)
+    private List<List<string>> DivisionWordsList(List<string> estimateWords)
     {
-        if (_currentFirstDisplayIndex == -1) return;
-
-        //ずらした後に1番上に表示される要素のリスト内でのindex
-        int firstDisplayIndex = _currentFirstDisplayIndex + slideRange;
-        if(firstDisplayIndex <= -1)//最初のページまで既に達している場合
+        List<List<string>> ReturnList = new List<List<string>>();
+        int i = 0;
+        do
         {
+            int restCount = estimateWords.Count - i;
+            if(_oneTimeWords <= restCount)
+            {
+                restCount = _oneTimeWords;
+            }
+
+            List<string> div = estimateWords.GetRange(i, restCount);
+            ReturnList.Add(div);
+
+            i += _oneTimeWords;
+        }
+        while (i < estimateWords.Count);
+
+        return ReturnList;
+    }
+
+    private void MovePage(int move)
+    {
+        int nextPage = _currentPageIndex + move;
+        if(_pages.Count <= nextPage)
+        {
+            nextPage -= _pages.Count;
+        }
+        else if (nextPage < 0)
+        {
+            nextPage = _pages.Count - 1;
+        }
+
+        CreateCandidateBox(_pages[nextPage]);
+        _currentPageIndex = nextPage;
+    }
+
+    private void MoveSelectBox(int move)
+    {
+        if(_currentSelectBoxIndex != -1)
+        {
+            _createdBoxPool[_currentSelectBoxIndex].LeaveThis();
+        }
+        RecursiveMoveSelectBox(move);
+    }
+
+    private void RecursiveMoveSelectBox(int move)
+    {
+        int nextSelect = _currentSelectBoxIndex + move;
+        //次のページに行く必要がある場合
+        if(nextSelect >= _pages[_currentPageIndex].Count)
+        {
+            int end = _pages[_currentPageIndex].Count - _currentSelectBoxIndex;
+            MovePerPage(true);
+            _currentSelectBoxIndex = 0;
+            RecursiveMoveSelectBox(move - end);
             return;
         }
-        else if(firstDisplayIndex >= _currentEstimateWordsList.Count)//始めに与えられた文字列リストの要素数以上のページを指定している場合
+        else if(nextSelect < 0)//前のページに行く必要がある場合
         {
-            //1ページ目に戻す
-            firstDisplayIndex = 0;
+            int end = _currentSelectBoxIndex + 1;
+            MovePerPage(false);
+            _currentSelectBoxIndex = _pages[_currentPageIndex].Count - 1;
+            RecursiveMoveSelectBox(move + end);
+            return;
         }
-        //1つ目の要素が1番上に表示する要素になるリストを作成
-        List<string> displayList = _currentEstimateWordsList.GetRange(firstDisplayIndex, _currentEstimateWordsList.Count - firstDisplayIndex);
-        //生成
-        CreateCandidateBox(displayList);
-        _currentFirstDisplayIndex = firstDisplayIndex;
 
+        _createdBoxPool[nextSelect].SelectThis();
+        _currentSelectBoxIndex = nextSelect;
     }
 }

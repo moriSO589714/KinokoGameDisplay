@@ -1227,7 +1227,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _oneTimeWords: 3
-  _candidateBoxPref: {fileID: 3881631629411642728, guid: 21aa226c049fe444686ed0fa94e359cf, type: 3}
+  _candidateBoxPref: {fileID: 1992794816119023700, guid: 21aa226c049fe444686ed0fa94e359cf, type: 3}
   _canvas: {fileID: 1869892736}
 --- !u!1 &575054742
 GameObject:
@@ -1342,7 +1342,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -325, y: -206}
+  m_AnchoredPosition: {x: -325.3, y: -205}
   m_SizeDelta: {x: 577.86, y: 155.4}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &610849417

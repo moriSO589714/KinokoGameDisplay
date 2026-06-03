@@ -39,13 +39,13 @@ public class GameBox : MonoBehaviour
     public void SetTitle(string gameTitle)
     {
         if (gameTitle == null || gameTitle == "") return;
-        string setStr = ReplaceOverWords(gameTitle, TitleWordsRemit);
+        string setStr = StrTools.ReplaceOverWords(gameTitle, TitleWordsRemit);
         Title.text = setStr;
     }
     public void SetDescription(string description)
     {
         if (description == "" || description == null) return;
-        string setDescription = ReplaceOverWords(description, DescriptionWordsRemit);
+        string setDescription = StrTools.ReplaceOverWords(description, DescriptionWordsRemit);
         DescriptionField.text = setDescription;
     }
     public void SetImage(string imageName)
@@ -84,7 +84,7 @@ public class GameBox : MonoBehaviour
     public void SetGameDirName(string gameDirName)
     {
         if (gameDirName == null || gameDirName == "") return;
-        string setGameDirName = ReplaceOverWords(gameDirName, GameDirNameWordsRemit);
+        string setGameDirName = StrTools.ReplaceOverWords(gameDirName, GameDirNameWordsRemit);
         GameDirName.text = setGameDirName;
     }
 
@@ -112,25 +112,5 @@ public class GameBox : MonoBehaviour
         }
 
         return sprite;
-    }
-
-    /// <summary>
-    /// 文字数以上の部分を削除して...に置き換える。wordLimitsは...分の3文字も含まれる
-    /// </summary>
-    /// <param name="wordLimits"></param>
-    /// <returns></returns>
-    string ReplaceOverWords(string targetStr, int wordLimits)
-    {
-        string returnStr = targetStr;
-        //制限された文字数以上であった場合以下の処理を実行する。
-        if(targetStr.Length > wordLimits)
-        {
-            //余剰分以外を抽出
-            string splited = targetStr.Substring(0, wordLimits - 3);
-            //...を文章に付け加える
-            returnStr = splited + "...";
-        }
-
-        return returnStr;
     }
 }

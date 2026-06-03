@@ -18,7 +18,7 @@ public class test : MonoBehaviour
     void Start()
     {
         Vector2 testPos = new Vector2(668, 58);
-        manager.InstCandidateBoxs(new List<string>(10) { "aaa", "bbb", "ccc", "ddd", "eee", "fff" }, testPos);
+        manager.InstCandidateBoxs(new List<string>(10) { "aaa", "bbb", "ccc", "ddd", "eee", "fff", "ggg", "hhh" }, testPos);
         Debug.Log("end");
     }
 
@@ -26,7 +26,11 @@ public class test : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            manager.SlidePerUnit(true);
+            manager.MovePerSelectBox(true);
+        }
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            manager.MovePerSelectBox(false);
         }
     }
     private void DLGame()
