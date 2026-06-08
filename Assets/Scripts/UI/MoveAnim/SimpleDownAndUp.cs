@@ -7,6 +7,7 @@ using UnityEngine;
 public class SimpleDownAndUp
 {
     private GameObject _targetObj;
+    private RectTransform _rectTransform;
     private Vector2 _firstPosition;
     private Vector2 _moveDistance;
     private float _moveSeconds;
@@ -16,7 +17,8 @@ public class SimpleDownAndUp
     public SimpleDownAndUp(GameObject obj, Vector2 moveDistance, float moveSeconds, float removeSeconds)
     {
         _targetObj = obj;
-        _firstPosition = obj.transform.position;
+        _rectTransform = obj.GetComponent<RectTransform>();
+        _firstPosition = _rectTransform.anchoredPosition;
         _moveDistance = moveDistance;
         _moveSeconds = moveSeconds;
         _removeSeconds = removeSeconds;
@@ -29,8 +31,9 @@ public class SimpleDownAndUp
     {
         if (_runtimeTween != null) _runtimeTween.Kill();
         //目的先の座標を出す
-        Vector2 targetPos = _firstPosition + _moveDistance;
-        _runtimeTween = _targetObj.transform.DOMove(targetPos, _moveSeconds);
+        Vector2 targetanchoredPos = _firstPosition + _moveDistance;
+
+        _runtimeTween = _rectTransform.DOAnchorPos(targetanchoredPos, _moveSeconds);
     }
 
     /// <summary>
@@ -39,6 +42,6 @@ public class SimpleDownAndUp
     public void RemoveObject()
     {
         if (_runtimeTween != null) _runtimeTween.Kill();
-        _runtimeTween = _targetObj.transform.DOMove(_firstPosition, _moveSeconds);
+        _runtimeTween = _rectTransform.DOAnchorPos(_firstPosition, _removeSeconds);
     }
 }
