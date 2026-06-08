@@ -1,4 +1,5 @@
-﻿using Google.Apis.Sheets.v4;
+﻿using Google.Apis.Drive.v3;
+using Google.Apis.Sheets.v4;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,6 +14,9 @@ public class NetworksSingleton : BasedSingleton<NetworksSingleton>
     private List<List<string>> _allGameDataOnSpSt = null;
     private int _liminalRow = -1;
 
+    private SheetsService _sheetsService = null;
+    private DriveService _driveService = null;
+
     public List<string> ReturnElementOrder(bool forceLoad)
     {
         if (_spreadSheetElementOrder != null && !forceLoad)
@@ -21,14 +25,7 @@ public class NetworksSingleton : BasedSingleton<NetworksSingleton>
         }
         else
         {
-            try
-            {
-                _spreadSheetElementOrder = new GetDataFromSpStAPI().GetElementOrder();
-            }
-            catch(Exception e)
-            {
-                Debug.Log(e);
-            }
+            _spreadSheetElementOrder = new GetDataFromSpStAPI().GetElementOrder();
             return _spreadSheetElementOrder;
         }
     }
@@ -41,15 +38,8 @@ public class NetworksSingleton : BasedSingleton<NetworksSingleton>
         }
         else
         {
-            try
-            {
-                List<string> elementOrder = ReturnElementOrder(false);
-                _liminalRow = new GetDataFromSpStAPI().GetLiminalRow(elementOrder);
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
+            List<string> elementOrder = ReturnElementOrder(false);
+            _liminalRow = new GetDataFromSpStAPI().GetLiminalRow(elementOrder);
             return _liminalRow;
         }
     }
@@ -62,17 +52,32 @@ public class NetworksSingleton : BasedSingleton<NetworksSingleton>
         }
         else
         {
-            try
-            {
-                int liminalRow = ReturnLiminalRow(false);
-                List<string> elementOrder = ReturnElementOrder(false);
-                _allGameDataOnSpSt = new GetDataFromSpStAPI().GetAllGameData(liminalRow, elementOrder);
-            }
-            catch(Exception e)
-            {
-                Debug.Log(e);
-            }
+            int liminalRow = ReturnLiminalRow(false);
+            List<string> elementOrder = ReturnElementOrder(false);
+            _allGameDataOnSpSt = new GetDataFromSpStAPI().GetAllGameData(liminalRow, elementOrder);
             return _allGameDataOnSpSt;
         }
+    }
+
+    public SheetsService ReturnSheetsService()
+    {
+        if(_sheetsService == null)
+        {
+            AllDirs allDirs = AllDirs.GetInstance();
+            _sheetsService = new CreateAPIService(allDirs.JsonPathKey).CreateSheetAPIService();
+        }
+
+        return _sheetsService;
+    }
+
+    public DriveService ReturnDriveService()
+    {
+        if(_driveService == null)
+        {
+            AllDirs allDirs = AllDirs.GetInstance();
+            _driveService = new CreateAPIService(allDirs.JsonPathKey).CreateDriveAPIService();
+        }
+
+        return _driveService;
     }
 }

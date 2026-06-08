@@ -21,7 +21,7 @@ public class GetDataFromSpStAPI
     {
         _allDirs = AllDirs.GetInstance();
         string jsonPathKey = _allDirs.JsonPathKey;
-        _sheetsService = new CreateAPIService(jsonPathKey).CreateSheetAPIService();
+        _sheetsService = NetworksSingleton.Instance.ReturnSheetsService();
         _onNetGameInfo = createOnNetGameInfo();
     }
 

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using UnityEngine;
 
 public class WordEstimater
 {
@@ -73,7 +71,7 @@ public class WordEstimater
             returnList.AddRange(candidateStrs);
         }
 
-        if(returnList == null || returnList.Count == 0)
+        if (returnList == null || returnList.Count == 0)
         {
             return null;
         }
@@ -133,84 +131,84 @@ public class WordEstimater
     }
 }
 
-    public static class WECLibCreater
+public static class WECLibCreater
+{
+    public static WordEmtCell CreateLibFromStrList(List<string> targetStrList, string separateMark)
     {
-        public static WordEmtCell CreateLibFromStrList(List<string> targetStrList, string separateMark)
+        List<List<string>> splitStrsList = new List<List<string>>();
+        int splitStrMaxLength = 0;
+        foreach (string targetStr in targetStrList)
         {
-            List<List<string>> splitStrsList = new List<List<string>>();
-            int splitStrMaxLength = 0;
-            foreach (string targetStr in targetStrList)
-            {
-                string[] splitStr = targetStr.Split(separateMark);
-                if (splitStrMaxLength < splitStr.Length) splitStrMaxLength = splitStr.Length;
-                splitStrsList.Add(splitStr.ToList());
-            }
+            string[] splitStr = targetStr.Split(separateMark);
+            if (splitStrMaxLength < splitStr.Length) splitStrMaxLength = splitStr.Length;
+            splitStrsList.Add(splitStr.ToList());
+        }
 
-            WordEmtCell originCell = new WordEmtCell("", 0);
-            foreach (List<string> strList in splitStrsList)
+        WordEmtCell originCell = new WordEmtCell("", 0);
+        foreach (List<string> strList in splitStrsList)
+        {
+            WordEmtCell parent = originCell;
+            for (int i = 0; i < strList.Count; i++)
             {
-                WordEmtCell parent = originCell;
-                for (int i = 0; i < strList.Count; i++)
+                if (parent._childCells.Any(x => x._myWord == strList[i]))
                 {
-                    if (parent._childCells.Any(x => x._myWord == strList[i]))
+                    parent = parent._childCells.Find(x => x._myWord == strList[i]);
+                    if (i == strList.Count - 1)
                     {
-                        parent = parent._childCells.Find(x => x._myWord == strList[i]);
-                        if (i == strList.Count - 1)
-                        {
-                            CreateEmptyWec(parent);
-                        }
-                    }
-                    else
-                    {
-                        WordEmtCell newWec = new WordEmtCell(strList[i], 0);
-                        //最後の要素であった場合、印として子オブジェクトに空のwecを追加する
-                        if (i == strList.Count - 1)
-                        {
-                            CreateEmptyWec(newWec);
-                        }
-                        parent.SetChild(newWec);
-                        parent = newWec;
+                        CreateEmptyWec(parent);
                     }
                 }
+                else
+                {
+                    WordEmtCell newWec = new WordEmtCell(strList[i], 0);
+                    //最後の要素であった場合、印として子オブジェクトに空のwecを追加する
+                    if (i == strList.Count - 1)
+                    {
+                        CreateEmptyWec(newWec);
+                    }
+                    parent.SetChild(newWec);
+                    parent = newWec;
+                }
             }
-
-            return originCell;
         }
 
-        public static void CreateEmptyWec(WordEmtCell parent)
-        {
-            WordEmtCell newWec = new WordEmtCell("", 0);
-            parent.SetChild(newWec);
-        }
-
-        public static WordEmtCell CreateLibFromLineAndPriority(Dictionary<string, int> words)
-        {
-            WordEmtCell originCell = new WordEmtCell("", 0);
-            foreach (var pair in words)
-            {
-                if (originCell._childCells.Any(x => x._myWord == pair.Key)) continue;
-                WordEmtCell newWec = new WordEmtCell(pair.Key, pair.Value);
-                originCell.SetChild(newWec);
-            }
-            return originCell;
-        }
+        return originCell;
     }
 
-    public class WordEmtCell
+    public static void CreateEmptyWec(WordEmtCell parent)
     {
-        public string _myWord { get; private set; } = "";
-        public List<WordEmtCell> _childCells { get; private set; } = new List<WordEmtCell>();
-        public int _priority { get; private set; } = 0;
-
-        public WordEmtCell(string myWord, int priority)
-        {
-            _myWord = myWord;
-            _priority = priority;
-        }
-
-        public void SetChild(WordEmtCell wec)
-        {
-            _childCells.Add(wec);
-        }
+        WordEmtCell newWec = new WordEmtCell("", 0);
+        parent.SetChild(newWec);
     }
+
+    public static WordEmtCell CreateLibFromLineAndPriority(Dictionary<string, int> words)
+    {
+        WordEmtCell originCell = new WordEmtCell("", 0);
+        foreach (var pair in words)
+        {
+            if (originCell._childCells.Any(x => x._myWord == pair.Key)) continue;
+            WordEmtCell newWec = new WordEmtCell(pair.Key, pair.Value);
+            originCell.SetChild(newWec);
+        }
+        return originCell;
+    }
+}
+
+public class WordEmtCell
+{
+    public string _myWord { get; private set; } = "";
+    public List<WordEmtCell> _childCells { get; private set; } = new List<WordEmtCell>();
+    public int _priority { get; private set; } = 0;
+
+    public WordEmtCell(string myWord, int priority)
+    {
+        _myWord = myWord;
+        _priority = priority;
+    }
+
+    public void SetChild(WordEmtCell wec)
+    {
+        _childCells.Add(wec);
+    }
+}
 

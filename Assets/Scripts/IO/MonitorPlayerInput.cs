@@ -1,18 +1,40 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MonitorPlayerInput : MonoBehaviour
 {
-    public Action<float> onMouseScroll;
+    public Action TabButtonAct;
+    public Action UpArrowAct;
+    public Action DownArrowAct;
+    public Action EscapeAct;
+    public Action<float> OnMouseScroll;
     void Update()
     {
         float scrollDelta = Input.mouseScrollDelta.y;
         if(scrollDelta != 0)
         {
-            if (scrollDelta > 0) onMouseScroll(1);
-            else if (scrollDelta < 0) onMouseScroll(-1);
+            if (OnMouseScroll != null && scrollDelta > 0) OnMouseScroll(1);
+            else if (OnMouseScroll != null && scrollDelta < 0) OnMouseScroll(-1);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            if(TabButtonAct != null) TabButtonAct();
+        }
+
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            if(UpArrowAct != null) UpArrowAct();
+        }
+
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            if (DownArrowAct != null) DownArrowAct();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (EscapeAct != null) EscapeAct();
         }
     }
 }

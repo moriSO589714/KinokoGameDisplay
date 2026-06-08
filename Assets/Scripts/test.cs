@@ -12,31 +12,16 @@ using UnityEngine.UIElements;
 
 public class test : MonoBehaviour
 {
-    [SerializeField] GameObject obj;
-    [SerializeField] CandidateBoxManager manager;
 
     void Start()
     {
-        Vector2 testPos = new Vector2(668, 58);
-        manager.InstCandidateBoxs(new List<string>(10) { "aaa", "bbb", "ccc", "ddd", "eee", "fff", "ggg", "hhh" }, testPos);
         Debug.Log("end");
-    }
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            manager.MovePerSelectBox(true);
-        }
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            manager.MovePerSelectBox(false);
-        }
     }
     private void DLGame()
     {
         AllDirs allDirs = AllDirs.GetInstance();
-        DriveService service = new CreateAPIService(allDirs.JsonPathKey).CreateDriveAPIService();
+        NetworksSingleton networksSingleton = NetworksSingleton.Instance;
+        DriveService service = networksSingleton.ReturnDriveService();
 
         OnNetDriveMetaData onNetDriveMetaData = new OnNetDriveMetaDatafromDv(service);
         OnNetDriveGetFile onNetDriveGetFile = new OnNetDriveGetFilefromDv(service);

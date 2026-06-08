@@ -10,35 +10,56 @@ public class CandidateBoxManager : MonoBehaviour
     [SerializeField] Canvas _canvas;
 
     private Vector2 _startAnchoredPos = Vector2.zero;
+    private List<CandidateBox> _createdBoxPool = new List<CandidateBox>();
 
-    private List<string> _currentEstimateWordsList = new List<string>();
     //oneTimeWordsずつ分割したワードリスト(1ページぶんづつ)
     private List<List<string>> _pages = new List<List<string>>();
     private int _currentPageIndex = -1;
-    private int _currentFirstDisplayIndex = -1;
     private int _currentSelectBoxIndex = -1;
-    private List<CandidateBox> _createdBoxPool = new List<CandidateBox>();
+
+    //マネージャーの初期化処理
+    private void Init()
+    {
+        foreach (CandidateBox cb in _createdBoxPool)
+        {
+            cb.LeaveThis();
+            cb.gameObject.SetActive(false);
+        }
+        _currentPageIndex = -1;
+        _currentSelectBoxIndex = -1;
+        _pages = new List<List<string>>();
+    }
+
+    public void ClearBoxs()
+    {
+        Init();
+    }
 
     /// <summary>
-    /// 初めてbox群を生成する時に実行する処理
+    /// box群を生成する時に実行する処理
     /// </summary>
     public void InstCandidateBoxs(List<string> estimateWords, Vector2 createPos)
     {
+        //マネージャーの初期化
+        Init();
+        
+        //各種値の設定
         _startAnchoredPos = createPos;
-        _currentEstimateWordsList = estimateWords;
-        _currentFirstDisplayIndex = 0;
-        _currentPageIndex = 0;
         _pages = DivisionWordsList(estimateWords);
 
+        //ボックス群の生成
         CreateCandidateBox(_pages[0]);
     }
-    
+
     /// <summary>
     /// 選択状態の語をずらしていく
     /// </summary>
     /// <param name="pn">true = 下の語へ false = 上の語へ</param>
     public void MovePerSelectBox(bool pn)
     {
+        //表示している語が無い場合は実行しない
+        if (_pages == null || _pages.Count == 0) return;
+
         int move = 0;
         if (pn)
         {
@@ -46,7 +67,7 @@ public class CandidateBoxManager : MonoBehaviour
         }
         else
         {
-            move = 1;
+            move = -1;
         }
 
         MoveSelectBox(move);
@@ -58,6 +79,9 @@ public class CandidateBoxManager : MonoBehaviour
     /// <param name="pn">true = 下の語へ false = 上の語へ</param>
     public void MovePerPage(bool pn)
     {
+        //表示している語が無い場合は実行しない
+        if (_pages == null || _pages.Count == 0) return;
+
         int move = 0;
         if (pn)
         {

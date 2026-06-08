@@ -9,10 +9,14 @@ public class UIPanel : MonoBehaviour
     protected virtual void Awake()
     {
         stateManager = CommonStateManager.Instance;
+    }
+
+    protected virtual void OnEnable()
+    {
         InitPanel();
     }
 
-    //パネルを作成した時に実行する処理
+    //初期化用処理
     public virtual void InitPanel()
     {
         //ステートの変更
@@ -26,6 +30,6 @@ public class UIPanel : MonoBehaviour
         stateManager.SetCurrentLoad(LoadStates.NoLoading);
 
         //オブジェクトを消す
-        Destroy(this.gameObject);
+        this.gameObject.SetActive(false);
     }
 }
