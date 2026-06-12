@@ -22,8 +22,7 @@ public class JSONandGameDataChanger
         //拡張子が.jsonではないファイルをnotJsonに記録しておく
         //https://shirakamisauto.hatenablog.com/entry/2016/06/27/080017
         var notJSON = files
-        //匿名クラスのリストに要素とインデックスを射影する。
-        .Select((p, i) => new { Content = p, Index = i })
+        .Select((p, i) => new { Content = p, Index = i })//匿名クラスのリストに要素とインデックスを射影する。
         //射影されたリスト内でフィルタリング
         .Where(x =>
             {
@@ -55,13 +54,6 @@ public class JSONandGameDataChanger
             catch(Exception e)
             {
                 Debug.Log("jsonファイルからGameDataへの変換に失敗しました。FILEPATH:" + jsf + "ERROR>>" + e);
-            }
-
-
-            //GameDataクラスが最低要件を満たしているかを確認する。(ゲームの実行ファイル名とフォルダ名)
-            if (gameData.GameExeName == null || gameData.GameDirName == null)
-            {
-                continue;
             }
 
             if (gameData != null)gameDatas.Add(gameData);

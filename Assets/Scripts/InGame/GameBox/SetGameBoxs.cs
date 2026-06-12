@@ -15,8 +15,6 @@ public class SetGameBoxs
         _gameDatasSingleton = GameDatasSingleton.Instance;
     }
 
-
-
     public async UniTask SetAllGameBoxfromLocal()
     {
         await UniTask.RunOnThreadPool(_gameDataManager.LoadGameDataFromJsons);

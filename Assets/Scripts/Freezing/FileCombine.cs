@@ -53,12 +53,17 @@ public class FileCombine
                 outFs.Write(bytedatas, 0, bytedatas.Length);
             }
         }
-        
+
+        //既に解凍されたフォルダが指定のパスに存在した場合完全消去したうえで実行する
+        if (File.Exists(gameDataPath))
+        {
+            DirectoryActs.CompleteDirDelete(gameDataPath);
+        }
+
         //結合して出来たZIPファイルを解凍する
         ZipFile.ExtractToDirectory(margedFilePath, gameDataPath, Encoding.GetEncoding("shift_jis"));
 
         //ZIPファイルを削除する
         System.IO.File.Delete(margedFilePath);
-        
     }
 }

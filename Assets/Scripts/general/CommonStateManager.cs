@@ -15,6 +15,7 @@ public enum LoadStates
     NoLoading,　//ロードを行っていない
     MainLoading, //パネルを用い全画面を伴うロード
     MiniLoading, //画面の一部分のみを伴うロード
+    BackLoading,
 }
 
 

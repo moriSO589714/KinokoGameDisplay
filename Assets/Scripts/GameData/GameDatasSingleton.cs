@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 /// <summary>
@@ -57,9 +58,24 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
             if(singletonGameData.GameID == gameData.GameID)
             {
                 //追加されるゲームのバージョンが新しい場合
-                if(int.Parse(singletonGameData.GameVersion) < int.Parse(gameData.GameVersion))
+                if(int.Parse(singletonGameData.GameVersion) < int.Parse(gameData.GameVersion) && singletonGameData.Status == GameStatus.Downloaded)
                 {
                     singletonGameData.Status = GameStatus.UpdateAvailable;
+                }
+
+                //それ以外に異なるデータが存在する場合
+                FieldInfo[] gameDataFields = typeof(GameData).GetFields();
+                foreach(FieldInfo field in gameDataFields)
+                {
+                    //ゲームのバージョンは処理を走らせない
+                    if (field.Name == "GameVersion") continue;
+                    var singletonDataValue = field.GetValue(singletonGameData);
+                    var newGameDataValue = field.GetValue(gameData);
+                    if(singletonDataValue != newGameDataValue)
+                    {
+                        //シングルトン側のデータを最新のものに書き換える
+                        field.SetValue(singletonGameData, newGameDataValue);
+                    }
                 }
                 return false;
             }

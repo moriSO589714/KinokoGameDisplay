@@ -13,7 +13,7 @@ public class GameBox : MonoBehaviour
     [SerializeField] Text DescriptionField;
     [SerializeField] int DescriptionWordsRemit;
     [SerializeField] Image GameImage;
-    [SerializeField] GameObject StartButton;
+    [SerializeField] UIActBase StartButton;
     [SerializeField] Text GameDirName;
     [SerializeField] int GameDirNameWordsRemit;
 
@@ -23,13 +23,16 @@ public class GameBox : MonoBehaviour
     /// <summary>
     /// ゲームボックスに各種データをセットする
     /// </summary>
-    public void SetDataByGameData(GameData gameData)
+    public void SetDataByGameData(GameData gameData, Action<GameData> startButtonFunc)
     {
         _thisGameData = gameData;
         SetTitle(gameData.GameTitle);
         SetDescription(gameData.GameDescription);
         SetImage(gameData.GameImageName);
         SetGameDirName(gameData.GameDirName);
+
+        //スタートボタンへのデリゲートセット
+        SetButton(startButtonFunc);
     }
 
     /// <summary>
@@ -65,20 +68,9 @@ public class GameBox : MonoBehaviour
 
         GameImage.sprite = setSprite;
     }
-    public void SetButton(GameStatus gameStatus)
+    public void SetButton(Action<GameData> clickStartButtonAct)
     {
-        if(gameStatus == GameStatus.Downloaded)
-        {
-
-        }
-        else if(gameStatus == GameStatus.UpdateAvailable)
-        {
-
-        }
-        else if(gameStatus == GameStatus.NotDownloaded)
-        {
-
-        }
+        StartButton.ClickAct += () => clickStartButtonAct(_thisGameData);
     }
 
     public void SetGameDirName(string gameDirName)

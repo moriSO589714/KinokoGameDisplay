@@ -1,17 +1,19 @@
 ﻿using Cysharp.Threading.Tasks;
-using System.Collections;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
 
 public class GameDLProc
 {
+    public GameData GameData { get; private set; }
+
     private OnNetDriveMetaData _onNetDriveMetaData = null;
     private OnNetDriveGetFile _onNetDriveFetFile = null;
-    private GameData _gameData;
+    private bool _doingTaskFlag = false;
+    private GameDlProgress _gameDlProgress = null;
 
     /// <summary>
     /// 対象のゲームの現在の状態を表す列挙型
@@ -26,15 +28,35 @@ public class GameDLProc
 
     public GameDLProc(OnNetDriveMetaData metaData, OnNetDriveGetFile onNetDriveFetFile, GameData gameData)
     {
-        _gameData = gameData;
         _onNetDriveMetaData = metaData;
         _onNetDriveFetFile = onNetDriveFetFile;
+        GameData = gameData;
     }
 
-    public async UniTask DLGameInUniTask()
+    public async UniTask DLGameInUniTask(CancellationToken ct, GameDlProgress gameDlProgress = null)
     {
-        //ダウンロードタスクをスレッドプールで実行
-        await UniTask.RunOnThreadPool(DLGame);
+        _doingTaskFlag = true;
+        try
+        {
+            if(gameDlProgress != null)
+            {
+                _gameDlProgress = gameDlProgress;
+            }
+            //ダウンロードタスクをスレッドプールで実行
+            await UniTask.RunOnThreadPool(DLGame, cancellationToken: ct);
+        }
+        catch(Exception e)
+        {
+            UnityEngine.Debug.LogError(e);
+        }
+    }
+
+    /// <summary>
+    /// 実行中のダウンロードタスクを停止する
+    /// </summary>
+    public void StopDlGame()
+    {
+        _doingTaskFlag = false;
     }
 
     /// <summary>
@@ -42,8 +64,8 @@ public class GameDLProc
     /// </summary>
     public void DLGame()
     {
-        string gameId = _gameData.GameID;
-        string driveId = _gameData.GameDriveId;
+        string gameId = GameData.GameID;
+        string driveId = GameData.GameDriveId;
         AllDirs allDirs = AllDirs.GetInstance();
 
         //使用するパスの定義
@@ -72,8 +94,7 @@ public class GameDLProc
 
         DLData newDLData = null;
 
-        //スライスされたファイルが既に存在する場合
-        //ここあまりにも長いからリファクタリングする！！！
+        //スライスされたファイルが既に存在する場合(ダウンロードしかけ)
         if(lastGameDLState == LastGameDLState.ExistSplit)
         {
             MistakeFiles mistakeFiles = null;
@@ -110,17 +131,23 @@ public class GameDLProc
             needDlFileDic = metaDic;
         }
 
-        //ダウンロードするファイルの数を取得
-        long maxDLfiles = newDLData.SplitFileNum;
-        //ダウンロード済みのファイルの数
-        long nowDLedFileCounts = 0;
+        if(_gameDlProgress != null)
+        {
+            _gameDlProgress.MaxDLfiles = (int)newDLData.SplitFileNum;
+        }
+
         //拡張子が.000以外のファイルを進捗を表示させながら保存する
         foreach (var pair in needDlFileDic)
         {
             if (pair.Key.EndsWith(newDLData.DLDataFileExtention)) continue;
+            if (!_doingTaskFlag) return; //もし停止するようフラッグが変わっていた場合処理を中断する
+
             _onNetDriveFetFile.GetFile(pair.Value, pair.Key, tempSlicedGameDLPath);
-            nowDLedFileCounts++;
-            Debug.Log(nowDLedFileCounts + "まで終了" + "ダウンロードしたファイル>>>" + pair.Key);
+
+            if(_gameDlProgress != null)
+            {
+                _gameDlProgress.NowDLedFileCount++;
+            }
         }
 
 
@@ -131,20 +158,20 @@ public class GameDLProc
         //保存したファイル群をマージする(FileCombineに不足ファイルが合った際に呼ぶ処理を登録できる)
         new FileCombine().MergeSplitedFile(tempSlicedGameDLPath, newGamePath);
         
-        _gameData.Status = GameStatus.Downloaded;
+        GameData.Status = GameStatus.Downloaded;
         string thisGameJsonPath = Path.Combine(allDirs.JsonsDirPath, gameId + ".json");
         //ダウンロード済みデータとしてjsonに保存
-        JSONTools.SerializeJson(_gameData, thisGameJsonPath);
+        JSONTools.SerializeJson(GameData, thisGameJsonPath);
 
         //ダウンロードに利用した一時保存関係のファイル・フォルダを全て削除する
         DirectoryActs.CompleteDirDelete(tempGameDLPath);
-        
     }
 
     private LastGameDLState CheckLastStatus(string gameID, string tempSliceGamePath)
     {
         AllDirs allDirs = AllDirs.GetInstance();
-        if (File.Exists(Path.Combine(allDirs.GameFilePath, gameID)))
+        //既にダウンロード済み
+        if (File.Exists(Path.Combine(allDirs.JsonsDirPath, gameID + ".json")))
         {
             return LastGameDLState.Completely;
         }
@@ -165,7 +192,7 @@ public class GameDLProc
 
     }
 
-    //既に前回ダウンロード途中の後がある際に、前回から現在まででアップデートが行われたかを確認し、行われていたならディレクトリを削除する
+    //既に前回ダウンロード途中の跡がある際に、前回から現在まででアップデートが行われたかを確認し、行われていたならディレクトリを削除する
     private bool CheckUpdated(DLData oldData, DLData newData)
     {
         //ファイル容量もしくは、GameIDが異なる
@@ -229,6 +256,4 @@ public class GameDLProc
 
         return gameDLData;
     }
-
-
 }

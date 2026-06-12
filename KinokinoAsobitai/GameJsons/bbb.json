@@ -1,13 +1,13 @@
 {
-  "GameDirName": "bbb",
-  "GameTitle": "BBBTitle",
-  "GameExeName": "bbb.exe",
-  "GameID": "bc9bc143-37a0-424d-b774-875bf9370c83",
-  "GameDevelopper": "bbbbb",
+  "GameDirName": "MinimumGameSample",
+  "GameTitle": "MinimumGame",
+  "GameExeName": "Minimum.exe",
+  "GameID": "minumumgamesample",
+  "GameDevelopper": "testUser",
   "GameDriveId": "",
   "GameImageId": "",
   "GameSoftwareType": "Unity",
-  "GameDescription": "",
+  "GameDescription": "テスト用の最小限のゲームです！",
   "GameVersion": 0,
   "GameStatus": 0
 }

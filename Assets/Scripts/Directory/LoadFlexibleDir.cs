@@ -18,7 +18,6 @@ public class LoadFlexibleDir
         flexibleDirs = JSONTools.ReadJSON<FlexibleDirs>(jsonFilePath);
 
         //typeof演算子を使い、System.Type(型情報)としてクラスを取得、GetFields()でフィールドを取得する。
-        PropertyInfo[] props = typeof(FlexibleDirs).GetProperties();
         FieldInfo[] fields = typeof(FlexibleDirs).GetFields();
         
         AllDirs dirPaths = AllDirs.GetInstance();

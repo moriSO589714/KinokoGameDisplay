@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class UIPanel : MonoBehaviour
 {
-    CommonStateManager stateManager;
+    protected CommonStateManager stateManager;
 
     protected virtual void Awake()
     {
