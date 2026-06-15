@@ -15,8 +15,6 @@ public class GameDlCue : MonoBehaviour
 
     //タスク実行中のフラグ
     bool doTaskFlag = false;
-    //新しくタスクを実行させない(リスト操作中は新しくタスクを実行させない)
-    bool lockCueFlag = false;
     GameDlTask onProgressTask = null;
     CancellationTokenSource cts;
 
@@ -25,50 +23,7 @@ public class GameDlCue : MonoBehaviour
     /// </summary>
     public void AddGameDlTask(GameDlTask task)
     {
-        //同じタスク名(ダウンロードするゲームのID)のタスクの追加は許容しない
-        if(GameDlTasksList.Any(x => x.TaskName == task.TaskName))
-        {
-            UnityEngine.Debug.LogError("現在実行待ちのタスクに同名のタスクがあります");
-            return;
-        }
-        GameDlTasksList.Add(task);
-        //タスク実行のループを発火
-        SequentiallyDoTasks();
-    }
-
-    /// <summary>
-    /// 実行中のダウンロードタスクを破棄する
-    /// </summary>
-    public void BreakProgressTask()
-    {
-        if(onProgressTask != null)
-        {
-            onProgressTask.TaskInstance.StopDlGame();
-            RemoveOnProgressTask(onProgressTask.TaskName);
-        }
-    }
-
-    /// <summary>
-    /// タスク名を指定して実行待ちのリストからタスクを消去する
-    /// </summary>
-    public void RemoveSpecifiedTask(string taskName)
-    {
-        int index = GameDlTasksList.FindIndex(x => x.TaskName == taskName);
-        if(index > 0)
-        {
-            GameDlTasksList.RemoveAt(index);
-        }
-        else if (index == 0)
-        {
-            if (doTaskFlag)
-            {
-                BreakProgressTask();
-            }
-            else
-            {
-                GameDlTasksList.RemoveAt(index);
-            }
-        }
+        HandleTaskList(-1, -1, task);
     }
 
     /// <summary>
@@ -77,12 +32,11 @@ public class GameDlCue : MonoBehaviour
     private void OnDestroy()
     {
         //実行中以外の全てのタスクを破棄
-        List<GameDlTask> progressTask = new List<GameDlTask>();
-        progressTask.Add(onProgressTask);
+        List<GameDlTask> progressTask = new List<GameDlTask>(1) { onProgressTask };
         GameDlTasksList = progressTask;
 
         //実行中のタスクを破棄
-        BreakProgressTask();
+        DestroyProgressTask();
     }
 
     /// <summary>
@@ -104,23 +58,110 @@ public class GameDlCue : MonoBehaviour
             //タスクの実行
             await onProgressTask.TaskInstance.DLGameInUniTask(cts.Token, CurrentGameDlProgress);
 
-            //キューがロックされている間は解除されるまで除去するのを待機する
-
-
             //終了したタスクを終了済みとしてリストから除去する
-            RemoveOnProgressTask(onProgressTask.TaskName);
+            DestroyProgressTask();
         }
         doTaskFlag = false;
     }
 
-    private void RemoveOnProgressTask(string taskName)
+    private void DestroyProgressTask()
     {
-        if (GameDlTasksList[0].TaskName == taskName)
+        //実行中のタスクがない場合は処理しない
+        if (onProgressTask == null) return;
+
+        HandleTaskList(0, -1);
+    }
+
+    /// <summary>
+    /// タスクが入っているリストを直接操作できるメソッド
+    /// ※このメソッド以外からリストは操作しない
+    /// </summary>
+    /// <param name="currentIndex">操作対象となる要素の現在のインデックス値。タスクの追加時は-1を指定</param>
+    /// <param name="targetIndex">操作実行後のインデックス値。最後尾にタスクを追加する際とタスクの破棄を行う際は-1を指定</param>
+    /// <param name="addValue">タスク追加時に追加するタスク</param>
+    private void HandleTaskList(int currentIndex, int targetIndex, GameDlTask addValue = null)
+    {
+        //タスク追加時
+        if(currentIndex == -1 && addValue != null)
         {
-            GameDlTasksList.RemoveAt(0);
-            onProgressTask = null;
-            CurrentGameDlProgress = null;
-            cts.Cancel();
+            AddTask(targetIndex, addValue);
         }
+        else
+        {
+            //タスク削除
+            if(targetIndex == -1)
+            {
+                DeleteTask(currentIndex);
+            }
+            else //タスクの入れ替え
+            {
+                ReplaceTask(currentIndex, targetIndex);
+            }
+        }
+        //タスクを止めていた際のためにループを再実行する
+        SequentiallyDoTasks();
+    }
+
+    private void AddTask(int targetIndex, GameDlTask addValue)
+    {
+        //最新部にタスクを追加する場合は現在の処理を中断させる
+        if(targetIndex == 0)
+        {
+            StopProgressTask(GameDlTasksList[0].TaskName);
+        }
+
+        //同じタスク名のタスクがリストに既に存在する場合は処理を中断する
+        if (GameDlTasksList.Any(x => x.TaskName == addValue.TaskName))
+        {
+            UnityEngine.Debug.LogError("現在実行待ちのタスクに同名のタスクがあります");
+            return;
+        }
+
+        if (targetIndex == -1)
+        {
+            //最後尾にタスクを追加する場合
+            GameDlTasksList.Add(addValue);
+        }
+        else
+        {
+            GameDlTasksList.Insert(targetIndex, addValue);
+        }
+    }
+
+    private void DeleteTask(int currentIndex)
+    {
+        //現在進行中のタスクを削除する場合は処理を停止させておく
+        if (currentIndex == 0)
+        {
+            StopProgressTask(GameDlTasksList[0].TaskName);
+        }
+
+        GameDlTasksList.RemoveAt(currentIndex);
+    }
+
+    private void ReplaceTask(int currentIndex, int targetIndex)
+    {
+        if(targetIndex == 0)
+        {
+            StopProgressTask(GameDlTasksList[0].TaskName);
+        }
+        //入れ替えの実行
+        (GameDlTasksList[currentIndex], GameDlTasksList[targetIndex]) = (GameDlTasksList[targetIndex], GameDlTasksList[currentIndex]);
+    }
+
+    /// <summary>
+    /// 現在進行中のタスクの中断のみを行う
+    /// </summary>
+    private void StopProgressTask(string taskName)
+    {
+        if (GameDlTasksList[0].TaskName != taskName)
+        {
+            throw new System.Exception("指定されたタスク名と進行中のタスク名が異なるためタスクを中断できません");
+        }
+        onProgressTask.TaskInstance.StopDlGame();
+        doTaskFlag = false;
+        onProgressTask = null;
+        CurrentGameDlProgress = null;
+        cts.Cancel();
     }
 }
