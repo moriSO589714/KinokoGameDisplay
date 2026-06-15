@@ -41,7 +41,7 @@ public enum GameStatus
 {
     ByLocal, //ローカルで追加されたゲーム
     NotDownloaded,
-    Downloading,
+    Downloading,//ランタイムのみ有効になる、そのセッションでダウンロード処理が開始されたかを確認する用
     Downloaded,
     UpdateAvailable, //ダウンロードされているけど新しいバージョンがある
 }

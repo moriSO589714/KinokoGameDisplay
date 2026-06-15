@@ -17,9 +17,6 @@ public class test : MonoBehaviour
     [SerializeField] SlideSideUIAct slideSideUIAct;
     void Start()
     {
-        FileSpliting fileSpliting = new FileSpliting();
-        string tempFilePath = fileSpliting.PackagingFile("C:\\Users\\souza\\Downloads\\corocorogame", "C:\\Users\\souza\\Downloads\\corocorogameToZip");
-        fileSpliting.DivideZipFile(100000, tempFilePath, "C:\\Users\\souza\\Downloads\\corocorogameSliced");
         Debug.Log("end");
     }
 

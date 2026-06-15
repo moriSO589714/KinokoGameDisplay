@@ -31,6 +31,5 @@ public class SlideSideUIAct : UIActBase
         _runTween?.Complete();
         //初期位置に戻す
         thisRectTransform.anchoredPosition = _firstPos;
-        Debug.Log("初期位置に移動 >>>" + _firstPos);
     }
 }
