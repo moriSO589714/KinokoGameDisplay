@@ -1,6 +1,5 @@
 ﻿using Google.Apis.Drive.v3;
 using System.IO;
-using Unity.IO.LowLevel.Unsafe;
 
 /// <summary>
 /// APIを利用してドライブにデータ保存リクエストを送る

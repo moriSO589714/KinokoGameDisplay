@@ -8,7 +8,9 @@ using UnityEngine;
 public static class CheckInEnvironment
 {
     //インターネット利用時に実際に通信を行うか
-    private const bool isOnNet = true;
+    public static bool isOnNet = false;
+    //ダウンロード処理時に発生させる遅延(秒)
+    public static float waitSecondsOnDownload = 0.5f;
 
     /// <summary>
     /// 実行環境がUnityEditorかどうか、Editorならtrueを返す
