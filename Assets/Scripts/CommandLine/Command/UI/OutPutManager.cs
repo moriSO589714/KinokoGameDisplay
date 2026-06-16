@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CmdOutPutManager : MonoBehaviour
+public class OutPutManager : MonoBehaviour
 {
     public void ReceiveMessage(string message)
     {

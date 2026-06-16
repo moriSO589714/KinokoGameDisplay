@@ -1,11 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class CommandNode : MonoBehaviour
 {
-    public string NodeName;
-    public List<CommandNode> ChildrenNodes;
+    public List<CommandNode> ChildrenNodes = new List<CommandNode>();
 
-    public Action OnAction { get; private set; }
+    public UnityEvent OnAction;
+
+    private void Awake()
+    {
+        CheckGameObjectName();
+    }
+
+    private void CheckGameObjectName()
+    {
+        string gameObjectName = gameObject.name;
+        if(gameObjectName.Contains(" ") || gameObjectName.Contains("　"))
+        {
+            throw new Exception("CommandNodeがアタッチされたゲームオブジェクトに半角/全角スペースの入った名前は設定できません");
+        }
+    }
 }

@@ -27,9 +27,6 @@ public class BasedSingletonInMono<T> : MonoBehaviour where T : MonoBehaviour
                     GameObject singletonObject = new GameObject();
                     instance = singletonObject.AddComponent<T>();
                     singletonObject.name = typeof(T).ToString() + " (Singleton)";
-                    
-                    //シーンが切り替わっても破棄されないようにする
-                    DontDestroyOnLoad(singletonObject);
                 }
             }
             return instance;

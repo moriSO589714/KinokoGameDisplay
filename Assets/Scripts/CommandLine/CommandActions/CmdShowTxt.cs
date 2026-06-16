@@ -2,11 +2,15 @@
 
 public class CmdShowTxt : MonoBehaviour
 {
-    [SerializeField] CmdInputManager _cmdInputManager;
-    [SerializeField] CmdOutPutManager cmdOutPutManager;
+    CmdSceneManager _cmdSceneManager;
 
-    public void ShowInputWord()
+    private void Awake()
     {
-        _cmdInputManager.ChangeAction(cmdOutPutManager.ReceiveMessage);
+        _cmdSceneManager = CmdSceneManager.Instance;
+    }
+
+    public void SayHelloWorld()
+    {
+        _cmdSceneManager.OutPutManager.ReceiveMessage("HelloWorld");
     }
 }
