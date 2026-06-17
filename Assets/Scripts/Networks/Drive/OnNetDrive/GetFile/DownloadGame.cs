@@ -21,7 +21,7 @@ public class DownloadGame
             onNetDriveMetaData = new OnNetDriveMetaDatafromTest();
         }
 
-        GameDLProc gameDLProc = new GameDLProc(onNetDriveMetaData, onNetDriveGetFile, gameData);
+        GameDlProc gameDLProc = new GameDlProc(onNetDriveMetaData, onNetDriveGetFile, gameData);
         GameDlTask returnTask = new GameDlTask(gameDLProc);
         _cue.AddGameDlTask(returnTask);
         return returnTask;

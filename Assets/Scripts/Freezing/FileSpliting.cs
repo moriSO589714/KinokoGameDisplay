@@ -81,7 +81,7 @@ public class FileSpliting
         chunkIndex--;
 
         DLData createdDLData = new DLData(fileSize, fileName, chunkIndex);
-        string dlDataFileName = fileName + createdDLData.DLDataFileExtention;
+        string dlDataFileName = fileName + createdDLData.DLDataInfoFileExtention;
         string dlDataPath = Path.Combine(saveinPath, dlDataFileName);
         //.000となるファイルにDLDataをシリアライズして保存する
         createdDLData.SerializeDLData(dlDataPath);

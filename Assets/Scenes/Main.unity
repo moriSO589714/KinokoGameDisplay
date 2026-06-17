@@ -1864,6 +1864,7 @@ MonoBehaviour:
   _gameTitleTxt: {fileID: 1978820265}
   _progress: {fileID: 1511145968}
   _progressBar: {fileID: 942436604}
+  _progressPanelManager: {fileID: 1636287897}
 --- !u!1 &384381313
 GameObject:
   m_ObjectHideFlags: 0
@@ -7320,7 +7321,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d19d68642217808459429d84a121427e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slideSideUIAct: {fileID: 383306972}
+  gameDlCue: {fileID: 384381314}
 --- !u!4 &1410984518
 Transform:
   m_ObjectHideFlags: 0
@@ -8328,7 +8329,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _closeMrk: {fileID: 1628447509}
   _toSettingMrk: {fileID: 681320065}
-  _toDevMrk: {fileID: 1924021923}
+  _toCommandMrk: {fileID: 1924021923}
   _toReportMrk: {fileID: 153844144}
   _settingPanel: {fileID: 1073690562}
   _reportPanel: {fileID: 1102603481}
@@ -8973,6 +8974,7 @@ GameObject:
   - component: {fileID: 1636287894}
   - component: {fileID: 1636287896}
   - component: {fileID: 1636287895}
+  - component: {fileID: 1636287897}
   m_Layer: 5
   m_Name: DownloadProgressPanel
   m_TagString: Untagged
@@ -9048,6 +9050,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1636287893}
   m_CullTransparentMesh: 1
+--- !u!114 &1636287897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1636287893}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef050fe6d8f96f445a4840bb40b0ec7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1677134542
 GameObject:
   m_ObjectHideFlags: 0

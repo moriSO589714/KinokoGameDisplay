@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
-using Unity.VisualScripting;
-using UnityEngine;
 
 public class FileCombine
 {
@@ -15,12 +11,13 @@ public class FileCombine
     /// </summary>
     /// <param name="splitedFilesPath">結合されるファイル群が置かれているディレクトリのパス</param>
     /// <param name="gameDataPath">完成したフォルダを置くパス</param>
-    public void MergeSplitedFile(string splitedFilesPath, string gameDataPath)
+    public void MergeSplitedFile(string tempGamePathForDl, string gameDataPath)
     {
+        string slicedGamePath = CreateDirPath.TempSlicedGamePathForDl(tempGamePathForDl: tempGamePathForDl);
         //対象ディレクトリ内のファイルのパスを取得してくる
-        string[] splitedFiles = Directory.GetFiles(splitedFilesPath);
+        string[] slicedFiles = Directory.GetFiles(slicedGamePath);
 
-        MistakeFiles mistakeFiles = new FreezingTools().hasAllRequiredData(splitedFilesPath);
+        MistakeFiles mistakeFiles = new FreezingTools().hasAllRequiredData(slicedGamePath);
         if(mistakeFiles.LackFiles.Count() != 0)
         {
             throw new Exception("ファイルの欠損を確認しました");
@@ -31,7 +28,7 @@ public class FileCombine
         }
 
         //データ群を拡張子でソート
-        string[] sortedFiles = new FreezingTools().sortingFilesByPath(splitedFilesPath);
+        string[] sortedFiles = new FreezingTools().sortingFilesByPath(slicedGamePath);
         DLData targetDLData = new DLData();
         //DLDataクラスにソート後の一番始めに来るファイル(.00)をデシリアライズさせて、データを格納
         targetDLData.DeserializeDataByFilePath(sortedFiles[0]);
@@ -41,9 +38,9 @@ public class FileCombine
         long splitedFileNum = targetDLData.SplitFileNum;
 
         //結合後にファイルを置くパスを生成
-        string zipFileDirPath = Path.Combine(splitedFilesPath, "zipFile");
-        DirectoryActs.CreateAndCheckDir(zipFileDirPath);
-        string margedFilePath = Path.Combine(zipFileDirPath, dlFileName + ".zip");
+        string inZipDirPath = CreateDirPath.InZipDirForDl(tempGamePathForDl: tempGamePathForDl);
+        DirectoryActs.CreateAndCheckDir(inZipDirPath);
+        string margedFilePath = CreateDirPath.ZipFilePathForDl(inZipDir: inZipDirPath, gameDirName: dlFileName);
         //データを結合する処理
         using (FileStream outFs = new FileStream(margedFilePath, FileMode.Create,FileAccess.Write))
         {

@@ -15,9 +15,6 @@ public class WordEstimater
         _separateMark = separateMark;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     /// <param name="returnDepth">入力しかけの単語以降、何単語目までの候補を返すか(0なら書きかけの単語部のみ)</param>
     /// <returns></returns>
     public List<string> ReturnEstimatedStrs(string input, int returnDepth)

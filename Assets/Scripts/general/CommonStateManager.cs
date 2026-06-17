@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 public enum SceneStates
 {
     Main,
-    Admin,
+    Command,
 }
 public enum LoadStates 
 {
@@ -39,6 +39,8 @@ public class CommonStateManager : BasedSingletonInMono<CommonStateManager>
     protected override void Awake()
     {
         base.Awake();
+        //シーン遷移で破壊されないようにする
+        DontDestroyOnLoad(this.gameObject);
     }
 
     public async UniTask SetCurrentState(SceneStates state)
@@ -58,7 +60,8 @@ public class CommonStateManager : BasedSingletonInMono<CommonStateManager>
             case SceneStates.Main:
                 SceneManager.LoadScene("Main");
                 break;
-            case SceneStates.Admin:
+            case SceneStates.Command:
+                SceneManager.LoadScene("Command");
                 break;
         }
 

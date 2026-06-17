@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using UnityEngine;
 
-public class GameDLProc
+public class GameDlProc
 {
     public GameData GameData { get; private set; }
 
@@ -26,7 +25,7 @@ public class GameDLProc
         None//全くダウンロードされていない
     }
 
-    public GameDLProc(OnNetDriveMetaData metaData, OnNetDriveGetFile onNetDriveFetFile, GameData gameData)
+    public GameDlProc(OnNetDriveMetaData metaData, OnNetDriveGetFile onNetDriveFetFile, GameData gameData)
     {
         _onNetDriveMetaData = metaData;
         _onNetDriveFetFile = onNetDriveFetFile;
@@ -36,19 +35,12 @@ public class GameDLProc
     public async UniTask DLGameInUniTask(CancellationToken ct, GameDlProgress gameDlProgress = null)
     {
         _doingTaskFlag = true;
-        try
+        if (gameDlProgress != null)
         {
-            if(gameDlProgress != null)
-            {
-                _gameDlProgress = gameDlProgress;
-            }
-            //ダウンロードタスクをスレッドプールで実行
-            await UniTask.RunOnThreadPool(DLGame, cancellationToken: ct);
+            _gameDlProgress = gameDlProgress;
         }
-        catch(Exception e)
-        {
-            UnityEngine.Debug.LogError(e);
-        }
+        //ダウンロードタスクをスレッドプールで実行
+        await UniTask.RunOnThreadPool(DLGame, cancellationToken: ct);
     }
 
     /// <summary>
@@ -69,9 +61,9 @@ public class GameDLProc
         AllDirs allDirs = AllDirs.GetInstance();
 
         //使用するパスの定義
-        string tempDirPath = AllDirs.GetInstance().TmpDLPath;
-        string tempGameDLPath = Path.Combine(tempDirPath, gameId);
-        string tempSlicedGameDLPath = Path.Combine(tempGameDLPath, "sliced");
+        string tempDirPath = allDirs.TmpDLPath;
+        string tempGameDLPath = CreateDirPath.TempGamePathForDl(tempDirPath: tempDirPath, gameId: gameId);
+        string tempSlicedGameDLPath = CreateDirPath.TempSlicedGamePathForDl(tempDirPath: tempDirPath, gameId: gameId);
 
         //保存用一時ディレクトリの作成
         DirectoryActs.CreateAndCheckDir(tempSlicedGameDLPath);
@@ -80,7 +72,7 @@ public class GameDLProc
 
         if(lastGameDLState == LastGameDLState.Completely)
         {
-            throw new Exception("このゲームは既にダウンロードされています");
+            throw new GameDlCustomException("このゲームは既にダウンロードされています", GameDlErrorType.Others);
         }
 
         if(lastGameDLState == LastGameDLState.FileError)
@@ -98,31 +90,22 @@ public class GameDLProc
         if(lastGameDLState == LastGameDLState.ExistSplit)
         {
             MistakeFiles mistakeFiles = null;
-            try
-            {
-                mistakeFiles = new FreezingTools().hasAllRequiredData(tempSlicedGameDLPath);
+            mistakeFiles = new FreezingTools().hasAllRequiredData(tempSlicedGameDLPath);
 
-                string dlDataFilePath = Path.Combine(tempSlicedGameDLPath, mistakeFiles.FileName + new DLData().DLDataFileExtention);
-                DLData oldDLData = new DLData(dlDataFilePath);
-                newDLData = GetDLDataFromDrive(metaDic, tempSlicedGameDLPath);
+            string dlDataFilePath = Path.Combine(tempSlicedGameDLPath, mistakeFiles.FileName + new DLData().DLDataInfoFileExtention);
+            DLData oldDLData = new DLData(dlDataFilePath);
+            newDLData = GetDLDataFromDrive(metaDic, tempSlicedGameDLPath);
 
-                //前回のダウンロードからゲームデータに更新がかけられているかを確認する
-                if (CheckUpdated(oldDLData, newDLData))
-                {
-                    DirectoryActs.RefleshDir(tempSlicedGameDLPath);
-                    newDLData.SerializeDLData(tempSlicedGameDLPath);
-                    needDlFileDic = metaDic;
-                }
-                else //アップデートが行われておらずそのまま流用可能
-                {
-                    needDlFileDic = CreateLackDic(mistakeFiles, metaDic);
-                }
-            }
-            catch (Exception e)
+            //前回のダウンロードからゲームデータに更新がかけられているかを確認する
+            if (CheckUpdated(oldDLData, newDLData))
             {
                 DirectoryActs.RefleshDir(tempSlicedGameDLPath);
-                newDLData = GetDLDataFromDrive(metaDic, tempSlicedGameDLPath);
+                newDLData.SerializeDLData(tempSlicedGameDLPath);
                 needDlFileDic = metaDic;
+            }
+            else //アップデートが行われておらずそのまま流用可能
+            {
+                needDlFileDic = CreateLackDic(mistakeFiles, metaDic);
             }
         }
         else
@@ -139,7 +122,7 @@ public class GameDLProc
         //拡張子が.000以外のファイルを進捗を表示させながら保存する
         foreach (var pair in needDlFileDic)
         {
-            if (pair.Key.EndsWith(newDLData.DLDataFileExtention)) continue;
+            if (pair.Key.EndsWith(newDLData.DLDataInfoFileExtention)) continue;
             if (!_doingTaskFlag) return; //もし停止するようフラッグが変わっていた場合処理を中断する
 
             _onNetDriveFetFile.GetFile(pair.Value, pair.Key, tempSlicedGameDLPath);
@@ -153,13 +136,13 @@ public class GameDLProc
 
         string gameFileName = newDLData.FileName;
         //完成したゲームデータが置かれるパス
-        string newGamePath = Path.Combine(allDirs.GameFilePath, gameId, gameFileName);
+        string newGamePath = CreateDirPath.GameDataPath(saveGamesDirName: allDirs.GameFilePath, gameId: gameId, gameDirName: gameFileName);
         
         //保存したファイル群をマージする(FileCombineに不足ファイルが合った際に呼ぶ処理を登録できる)
-        new FileCombine().MergeSplitedFile(tempSlicedGameDLPath, newGamePath);
-        
+        new FileCombine().MergeSplitedFile(tempGameDLPath, newGamePath);
+
         GameData.Status = GameStatus.Downloaded;
-        string thisGameJsonPath = Path.Combine(allDirs.JsonsDirPath, gameId + ".json");
+        string thisGameJsonPath = CreateDirPath.GameJsonPath(savedJsonsPath: allDirs.JsonsDirPath, gameId: gameId);
         //ダウンロード済みデータとしてjsonに保存
         JSONTools.SerializeJson(GameData, thisGameJsonPath);
 
@@ -227,7 +210,7 @@ public class GameDLProc
             }
             else
             {
-                throw new Exception("ドライブに必要なファイルが保存されていないため、結合できません");
+                throw new GameDlCustomException("ドライブに必要なファイルが保存されていないため、結合できません", GameDlErrorType.ImpossibleRecoveryErrorOnDrive);
             }
         }
         return lackFilesDic;
@@ -240,11 +223,11 @@ public class GameDLProc
     {
         DLData gameDLData = new DLData();
 
-        Dictionary<string, string> dlDataFileNameAndDriveId = metaDic.Where(x => x.Key.EndsWith(gameDLData.DLDataFileExtention)).ToDictionary(x => x.Key, x => x.Value);
+        Dictionary<string, string> dlDataFileNameAndDriveId = metaDic.Where(x => x.Key.EndsWith(gameDLData.DLDataInfoFileExtention)).ToDictionary(x => x.Key, x => x.Value);
         //.000ファイルの数が不正な場合
         if (dlDataFileNameAndDriveId == null || dlDataFileNameAndDriveId.Count == 0 || dlDataFileNameAndDriveId.Count > 1)
         {
-            throw new System.Exception("ドライブにフォルダが存在しないか、ドライブにある'.00'形式のファイル数が不正です");
+            throw new GameDlCustomException("ドライブにフォルダが存在しないか、ドライブにある'.00'形式のファイル数が不正です", GameDlErrorType.ImpossibleRecoveryErrorOnDrive);
         }
         string dlDataFileName = dlDataFileNameAndDriveId.Keys.First();
         string dlDataDriveId = dlDataFileNameAndDriveId.Values.First();

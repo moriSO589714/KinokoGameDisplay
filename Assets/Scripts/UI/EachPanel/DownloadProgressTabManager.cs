@@ -11,12 +11,15 @@ public class DownloadProgressTabManager : UIPanel
     [SerializeField]private Text _progress;
     [SerializeField]private Image _progressBar;
 
+    [SerializeField]private DlProgressPanelManager _progressPanelManager;
+
     private BarManager _barManager;
 
     protected override void Awake()
     {
         base.Awake();
         _barManager = new BarManager(_progressBar);
+        _thisUIAct.ClickAct += ActivateProgressPanel;
         _watchCue.UpdateProgressInTaskNameAct += SetNewtitle;
         _watchCue.UpdateProgressInPercentageAct += SetNewProgress;
         _watchCue.ChangeTaskEmptyAct += EndAllProgress;
@@ -51,5 +54,10 @@ public class DownloadProgressTabManager : UIPanel
     public void EndAllProgress()
     {
         _thisUIAct.HideThisTab();
+    }
+
+    private void ActivateProgressPanel()
+    {
+        _progressPanelManager.gameObject.SetActive(true);
     }
 }

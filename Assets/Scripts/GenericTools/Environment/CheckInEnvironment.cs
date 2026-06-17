@@ -10,7 +10,7 @@ public static class CheckInEnvironment
     //インターネット利用時に実際に通信を行うか
     public static bool isOnNet = false;
     //ダウンロード処理時に発生させる遅延(秒)
-    public static float waitSecondsOnDownload = 0.5f;
+    public static float waitSecondsOnDownload = 1f;
 
     /// <summary>
     /// 実行環境がUnityEditorかどうか、Editorならtrueを返す

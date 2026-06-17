@@ -6,7 +6,7 @@ public class OptionPanelManager : UIPanel
 {
     [SerializeField] private UIActBase _closeMrk;
     [SerializeField] private UIActBase _toSettingMrk;
-    [SerializeField] private UIActBase _toDevMrk;
+    [SerializeField] private UIActBase _toCommandMrk;
     [SerializeField] private UIActBase _toReportMrk;
 
     [SerializeField] private OverrapUIPanel _settingPanel;
@@ -21,6 +21,13 @@ public class OptionPanelManager : UIPanel
 
         _toSettingMrk.ClickAct = () => CreateOverrapPanel(_settingPanel);
         _toReportMrk.ClickAct = () => CreateOverrapPanel(_reportPanel);
+        _toCommandMrk.ClickAct = () => TransitionDevScene();
+    }
+
+    public void TransitionDevScene()
+    {
+        CommonStateManager commonStateManager = CommonStateManager.Instance;
+        commonStateManager.SetCurrentState(SceneStates.Command);
     }
 
     public void CreateOverrapPanel(OverrapUIPanel createPanel)

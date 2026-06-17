@@ -1,22 +1,24 @@
 ﻿using Cysharp.Threading.Tasks;
-using Google.Apis.Drive.v3;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
 
 public class GameDlCue : MonoBehaviour
 {
+    //実行待ちのタスクリスト
     public List<GameDlTask> GameDlTasksList { get; private set; } = new List<GameDlTask>();
+    //エラーが発生したタスクのリスト
+    public List<GameDlError> ErrorTasksList { get; private set; } = new List<GameDlError>();
+
     //進捗監視用のオブジェクト
     public GameDlProgress CurrentGameDlProgress { get; private set; } = null;
 
     //タスク実行中のフラグ
     bool doTaskFlag = false;
     GameDlTask onProgressTask = null;
-    CancellationTokenSource cts;
+    CancellationTokenSource ctsForDl;
+    CancellationTokenSource ctsForRecovery;
 
     /// <summary>
     /// ダウンロードタスクの追加
@@ -27,10 +29,29 @@ public class GameDlCue : MonoBehaviour
     }
 
     /// <summary>
+    /// エラーが発生したタスクについて、復旧動作を行ってから再度ダウンロードキューに入れる
+    /// </summary>
+    public async UniTask RecoveryAndDlInErrorTasksList(int errorTasksListIndex)
+    {
+        GameDlError targetError = ErrorTasksList[errorTasksListIndex];
+
+        ctsForRecovery?.Cancel();
+        ctsForRecovery = new CancellationTokenSource();
+        //リカバリの実行
+        await new GameDlErrorRecovery().RecoveryError(targetError, ctsForRecovery.Token);
+        
+        //エラーリストから除去した後、ダウンロードキューに追加
+        ErrorTasksList.RemoveAt(errorTasksListIndex);
+        AddGameDlTask(targetError.Task);
+    }
+
+    /// <summary>
     /// オブジェクト破棄時にダウンロード中・ダウンロード待ちのタスクを全て破棄する
     /// </summary>
     private void OnDestroy()
     {
+        ctsForRecovery?.Cancel();
+
         //実行中以外の全てのタスクを破棄
         List<GameDlTask> progressTask = new List<GameDlTask>(1) { onProgressTask };
         GameDlTasksList = progressTask;
@@ -48,22 +69,40 @@ public class GameDlCue : MonoBehaviour
         while (GameDlTasksList.Count > 0)
         {
             doTaskFlag = true;
-            cts = new CancellationTokenSource();
+            ctsForDl = new CancellationTokenSource();
             //今回実行するタスク
             onProgressTask = GameDlTasksList[0];
             //進捗監視用のクラスをインスタンス
             GameDlProgress progress = new GameDlProgress(onProgressTask.TaskName, onProgressTask.TaskInstance.GameData.GameDirName);
             CurrentGameDlProgress = progress;
-
-            //タスクの実行
-            await onProgressTask.TaskInstance.DLGameInUniTask(cts.Token, CurrentGameDlProgress);
+            try
+            {
+                //タスクの実行
+                await onProgressTask.TaskInstance.DLGameInUniTask(ctsForDl.Token, CurrentGameDlProgress);
+            }
+            catch(GameDlCustomException e)
+            {
+                UnityEngine.Debug.LogError(e.Message);
+                ErrorTasksList.Add(new GameDlError(onProgressTask, e));
+            }
+            catch(System.Exception e)
+            {
+                UnityEngine.Debug.LogError(e);
+                //エラー種別の解析を行う
+                GameDlCustomException gameDlCustomException = new GameDlErrorrSpecify().SpecifyError(e);
+                ErrorTasksList.Add(new GameDlError(onProgressTask, gameDlCustomException));
+            }
 
             //終了したタスクを終了済みとしてリストから除去する
             DestroyProgressTask();
         }
+
         doTaskFlag = false;
     }
 
+    /// <summary>
+    /// 進行中のタスクを破棄する
+    /// </summary>
     private void DestroyProgressTask()
     {
         //実行中のタスクがない場合は処理しない
@@ -162,6 +201,6 @@ public class GameDlCue : MonoBehaviour
         doTaskFlag = false;
         onProgressTask = null;
         CurrentGameDlProgress = null;
-        cts.Cancel();
+        ctsForDl?.Cancel();
     }
 }

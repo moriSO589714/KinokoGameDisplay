@@ -20,7 +20,7 @@ public class DLData
     //ファイル群にすべてのデータが揃っているか
     public bool IsCheckAllRequiredData { get; private set; } = false;
 
-    public readonly string DLDataFileExtention = ".000";
+    public readonly string DLDataInfoFileExtention = ".000";
 
     /// <summary>
     /// インスタンス時にデータをセットするようのコンストラクタ
