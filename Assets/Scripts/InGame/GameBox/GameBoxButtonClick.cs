@@ -21,8 +21,9 @@ public class GameBoxButtonClick
     /// <summary>
     /// ボタンが押された際の処理
     /// </summary>
-    public void OnClickAction(GameData targetGameData)
+    public void OnClickAction(GameBox targetGameBox)
     {
+        GameData targetGameData = targetGameBox._thisGameData;
         //ゲームの状態ごとに処理を分ける
         if(targetGameData.Status == GameStatus.Downloaded || targetGameData.Status == GameStatus.ByLocal)
         {
@@ -33,7 +34,7 @@ public class GameBoxButtonClick
         {
             //ダウンロードを確認するパネルを有効化。残りの処理はそっちに任せる
             _checkDownloadPanel.gameObject.SetActive(true);
-            _checkDownloadPanel.GetComponent<CheckDownloadPanel>().SetGameData(targetGameData, _gameDlCue);
+            _checkDownloadPanel.GetComponent<CheckDownloadPanel>().SetGameData(targetGameData, _gameDlCue, targetGameBox);
         }
         else if(targetGameData.Status == GameStatus.UpdateAvailable)
         {

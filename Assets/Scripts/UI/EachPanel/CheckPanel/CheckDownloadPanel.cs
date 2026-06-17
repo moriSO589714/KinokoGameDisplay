@@ -7,6 +7,7 @@ public class CheckDownloadPanel : UIPanel
 
     private GameData _dlGameData = null;
     private GameDlCue _gameDlCue = null;
+    private GameBox _gameBox = null;
 
     public override void InitPanel()
     {
@@ -18,16 +19,19 @@ public class CheckDownloadPanel : UIPanel
     }
 
     //ダウンロードを実行するゲームのGameDataクラスをセットする
-    public void SetGameData(GameData gameData, GameDlCue gameDlCue)
+    public void SetGameData(GameData gameData, GameDlCue gameDlCue, GameBox gameBox)
     {
         _dlGameData = gameData;
         _gameDlCue = gameDlCue;
+        _gameBox = gameBox;
     }
 
     public void AddGameDlTask()
     {
         //ダウンロード用のタスクを作成してキューに追加
         GameDlTask dlTask = new DownloadGame().CreateGameDlTaskAndAddCue(_dlGameData, _gameDlCue);
+        //ダウンロード中であることが分かるようにゲームボックスのスプライトを差し替える
+        _gameBox.ChangeButtonImage();
         OnCloseProc();
     }
 

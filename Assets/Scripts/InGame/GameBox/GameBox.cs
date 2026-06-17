@@ -18,12 +18,15 @@ public class GameBox : MonoBehaviour
     [SerializeField] int GameDirNameWordsRemit;
 
     [SerializeField] Sprite NoImageSprite;
+    [SerializeField] Sprite StartButtonSprite;
+    [SerializeField] Sprite DownloadButtonSprite;
+    [SerializeField] Sprite DownloadingButtonSprite;
     public GameData _thisGameData { get; private set; }
 
     /// <summary>
     /// ゲームボックスに各種データをセットする
     /// </summary>
-    public void SetDataByGameData(GameData gameData, Action<GameData> startButtonFunc)
+    public void SetDataByGameData(GameData gameData, Action<GameBox> startButtonFunc)
     {
         _thisGameData = gameData;
         SetTitle(gameData.GameTitle);
@@ -68,9 +71,33 @@ public class GameBox : MonoBehaviour
 
         GameImage.sprite = setSprite;
     }
-    public void SetButton(Action<GameData> clickStartButtonAct)
+    public void SetButton(Action<GameBox> clickStartButtonAct)
     {
-        StartButton.ClickAct += () => clickStartButtonAct(_thisGameData);
+        StartButton.ClickAct += () => clickStartButtonAct(this);
+        ChangeButtonImage();
+    }
+
+    public void ChangeButtonImage()
+    {
+        Image buttonImage = StartButton.gameObject.GetComponent<Image>();
+        switch (_thisGameData.Status) 
+        {
+            case GameStatus.ByLocal:
+                buttonImage.sprite = StartButtonSprite;
+                break;
+            case GameStatus.Downloaded:
+                buttonImage.sprite = StartButtonSprite;
+                break;
+            case GameStatus.UpdateAvailable:
+                buttonImage.sprite = StartButtonSprite;
+                break;
+            case GameStatus.NotDownloaded:
+                buttonImage.sprite = DownloadButtonSprite;
+                break;
+            case GameStatus.Downloading:
+                buttonImage.sprite = DownloadingButtonSprite;
+                break;
+        }
     }
 
     public void SetGameDirName(string gameDirName)

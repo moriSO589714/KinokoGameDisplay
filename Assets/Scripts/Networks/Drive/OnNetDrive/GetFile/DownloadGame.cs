@@ -7,6 +7,7 @@ public class DownloadGame
     /// </summary>
     public GameDlTask CreateGameDlTaskAndAddCue(GameData gameData, GameDlCue _cue)
     {
+        gameData.Status = GameStatus.Downloading;
         DriveService driveService = NetworksSingleton.Instance.ReturnDriveService();
         OnNetDriveGetFile onNetDriveGetFile = null;
         OnNetDriveMetaData onNetDriveMetaData = null;
