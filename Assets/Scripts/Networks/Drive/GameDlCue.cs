@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks.CompilerServices;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -25,7 +26,7 @@ public class GameDlCue : MonoBehaviour
     /// </summary>
     public void AddGameDlTask(GameDlTask task)
     {
-        HandleTaskList(-1, -1, task);
+        HandleTaskList((-1, null), (-1, null), task);
     }
 
     /// <summary>
@@ -41,8 +42,41 @@ public class GameDlCue : MonoBehaviour
         await new GameDlErrorRecovery().RecoveryError(targetError, ctsForRecovery.Token);
         
         //エラーリストから除去した後、ダウンロードキューに追加
-        ErrorTasksList.RemoveAt(errorTasksListIndex);
+        DeleteErrorTask(errorTasksListIndex);
         AddGameDlTask(targetError.Task);
+    }
+
+    public void DeleteTaskFromIndex(int index, string taskName)
+    {
+        HandleTaskList((index, taskName), (-1, null));
+    }
+
+    /// <summary>
+    /// エラータスクリストからタスクを削除する
+    /// </summary>
+    public void DeleteErrorTask(int index)
+    {
+        ErrorTasksList[index].Task.TaskInstance.ForceEndThisProc();
+        ErrorTasksList.RemoveAt(index);
+    }
+
+    /// <summary>
+    /// 任意のインデックスのタスクと現在実行中のタスクを入れ替える
+    /// </summary>
+    public void ReplaceProgressTaskWithNewTask(int newTaskIndex, string newTaskName)
+    {
+        if (newTaskIndex == 0) return;
+        string progressTaskName = GameDlTasksList[0].TaskName;
+        HandleTaskList((newTaskIndex, newTaskName), (0, progressTaskName));
+    }
+
+    /// <summary>
+    /// タスクの入れ替え(対象に現在実行中のタスクが含まれない)
+    /// </summary>
+    public void ReplaceTaskIndex((int index, string taskName) current, (int index, string taskName) target)
+    {
+        if (current.index == 0 || target.index == 0) return;
+        HandleTaskList(current, target);
     }
 
     /// <summary>
@@ -58,6 +92,13 @@ public class GameDlCue : MonoBehaviour
 
         //実行中のタスクを破棄
         DestroyProgressTask();
+    }
+
+    private async UniTaskVoid StartLoopSequence()
+    {
+        await UniTask.WaitUntil(() => !doTaskFlag);
+
+        SequentiallyDoTasks().Forget();
     }
 
     /// <summary>
@@ -87,14 +128,24 @@ public class GameDlCue : MonoBehaviour
             }
             catch(System.Exception e)
             {
+                //タスクキャンセルによる終了
+                if (ctsForDl.IsCancellationRequested)
+                {
+                    doTaskFlag = false;
+                    return;
+                }
+
                 UnityEngine.Debug.LogError(e);
                 //エラー種別の解析を行う
                 GameDlCustomException gameDlCustomException = new GameDlErrorrSpecify().SpecifyError(e);
                 ErrorTasksList.Add(new GameDlError(onProgressTask, gameDlCustomException));
             }
 
-            //終了したタスクを終了済みとしてリストから除去する
-            DestroyProgressTask();
+            if(!ctsForDl.IsCancellationRequested)
+            {
+                //終了したタスクを終了済みとしてリストから除去する
+                DestroyProgressTask();
+            }
         }
 
         doTaskFlag = false;
@@ -108,7 +159,7 @@ public class GameDlCue : MonoBehaviour
         //実行中のタスクがない場合は処理しない
         if (onProgressTask == null) return;
 
-        HandleTaskList(0, -1);
+        HandleTaskList((0, GameDlTasksList[0].TaskName), (-1, null));
     }
 
     /// <summary>
@@ -118,27 +169,48 @@ public class GameDlCue : MonoBehaviour
     /// <param name="currentIndex">操作対象となる要素の現在のインデックス値。タスクの追加時は-1を指定</param>
     /// <param name="targetIndex">操作実行後のインデックス値。最後尾にタスクを追加する際とタスクの破棄を行う際は-1を指定</param>
     /// <param name="addValue">タスク追加時に追加するタスク</param>
-    private void HandleTaskList(int currentIndex, int targetIndex, GameDlTask addValue = null)
+    private void HandleTaskList
+        ((int index, string taskName) current, (int index, string taskName) target, GameDlTask addValue = null)
     {
-        //タスク追加時
-        if(currentIndex == -1 && addValue != null)
+        //想定と異なる操作が行われる場合(予期しないリストの変更等により)はここで処理を中断
+        if(current.index != -1)
         {
-            AddTask(targetIndex, addValue);
+            if(current.index > GameDlTasksList.Count - 1 || GameDlTasksList[current.index].TaskName != current.taskName)
+            {
+                return;
+            }
+        }
+        if(target.index != -1)
+        {
+            if(target.index > GameDlTasksList.Count)
+            {
+                return;
+            }
+            else if (target.index < GameDlTasksList.Count - 1 && GameDlTasksList[target.index].TaskName != target.taskName)
+            {
+                return;
+            }
+        }
+
+        //タスク追加時
+        if(current.index == -1 && addValue != null)
+        {
+            AddTask(target.index, addValue);
         }
         else
         {
             //タスク削除
-            if(targetIndex == -1)
+            if(target.index == -1)
             {
-                DeleteTask(currentIndex);
+                DeleteTask(current.index);
             }
             else //タスクの入れ替え
             {
-                ReplaceTask(currentIndex, targetIndex);
+                ReplaceTask(current.index, target.index);
             }
         }
         //タスクを止めていた際のためにループを再実行する
-        SequentiallyDoTasks();
+        StartLoopSequence();
     }
 
     private void AddTask(int targetIndex, GameDlTask addValue)
@@ -180,6 +252,8 @@ public class GameDlCue : MonoBehaviour
 
     private void ReplaceTask(int currentIndex, int targetIndex)
     {
+        if (targetIndex > GameDlTasksList.Count - 1) return;
+
         if(targetIndex == 0)
         {
             StopProgressTask(GameDlTasksList[0].TaskName);
@@ -197,9 +271,7 @@ public class GameDlCue : MonoBehaviour
         {
             throw new System.Exception("指定されたタスク名と進行中のタスク名が異なるためタスクを中断できません");
         }
-        onProgressTask.TaskInstance.StopDlGame();
-        doTaskFlag = false;
-        onProgressTask = null;
+        onProgressTask.TaskInstance.ForceEndThisProc();
         CurrentGameDlProgress = null;
         ctsForDl?.Cancel();
     }

@@ -8,6 +8,8 @@ public class SettingPanelManager : OverrapUIPanel
     [SerializeField] private UIActBase _closeButton;
     [SerializeField] private InputField _activationCodeInputField;
     [SerializeField] private UIActBase _activationButton;
+    [SerializeField] private UIActBase _onDownloadPanelButton;
+    [SerializeField] private UIPanel _downloadPanel;
     [SerializeField] private GameObject _loadingPanelPref;
 
     public override void InitPanel()
@@ -16,6 +18,7 @@ public class SettingPanelManager : OverrapUIPanel
         //デリゲート設定
         _closeButton.ClickAct = OnCloseProc;
         _activationButton.ClickAct = ActivationKeyCode;
+        _onDownloadPanelButton.ClickAct = () => { _downloadPanel.gameObject.SetActive(true); };
     }
 
     private void InitPanelUIObj()

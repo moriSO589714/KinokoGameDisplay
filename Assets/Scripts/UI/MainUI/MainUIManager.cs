@@ -7,6 +7,7 @@ using UnityEngine;
 public class MainUIManager : MonoBehaviour
 {
     [SerializeField] private MonitorPlayerInput _monitorPlayerInput;
+    [SerializeField] private WatchingGameDlCueForUI _watchingGameDlCueForUI;
 
     [SerializeField] private GameBoxsManager _gameBoxManager;
     [SerializeField] private UIActBase _networkDownTab;
@@ -71,6 +72,16 @@ public class MainUIManager : MonoBehaviour
         //ローカルで保存されているゲームをロードしてgameBoxを作成する=====================
         new SetGameBoxs(_gameBoxManager).SetAllGameBoxfromLocal();
         //================================================================================
+        //ダウンロード等時リロード用のアクションを登録
+        _watchingGameDlCueForUI.EndProgressTaskAct += UpdataOnGameStatus;
+    }
+
+    /// <summary>
+    /// ゲームのステータスに変更があった場合(ダウンロードの完了など)にゲームボックスUIの再生成を行うメソッド
+    /// </summary>
+    private void UpdataOnGameStatus() 
+    {
+        new SetGameBoxs(_gameBoxManager).NoLoadSetAllGameBox();
     }
 
     private void CreatePanel(GameObject panel)

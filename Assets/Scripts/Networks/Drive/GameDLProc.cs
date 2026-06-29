@@ -1,6 +1,7 @@
 ﻿using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -46,9 +47,13 @@ public class GameDlProc
     /// <summary>
     /// 実行中のダウンロードタスクを停止する
     /// </summary>
-    public void StopDlGame()
+    public void ForceEndThisProc()
     {
-        _doingTaskFlag = false;
+        if (_doingTaskFlag)
+        {
+            _doingTaskFlag = false;
+            GameData.Status = GameStatus.NotDownloaded;
+        }
     }
 
     /// <summary>

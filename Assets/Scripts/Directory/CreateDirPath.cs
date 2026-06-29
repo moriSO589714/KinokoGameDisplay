@@ -19,6 +19,13 @@ public static class CreateDirPath
         return gameDataPath;
     }
 
+    public static string GameDataPathId(string saveGamesDirName, string gameId)
+    {
+        List<string> paths = new List<string>(2) { saveGamesDirName, gameId };
+        string gameDataPathId = MergePath(paths);
+        return gameDataPathId;
+    }
+
     /// <param name="savedJsonsPath">jsonファイルの保存に利用しているディレクトリパス</param>
     /// <param name="gameId">今回対象にするゲームのID</param>
     /// <returns>特定のゲームのjsonファイルのパス</returns>

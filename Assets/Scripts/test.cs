@@ -14,18 +14,23 @@ using UnityEngine.UIElements;
 
 public class test : MonoBehaviour
 {
-    [SerializeField] GameDlCue gameDlCue;
+    [SerializeField] InputField inputField;
+    [SerializeField] LabelFieldManager labelFieldManager;
+
     void Start()
     {
         Debug.Log("end");
     }
 
+    public void TestMethod()
+    {
+        string inputText = inputField.text;
+        labelFieldManager.AddLabel(inputText);
+    }
+
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
-            gameDlCue.RecoveryAndDlInErrorTasksList(0);
-        }
+
     }
 
     private void DLGame()

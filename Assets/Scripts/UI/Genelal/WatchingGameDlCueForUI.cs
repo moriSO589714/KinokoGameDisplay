@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -11,7 +12,11 @@ public class WatchingGameDlCueForUI : MonoBehaviour
     private string _lastProgressTaskName = "";
     private float _lastProgressPercentage = -1;
 
-    public Action<string> UpdateProgressInTaskNameAct = null;
+    //キューの最新タスクの更新が行われた際に発火させるメソッド
+    public Action UpdateProgressTaskAct = null;
+    public Action<GameDlTask> UpdateProgressTaskActForTaskAct = null;
+    public Action EndProgressTaskAct;
+
     public Action<float> UpdateProgressInPercentageAct = null;
     public Action ChangeTaskEmptyAct = null;
 
@@ -25,7 +30,12 @@ public class WatchingGameDlCueForUI : MonoBehaviour
         {
             if(gameDlProgress.TaskName != _lastProgressTaskName) 
             {
-                UpdateProgressInTaskName(gameDlProgress.TaskName, gameDlProgress.GameName);
+                if(_lastProgressTaskName != "")
+                {
+                    CallProgressTaskEnd();
+                }
+
+                CallUpdateProgressTask(_gameDlCue.GameDlTasksList[0]);
             }
 
             if(gameDlProgress.NowPercentage != _lastProgressPercentage)
@@ -43,10 +53,26 @@ public class WatchingGameDlCueForUI : MonoBehaviour
         }
     }
 
-    private void UpdateProgressInTaskName(string taskName, string gameName)
+    public List<GameDlTask> CheckTasks()
     {
-        _lastProgressTaskName = taskName;
-        UpdateProgressInTaskNameAct?.Invoke(gameName);
+        return new List<GameDlTask>(_gameDlCue.GameDlTasksList);
+    }
+
+    public List<GameDlError> CheckErrorTasks()
+    {
+        return new List<GameDlError>(_gameDlCue.ErrorTasksList);
+    }
+
+    /// <summary>
+    /// 現在実行中のタスクが更新された際に呼ばれる
+    /// キューがなくなる際は呼ばれないので注意
+    /// </summary>
+    private void CallUpdateProgressTask(GameDlTask newTask)
+    {
+        _lastProgressTaskName = newTask.TaskName;
+
+        UpdateProgressTaskAct?.Invoke();
+        UpdateProgressTaskActForTaskAct?.Invoke(newTask);
     }
 
     private void UpdateProgressInPercentage(float percentage)
@@ -55,10 +81,20 @@ public class WatchingGameDlCueForUI : MonoBehaviour
     }
 
     /// <summary>
+    /// タスクが終了した際に呼ばれる
+    /// </summary>
+    private void CallProgressTaskEnd()
+    {
+        EndProgressTaskAct?.Invoke();
+    }
+
+
+    /// <summary>
     /// ダウンロードタスクが存在した状態から存在しない状態になった瞬間呼ばれる
     /// </summary>
     private void ChangeTaskEmptyState()
     {
+        CallProgressTaskEnd();
         _lastProgressTaskName = "";
         _lastProgressPercentage = 0;
         ChangeTaskEmptyAct?.Invoke();

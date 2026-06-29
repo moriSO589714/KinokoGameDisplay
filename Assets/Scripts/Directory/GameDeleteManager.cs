@@ -4,8 +4,8 @@
     {
         AllDirs allDirs = AllDirs.GetInstance();
 
-        string gameDirPath = CreateDirPath.GameDataPath
-            (saveGamesDirName: allDirs.GameFilePath, gameId: gameData.GameID, gameDirName: gameData.GameDirName);
+        string gameDirPath = CreateDirPath.GameDataPathId
+            (saveGamesDirName: allDirs.GameFilePath, gameId: gameData.GameID);
         DirectoryActs.CompleteDirDelete(gameDirPath);
 
         string gameJsonPath = CreateDirPath.GameJsonPath(savedJsonsPath: allDirs.JsonsDirPath, gameId: gameData.GameID);

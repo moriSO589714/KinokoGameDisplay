@@ -1,17 +1,26 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 
-public class BarManager
+public class BarManager : MonoBehaviour
 {
-    Image _barImage;
     RectTransform _rectTransform;
     float _perWidth = -1;
-    public BarManager(Image barImage)
+
+    private bool isInit = false;
+    private void Awake()
     {
-        _barImage = barImage;
-        _rectTransform = _barImage.GetComponent<RectTransform>();
-        //1パーセントあたりの幅
+        if(!isInit) Init();
+    }
+
+    public void InitFromOther()
+    {
+        if(!isInit) Init();
+    }
+
+    private void Init()
+    {
+        _rectTransform = this.GetComponent<RectTransform>();
         _perWidth = _rectTransform.sizeDelta.x / 100;
+        isInit = true;
     }
 
     public void SetPercentage(float percentage)

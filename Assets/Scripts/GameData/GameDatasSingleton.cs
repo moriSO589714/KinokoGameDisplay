@@ -69,6 +69,7 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
                 {
                     //ゲームのバージョンは処理を走らせない
                     if (field.Name == "GameVersion") continue;
+                    if (field.Name == "Status") continue;
                     var singletonDataValue = field.GetValue(singletonGameData);
                     var newGameDataValue = field.GetValue(gameData);
                     if(singletonDataValue != newGameDataValue)

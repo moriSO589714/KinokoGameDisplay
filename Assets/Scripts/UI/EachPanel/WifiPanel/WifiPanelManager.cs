@@ -62,7 +62,8 @@ public class WifiPanelManager : UIPanel
         catch (Exception e)
         {
             SetErrorMode();
-            _description.text = "通信中にエラーが発生しました。Log>>> " + e;
+            Debug.LogError(e);
+            _description.text = "通信中にエラーが発生しました";
         }
     }
 
@@ -77,7 +78,7 @@ public class WifiPanelManager : UIPanel
 
     private void SetLoadingMode()
     {
-        _description.text = "スプレッドシートからロードを取得しています";
+        _description.text = "スプレッドシートからデータを取得しています";
         _closeMark.gameObject.SetActive(false);
         _yesMark.gameObject.SetActive(false);
         _noMark.gameObject.SetActive(false);

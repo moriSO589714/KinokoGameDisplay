@@ -23,7 +23,7 @@ public class GameBoxButtonClick
     /// </summary>
     public void OnClickAction(GameBox targetGameBox)
     {
-        GameData targetGameData = targetGameBox._thisGameData;
+        GameData targetGameData = targetGameBox._myGameData;
         //ゲームの状態ごとに処理を分ける
         if(targetGameData.Status == GameStatus.Downloaded || targetGameData.Status == GameStatus.ByLocal)
         {
