@@ -1,13 +1,15 @@
 {
-  "GameDirName": "ccc",
-  "GameTitle": "CCCTitle",
-  "GameExeName": "ccc.exe",
-  "GameID": "315c4d65-0840-46a9-b3df-b9d2b411efbc",
-  "GameDevelopper": "ccccc",
+  "GameTitle": "LocalTestC",
+  "GameDirName": "LocalTestC",
+  "GameExeName": "LocalTestC",
+  "GameID": "locallocalCCC333",
+  "GameVersion": "202109112203",
+  "GameDescription": "ローカルCゲームの説明",
+  "GameDevelopper": [ "C作者", "CLocal作者" ],
+  "GameSoftwareType": "TyranoScript",
   "GameDriveId": "",
   "GameImageId": "",
-  "GameSoftwareType": "Unity",
-  "GameDescription": "",
-  "GameVersion": 0,
-  "GameStatus": 0
+  "GameImageName": "locallocalCCC333.png",
+  "GameTags": [ "格闘ゲーム", "アグリカルチャ", "アニメ" ],
+  "Status": 0
 }

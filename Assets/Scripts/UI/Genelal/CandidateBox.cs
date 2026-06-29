@@ -5,7 +5,7 @@ public class CandidateBox : MonoBehaviour
 {
     [SerializeField] private Text _txtBox;
     [SerializeField] private int _limitLabelLength = 17;
-    [SerializeField] private Sprite _greenSprite;
+    [SerializeField] private Sprite _selectedSprite;
 
     public string _pureTxt { get; private set; }
 
@@ -37,7 +37,7 @@ public class CandidateBox : MonoBehaviour
 
     private void SetActive()
     {
-        gameObject.GetComponent<Image>().sprite = _greenSprite;
+        gameObject.GetComponent<Image>().sprite = _selectedSprite;
         _txtBox.color = Color.white;
         _isActive = true;
     }

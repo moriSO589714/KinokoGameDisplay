@@ -1,14 +1,15 @@
 {
-  "GameDirName": "aaa",
-  "GameTitle": "NonStopTuna2",
-  "GameExeName": "aaa.exe",
-  "GameID": "315c4d65-0840-46a9-b3df-b9d2b411efbc",
-  "GameDevelopper": "aaaaa",
+  "GameTitle": "LocalTestA",
+  "GameDirName": "LocalTestA",
+  "GameExeName": "LocalTestA",
+  "GameID": "locallocalAAA111",
+  "GameVersion": "202209112213",
+  "GameDescription": "ローカルAゲームの説明",
+  "GameDevelopper": [ "A作者", "ALocal作者" ],
+  "GameSoftwareType": "Unity",
   "GameDriveId": "",
   "GameImageId": "",
-  "GameImageName": "aaa.png",
-  "GameSoftwareType": "Unity",
-  "GameDescription": "マグロになって、大海を駆けるレースゲームです！",
-  "GameVersion": 0,
-  "GameStatus": 0
+  "GameImageName": "locallocalAAA111.png",
+  "GameTags": [ "なごやか", "アクション" ],
+  "Status": 0
 }

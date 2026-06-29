@@ -1,13 +1,15 @@
 {
-  "GameDirName": "MinimumGameSample",
-  "GameTitle": "MinimumGame",
-  "GameExeName": "Minimum.exe",
-  "GameID": "minumumgamesample",
-  "GameDevelopper": "testUser",
+  "GameTitle": "LocalTestB",
+  "GameDirName": "LocalTestB",
+  "GameExeName": "LocalTestB",
+  "GameID": "locallocalBBB222",
+  "GameVersion": "202209112203",
+  "GameDescription": "ローカルBゲームの説明",
+  "GameDevelopper": [ "B作者", "BLocal作者" ],
+  "GameSoftwareType": "RPGツクール",
   "GameDriveId": "",
   "GameImageId": "",
-  "GameSoftwareType": "Unity",
-  "GameDescription": "テスト用の最小限のゲームです！",
-  "GameVersion": 0,
-  "GameStatus": 0
+  "GameImageName": "locallocalBBB222.png",
+  "GameTags": [ "アクションゲーム", "アクション", "27年度文化祭" ],
+  "Status": 0
 }

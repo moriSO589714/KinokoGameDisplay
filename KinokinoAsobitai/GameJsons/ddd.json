@@ -1,13 +1,15 @@
 {
-  "GameDirName": "ddd",
-  "GameTitle": "DDDTitle",
-  "GameExeName": "ddd.exe",
-  "GameDevelopper": "ddddd",
-  "GameID": "ef063468-ff5e-4491-a9a5-223b7e6ea19d",
+  "GameTitle": "LocalTestD",
+  "GameDirName": "LocalTestD",
+  "GameExeName": "LocalTestD",
+  "GameID": "locallocalDDD444",
+  "GameVersion": "109109112203",
+  "GameDescription": "ローカルDゲームの説明",
+  "GameDevelopper": [ "D作者", "DLocal作者" ],
+  "GameSoftwareType": "TyranoScript",
   "GameDriveId": "",
   "GameImageId": "",
-  "GameSoftwareType": "Unity",
-  "GameDescription": "",
-  "GameVersion": 0,
-  "GameStatus": 0
+  "GameImageName": "locallocalDDD444.png",
+  "GameTags": [ "アああああああああああああああああ", "アあああああああああああああああああああああああああ", "ア" ],
+  "Status": 0
 }

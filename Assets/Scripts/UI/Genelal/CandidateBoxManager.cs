@@ -49,6 +49,7 @@ public class CandidateBoxManager : MonoBehaviour
 
         //ボックス群の生成
         CreateCandidateBox(_pages[0]);
+        _currentPageIndex = 0;
     }
 
     /// <summary>
@@ -98,7 +99,6 @@ public class CandidateBoxManager : MonoBehaviour
     /// <summary>
     /// 現在選択中のboxに割り当てられているテキストを返す
     /// </summary>
-    /// <returns></returns>
     public string ReturnSelectedTxt()
     {
         if(_currentSelectBoxIndex == -1)
@@ -178,7 +178,7 @@ public class CandidateBoxManager : MonoBehaviour
 
             i += _oneTimeWords;
         }
-        while (i < estimateWords.Count);
+        while (i < estimateWords.Count - 1);
 
         return ReturnList;
     }

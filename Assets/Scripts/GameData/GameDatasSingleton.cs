@@ -16,15 +16,13 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
     public List<GameData> CurrentFilterConditions { get; private set; } = new List<GameData>();
 
     //現在のタグの予測変換用辞書
-    public WordEmtCell TagsLib { get; private set; }
+    private WordEmtCell _tagsLib;
 
     //ゲームデータをリストにセット
     public void AddGameData(GameData gameData)
     {
         //追加
         if(CheckGameData(gameData)) AllGameDatas.Add(gameData);
-        //予測変換用辞書のリロード
-        SetEstimateLibs();
     }
     public void AddGameDataList(List<GameData> gameDatas)
     {
@@ -34,8 +32,6 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
             if(CheckGameData(gameData)) addGameDataList.Add(gameData);
         }
         AllGameDatas.AddRange(addGameDataList);
-        //予測変換用辞書のリロード
-        SetEstimateLibs();
     }
 
     //リストのリセット
@@ -48,6 +44,12 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
     {
         CurrentDisplayGames = currentGameDatas;
         CurrentFilterConditions = currentFilterConditions;
+    }
+
+    public WordEmtCell ReturnTagDictionary()
+    {
+        SetTagsEstimateLib();
+        return _tagsLib;
     }
 
     private bool CheckGameData(GameData gameData)
@@ -97,7 +99,7 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
 
     private void SetTagsEstimateLib()
     {
-        TagsLib = CreateTagsEstimateLib();
+        _tagsLib = CreateTagsEstimateLib();
     }
 
     /// <summary>

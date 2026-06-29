@@ -36,7 +36,7 @@ public class MainUIManager : MonoBehaviour
         //================================================================================
 
         //フィルターボタンのデリゲート設定================================================
-        _filterDownTab.ClickAct = () => CreatePanel(_filterDownTab.gameObject);
+        _filterDownTab.ClickAct = () => CreatePanel(_filterPanel.gameObject);
         //================================================================================
 
         //オプションボタンのデリゲート設定================================================

@@ -7,16 +7,14 @@ using UnityEngine.UI;
 
 public class FreeInputManager : MonoBehaviour
 {
-    [SerializeField] private InputField _myField;
+    [SerializeField] protected InputField _myInputField;
     [SerializeField] private CandidateBoxManager _candidateBoxManager;
-    [SerializeField] private int _maxWordsPerLine;
     [SerializeField] private MonitorPlayerInput _monitorPlayerInput;
 
     private WordEstimater _wordEstimater;
-    private FreeInputSearchDifferent _freeInputSearchDifferent;
-    private FlexibleInputField _flexibleInputField;
 
     private RectTransform _myFieldRectTransform;
+    private string _recordLastInput = "";
 
     private Action _nextSelectBox;
     private Action _previousSelectBox;
@@ -27,10 +25,9 @@ public class FreeInputManager : MonoBehaviour
     private void OnEnable()
     {
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
-        _wordEstimater = new WordEstimater(gameDatasSingleton.TagsLib, " ");
-        _freeInputSearchDifferent = new FreeInputSearchDifferent();
-        _myFieldRectTransform = _myField.GetComponent<RectTransform>();
-        _flexibleInputField = new FlexibleInputField(_myField, _maxWordsPerLine);
+        _wordEstimater = new WordEstimater(gameDatasSingleton.ReturnTagDictionary(), " ");
+        _recordLastInput = "";
+        _myFieldRectTransform = _myInputField.GetComponent<RectTransform>();
 
         _nextSelectBox = () => _candidateBoxManager.MovePerSelectBox(true);
         _previousSelectBox = () => _candidateBoxManager.MovePerSelectBox(false);
@@ -41,9 +38,7 @@ public class FreeInputManager : MonoBehaviour
     /// </summary>
     public void OnValueChange()
     {
-        string inputTxt = _myField.text;
-        //フィールドサイズの変更
-        _flexibleInputField.ChangeFieldSize(inputTxt);
+        string inputTxt = _myInputField.text;
         //単語予測の表示
         CreateEstimate(inputTxt);
     }
@@ -58,13 +53,11 @@ public class FreeInputManager : MonoBehaviour
 
     private void CreateEstimate(string inputTxt)
     {
-        //変更された単語の取得
-        string diffWord = _freeInputSearchDifferent.SearchDifferent(inputTxt);
-
-        if(diffWord != "")
+        //前回の入力から入力が変更されている場合
+        if(_recordLastInput != inputTxt)
         {
             //予測単語群を取得
-            List<string> estimateWords = _wordEstimater.ReturnEstimatedStrs(diffWord, 0);
+            List<string> estimateWords = _wordEstimater.ReturnEstimatedStrs(inputTxt, 0);
 
             //予測単語が無い場合はパネルを初期化して終了
             if(estimateWords == null || estimateWords.Count() == 0)
@@ -108,7 +101,7 @@ public class FreeInputManager : MonoBehaviour
     /// </summary>
     private Vector2 ReturnEstimatePanelPos()
     {
-        float panelYPos = _myFieldRectTransform.anchoredPosition.y - _myFieldRectTransform.sizeDelta.y;
-        return new Vector2(_myFieldRectTransform.anchoredPosition.x, panelYPos);
+        float panelYPos = - _myFieldRectTransform.sizeDelta.y;
+        return new Vector2(0, panelYPos);
     }
 }
