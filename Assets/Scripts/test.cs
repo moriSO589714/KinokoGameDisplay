@@ -14,8 +14,6 @@ using UnityEngine.UIElements;
 
 public class test : MonoBehaviour
 {
-    [SerializeField] InputField inputField;
-    [SerializeField] LabelFieldManager labelFieldManager;
 
     void Start()
     {
@@ -24,13 +22,11 @@ public class test : MonoBehaviour
 
     public void TestMethod()
     {
-        string inputText = inputField.text;
-        labelFieldManager.AddLabel(inputText);
+
     }
 
     void Update()
     {
-
     }
 
     private void DLGame()

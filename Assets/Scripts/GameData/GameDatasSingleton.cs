@@ -13,10 +13,13 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
 
     //現在GameBoxとして表示されているゲームとその条件指定用のGameDataインスタンス
     public List<GameData> CurrentDisplayGames { get; private set; } = new List<GameData>();
-    public List<GameData> CurrentFilterConditions { get; private set; } = new List<GameData>();
+    public FilterCondition CurrentFilterCondition { get; private set; } = null;
 
-    //現在のタグの予測変換用辞書
+    //予測変換用辞書
     private WordEmtCell _tagsLib;
+    private WordEmtCell _devsLib;
+    private WordEmtCell _toolsLib;
+    private List<string> _titlesLib;
 
     //ゲームデータをリストにセット
     public void AddGameData(GameData gameData)
@@ -40,16 +43,34 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
         AllGameDatas = new List<GameData>();
     }
 
-    public void SetCurrentDisplayGames(List<GameData> currentGameDatas, List<GameData> currentFilterConditions)
+    public void SetCurrentDisplayGames(List<GameData> currentGameDatas, FilterCondition currentFilterCondition)
     {
         CurrentDisplayGames = currentGameDatas;
-        CurrentFilterConditions = currentFilterConditions;
+        CurrentFilterCondition = currentFilterCondition;
     }
 
-    public WordEmtCell ReturnTagDictionary()
+    public WordEmtCell ReturnTagsLib()
     {
-        SetTagsEstimateLib();
+        _tagsLib = CreateLibFromGameDatas.CreateTagsLib(AllGameDatas);
         return _tagsLib;
+    }
+
+    public WordEmtCell ReturnDeveroppersLib()
+    {
+        _devsLib = CreateLibFromGameDatas.CreateDeveropperLib(AllGameDatas);
+        return _devsLib;
+    }
+
+    public WordEmtCell ReturnToolsLib()
+    {
+        _toolsLib = CreateLibFromGameDatas.CreateToolsLib(AllGameDatas);
+        return _toolsLib;
+    }
+
+    public List<string> ReturnTitlesLib()
+    {
+        _titlesLib = CreateLibFromGameDatas.CreateTitlesLib(AllGameDatas);
+        return _titlesLib;
     }
 
     private bool CheckGameData(GameData gameData)
@@ -87,45 +108,6 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
         //ゲーム情報として扱う最低要件を満たせていない場合は追加しない
         if (!GameDataQualityCheck.CheckQuality(gameData)) return false;
         return true;
-    }
-
-    /// <summary>
-    /// 予測変換に利用する辞書をセットしなおす
-    /// </summary>
-    private void SetEstimateLibs()
-    {
-        SetTagsEstimateLib();
-    }
-
-    private void SetTagsEstimateLib()
-    {
-        _tagsLib = CreateTagsEstimateLib();
-    }
-
-    /// <summary>
-    /// AllGameDatasから予測変換用の辞書を作成する
-    /// </summary>
-    private WordEmtCell CreateTagsEstimateLib()
-    {
-        Dictionary<string, int> words = new Dictionary<string, int>();
-        foreach(GameData gd in AllGameDatas)
-        {
-            if (gd.GameTags == null) continue;
-            foreach(string tag in gd.GameTags)
-            {
-                if (words.ContainsKey(tag))
-                {
-                    words[tag]++;
-                }
-                else
-                {
-                    words[tag] = 1;
-                }
-            }
-        }
-
-        WordEmtCell tagEstimateLib = WECLibCreater.CreateLibFromLineAndPriority(words);
-        return tagEstimateLib;
     }
 }
 

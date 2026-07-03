@@ -6,7 +6,6 @@ using System.Linq;
 /// </summary>
 public class GameBoxFilter
 {
-
     public List<GameData> FilteringGameDatas(FilterCondition filterCondition)
     {
         return filtering(filterCondition);
@@ -31,7 +30,6 @@ public class GameBoxFilter
         }
         filterdGames = new List<GameData>(statusCandidate);
 
-
         //ゲームのソフトウェア種類
         List<GameData> softwareCandidate = new List<GameData>();
         if (filterCondition.Softs.Count == 0)
@@ -44,16 +42,15 @@ public class GameBoxFilter
         }
         filterdGames = new List<GameData>(softwareCandidate);
 
-
         //ゲームのタイトル名
         List<GameData> gameNamesCandidate = new List<GameData>();
         if(filterCondition.GameNames.Count == 0)
         {
             gameNamesCandidate = filterdGames;
         }
-        foreach(string gameName in filterCondition.GameNames)
+        foreach(List<string> gameNames in filterCondition.GameNames)
         {
-            gameNamesCandidate.AddRange(filterGameName(gameName, filterdGames));
+            gameNamesCandidate.AddRange(filterGameName(gameNames, filterdGames));
         }
         filterdGames = new List<GameData>(gameNamesCandidate);
 
@@ -92,16 +89,19 @@ public class GameBoxFilter
     /// <summary>
     /// ゲームタイトルは部分一致でもリストに追加する
     /// </summary>
-    private List<GameData> filterGameName(string gameName, List<GameData> currentGameDatas)
+    private List<GameData> filterGameName(List<string> gameNames, List<GameData> currentGameDatas)
     {
-        if (gameName == null || gameName == "")
+        if (gameNames == null || gameNames.Count == 0)
         {
             return currentGameDatas;
         }
         else
         {
-            List<GameData> returnList = currentGameDatas.Where(x => x.GameTitle.Contains(gameName)).ToList();
-            return returnList;
+            foreach(string gameName in gameNames)
+            {
+                currentGameDatas = currentGameDatas.Where(x => x.GameTitle.Contains(gameName)).ToList();
+            }
+            return currentGameDatas;
         }
     }
 

@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class Label : MonoBehaviour
 {
+    public string MyLabelName { get; private set; } = "";
     public RectTransform MyRect { get; private set; }
 
     [SerializeField] private float _thisSpacingAreaWidth;
@@ -16,7 +17,6 @@ public class Label : MonoBehaviour
 
     private Action<Label> _deleteThisLabelAct;
     private Text _labelTxt;
-    private string _myLabelName = "";
 
     private void Awake()
     {
@@ -33,7 +33,7 @@ public class Label : MonoBehaviour
 
     public void ActivateLabel(string labelName, Action<Label> whenDeleteAct)
     {
-        _myLabelName = labelName;
+        MyLabelName = labelName;
         SetLabelTxt(labelName);
         _deleteThisLabelAct = whenDeleteAct;
         FlexibleMyWidth();

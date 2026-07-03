@@ -11,6 +11,7 @@ public class MainUIManager : MonoBehaviour
 
     [SerializeField] private GameBoxsManager _gameBoxManager;
     [SerializeField] private UIActBase _networkDownTab;
+    [SerializeField] private GameObject _onFilteringMrk;
     [SerializeField] private UIActBase _filterDownTab;
     [SerializeField] private UIActBase _optionDownTab;
     [SerializeField] private GameObject _canvas;
@@ -74,6 +75,9 @@ public class MainUIManager : MonoBehaviour
         //================================================================================
         //ダウンロード等時リロード用のアクションを登録
         _watchingGameDlCueForUI.EndProgressTaskAct += UpdataOnGameStatus;
+
+        //フィルタリングマークのアクティブ化確認をメイン画面に戻る度に行う
+        commonStateManager.AddOutLoadingFunc(CheckFiltering);
     }
 
     /// <summary>
@@ -87,5 +91,18 @@ public class MainUIManager : MonoBehaviour
     private void CreatePanel(GameObject panel)
     {
         panel.SetActive(true);
+    }
+
+    private void CheckFiltering()
+    {
+        GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
+        if(gameDatasSingleton.CurrentFilterCondition == null)
+        {
+            _onFilteringMrk.SetActive(false);
+        }
+        else
+        {
+            _onFilteringMrk.SetActive(true);
+        }
     }
 }

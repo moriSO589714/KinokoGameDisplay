@@ -4,12 +4,12 @@
 public class FilterCondition 
 {
     public List<GameStatus> Statuses { get; private set; } = new List<GameStatus>();
-    public List<string> GameNames { get; private set; } = new List<string>();
+    public List<List<string>> GameNames { get; private set; } = new List<List<string>>();
     public List<List<string>> GameTags { get; private set; } = new List<List<string>>();
     public List<List<string>> GameDevs { get; private set; } = new List<List<string>>();
     public List<string> Softs { get; private set; } = new List<string>();
 
-    public FilterCondition(List<GameStatus> statuses, List<string> names, List<List<string>> tags, List<List<string>> devs, List<string> softs)
+    public FilterCondition(List<GameStatus> statuses, List<List<string>> names, List<List<string>> tags, List<List<string>> devs, List<string> softs)
     {
         Statuses = statuses;
         GameNames = names;
@@ -27,7 +27,7 @@ public class FilterCondition
         Statuses = statuses;
     }
 
-    public void SetGameNames(List<string> names)
+    public void SetGameNames(List<List<string>> names)
     {
         GameNames = names;
     }

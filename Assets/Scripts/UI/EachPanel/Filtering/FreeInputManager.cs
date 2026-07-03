@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,11 +10,14 @@ public class FreeInputManager : MonoBehaviour
     [SerializeField] private CandidateBoxManager _candidateBoxManager;
     [SerializeField] private MonitorPlayerInput _monitorPlayerInput;
 
-    private WordEstimater _wordEstimater;
+    protected PickUpCandidateElementProc _pickUpCandidateElementProc;
+
+    private FreeInputEnterController _freeInputEnterController;
 
     private RectTransform _myFieldRectTransform;
     private string _recordLastInput = "";
 
+    private Action<string> _sendInputValue;
     private Action _nextSelectBox;
     private Action _previousSelectBox;
 
@@ -24,9 +26,9 @@ public class FreeInputManager : MonoBehaviour
     /// </summary>
     private void OnEnable()
     {
-        GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
-        _wordEstimater = new WordEstimater(gameDatasSingleton.ReturnTagDictionary(), " ");
+        ActivatePickUpCandidateProc();
         _recordLastInput = "";
+        _freeInputEnterController = new FreeInputEnterController(RegisterInput, RefrelctCandidateTxt, _candidateBoxManager);
         _myFieldRectTransform = _myInputField.GetComponent<RectTransform>();
 
         _nextSelectBox = () => _candidateBoxManager.MovePerSelectBox(true);
@@ -43,6 +45,11 @@ public class FreeInputManager : MonoBehaviour
         CreateEstimate(inputTxt);
     }
 
+    public void OnValueSubmit()
+    {
+        _freeInputEnterController.WhenSubmitInputField();
+    }
+
     /// <summary>
     /// フィールドから入力が離れた際に発火させる
     /// </summary>
@@ -51,13 +58,37 @@ public class FreeInputManager : MonoBehaviour
         ClearBox();
     }
 
+    public void SetSendInputValueAct(Action<string> sendInputValueAct)
+    {
+        _sendInputValue = sendInputValueAct;
+    }
+
+    protected virtual void RegisterInput()
+    {
+        string inputTxt = _myInputField.text;
+        _sendInputValue(inputTxt);
+        _myInputField.text = "";
+        ClearBox();
+    }
+
+    private void RefrelctCandidateTxt()
+    {
+        string candidateTxt = _candidateBoxManager.ReturnSelectedTxt();
+        _myInputField.text = candidateTxt;
+    }
+
+    protected virtual void ActivatePickUpCandidateProc()
+    {
+
+    }
+
     private void CreateEstimate(string inputTxt)
     {
-        //前回の入力から入力が変更されている場合
+        //前回の入力から入力値が変更されている場合
         if(_recordLastInput != inputTxt)
         {
             //予測単語群を取得
-            List<string> estimateWords = _wordEstimater.ReturnEstimatedStrs(inputTxt, 0);
+            List<string> estimateWords = _pickUpCandidateElementProc.CreateCandidates(inputTxt);
 
             //予測単語が無い場合はパネルを初期化して終了
             if(estimateWords == null || estimateWords.Count() == 0)

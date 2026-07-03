@@ -15,7 +15,8 @@ public class CandidateBoxManager : MonoBehaviour
     //oneTimeWordsずつ分割したワードリスト(1ページぶんづつ)
     private List<List<string>> _pages = new List<List<string>>();
     private int _currentPageIndex = -1;
-    private int _currentSelectBoxIndex = -1;
+
+    public int _currentSelectBoxIndex { get; private set; } = -1;
 
     //マネージャーの初期化処理
     private void Init()

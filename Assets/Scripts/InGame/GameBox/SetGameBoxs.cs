@@ -36,4 +36,10 @@ public class SetGameBoxs
         List<GameData> gameDatas = _gameDatasSingleton.AllGameDatas;
         _gameBoxsManager.GenerateBoxs(gameDatas);
     }
+
+    public void NoLoadSetCurrentDisplayGameBox()
+    {
+        List<GameData> gameDatas = _gameDatasSingleton.CurrentDisplayGames;
+        _gameBoxsManager.GenerateBoxs(gameDatas);
+    }
 }

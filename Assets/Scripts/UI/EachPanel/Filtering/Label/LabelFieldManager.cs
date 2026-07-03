@@ -12,7 +12,7 @@ public class LabelFieldManager : MonoBehaviour
 {
     [SerializeField] private GameObject _labelPref;
     [SerializeField] private GameObject _labelFieldObj;
-    [SerializeField] private GameObject _whenEmptyDisplay;
+    [SerializeField] private GameObject _whenEmptyDisplay = null;
 
     //ラベルフィールドと実際にラベルを生成するエリアの余白サイズ
     [SerializeField] private Vector2 _fieldMargin;
@@ -67,7 +67,10 @@ public class LabelFieldManager : MonoBehaviour
         addLabel.gameObject.SetActive(true);
         FlexibleLabelFieldHeight(CalcLabelRowLength());
 
-        _whenEmptyDisplay.gameObject.SetActive(false);
+        if(_whenEmptyDisplay != null)
+        {
+            _whenEmptyDisplay.gameObject.SetActive(false);
+        }
     }
 
     /// <summary>
@@ -94,10 +97,19 @@ public class LabelFieldManager : MonoBehaviour
         int rowLength = CalcLabelRowLength();
         if(rowLength == -1)
         {
-            _whenEmptyDisplay.gameObject.SetActive(true);
+            if (_whenEmptyDisplay != null)
+            {
+                _whenEmptyDisplay.gameObject.SetActive(true);
+            }
             rowLength = 1;
         }
         FlexibleLabelFieldHeight(rowLength);
+    }
+
+    public List<string> ReturnActiveLabelTxts()
+    {
+        List<string> activeLabelTxts = _activeLabelPool.Select(x => x.MyLabelName).ToList();
+        return activeLabelTxts;
     }
 
     /// <summary>
