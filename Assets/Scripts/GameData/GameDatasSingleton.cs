@@ -81,7 +81,7 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
             if(singletonGameData.GameID == gameData.GameID)
             {
                 //追加されるゲームのバージョンが新しい場合
-                if(int.Parse(singletonGameData.GameVersion) < int.Parse(gameData.GameVersion) && singletonGameData.Status == GameStatus.Downloaded)
+                if(long.Parse(singletonGameData.GameVersion) < long.Parse(gameData.GameVersion) && singletonGameData.Status == GameStatus.Downloaded)
                 {
                     singletonGameData.Status = GameStatus.UpdateAvailable;
                 }
