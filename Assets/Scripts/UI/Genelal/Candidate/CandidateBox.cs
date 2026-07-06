@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class CandidateBox : MonoBehaviour
@@ -11,7 +12,6 @@ public class CandidateBox : MonoBehaviour
 
     private Sprite _normalSprite;
     private string _labelTxt;
-    private bool _isActive = false;
 
     private void Awake()
     {
@@ -39,13 +39,11 @@ public class CandidateBox : MonoBehaviour
     {
         gameObject.GetComponent<Image>().sprite = _selectedSprite;
         _txtBox.color = Color.white;
-        _isActive = true;
     }
 
     private void CancellActive()
     {
         gameObject.GetComponent<Image>().sprite = _normalSprite;
         _txtBox.color = Color.black;
-        _isActive = false;
     }
 }

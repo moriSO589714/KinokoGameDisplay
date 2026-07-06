@@ -14,9 +14,12 @@ using UnityEngine.UIElements;
 
 public class test : MonoBehaviour
 {
+    [SerializeField] GameObject _arrow;
 
     void Start()
     {
+        RectTransform rectTransform = _arrow.GetComponent<RectTransform>();
+        Debug.Log("Rotation>>>" + rectTransform.localEulerAngles);
         Debug.Log("end");
     }
 

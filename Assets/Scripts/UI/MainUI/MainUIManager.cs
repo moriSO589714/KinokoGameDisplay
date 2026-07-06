@@ -14,11 +14,13 @@ public class MainUIManager : MonoBehaviour
     [SerializeField] private GameObject _onFilteringMrk;
     [SerializeField] private UIActBase _filterDownTab;
     [SerializeField] private UIActBase _optionDownTab;
+    [SerializeField] private UIActBase _sortDownTab;
     [SerializeField] private GameObject _canvas;
 
     [SerializeField] private UIPanel _onNetPanel;
     [SerializeField] private UIPanel _filterPanel;
     [SerializeField] private UIPanel _optionPanel;
+    [SerializeField] private UIPanel _sortPanel;
     private void Awake()
     {
         InitMainUI();
@@ -42,6 +44,10 @@ public class MainUIManager : MonoBehaviour
 
         //オプションボタンのデリゲート設定================================================
         _optionDownTab.ClickAct = () => CreatePanel(_optionPanel.gameObject);
+        //================================================================================
+
+        //ソートボタンのデリゲート設定====================================================
+        _sortDownTab.ClickAct = () => CreatePanel(_sortPanel.gameObject);
         //================================================================================
 
         //マウススクロールの割り当て======================================================
@@ -85,7 +91,7 @@ public class MainUIManager : MonoBehaviour
     /// </summary>
     private void UpdataOnGameStatus() 
     {
-        new SetGameBoxs(_gameBoxManager).NoLoadSetAllGameBox();
+        new SetGameBoxs(_gameBoxManager).NoLoadSetCurrentDisplayGameBox();
     }
 
     private void CreatePanel(GameObject panel)

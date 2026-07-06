@@ -8,7 +8,7 @@ using UnityEngine;
 /// <summary>
 /// ラベルフィールドの管理
 /// </summary>
-public class LabelFieldManager : MonoBehaviour
+public class LabelFieldManager : ObjectStuckPool<Label>
 {
     [SerializeField] private GameObject _labelPref;
     [SerializeField] private GameObject _labelFieldObj;
@@ -18,9 +18,6 @@ public class LabelFieldManager : MonoBehaviour
     [SerializeField] private Vector2 _fieldMargin;
     //ラベル同士の間隔
     [SerializeField] private Vector2 _labelSpacing;
-
-    private List<Label> _activeLabelPool = new List<Label>();
-    private List<Label> _notUsedLabelPool = new List<Label>();
 
     private RectTransform _labelFieldRect;
     private float _labelHeight;
@@ -33,9 +30,6 @@ public class LabelFieldManager : MonoBehaviour
         Init();
     }
 
-    /// <summary>
-    /// 初期化用関数
-    /// </summary>
     private void Init()
     {
         _labelFieldRect = _labelFieldObj.GetComponent<RectTransform>();
@@ -51,6 +45,14 @@ public class LabelFieldManager : MonoBehaviour
         _firstLabelPos = new Vector2(_fieldMargin.x, -_fieldMargin.y);
     }
 
+    public override void ClearActiveStucks()
+    {
+        base.ClearActiveStucks();
+
+        //ラベルフィール(後ろの灰色)のサイズを初期値に戻す
+        _labelFieldRect.sizeDelta = _firstFieldSize;
+    }
+
     /// <summary>
     /// 現在のラベルの最後尾に新しくラベルを追加する
     /// </summary>
@@ -59,9 +61,9 @@ public class LabelFieldManager : MonoBehaviour
         //ラベルの生成
         Label addLabel = InstantiateLabel(labelName);
         //リストに追加
-        _activeLabelPool.Add(addLabel);
+        _activeStuckPool.Add(addLabel);
         //ui位置座標を取得
-        Vector2 addLabelPos = CalcLabelPos(_activeLabelPool.Count - 1, _activeLabelPool);
+        Vector2 addLabelPos = CalcLabelPos(_activeStuckPool.Count - 1, _activeStuckPool);
         //生成したラベルを移動させてアクティブ化
         addLabel.GetComponent<RectTransform>().anchoredPosition = addLabelPos;
         addLabel.gameObject.SetActive(true);
@@ -73,29 +75,25 @@ public class LabelFieldManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 指定ラベルの削除
-    /// </summary>
-    public void RemoveLabel(Label removedLabel)
+    public override void RemoveActiveObject(Label targetObj)
     {
-        //リスト上のインデックスを取得
-        int removeIndex = _activeLabelPool.IndexOf(removedLabel);
-        //プールから削除
-        _activeLabelPool.RemoveAt(removeIndex);
-        removedLabel.gameObject.SetActive(false);
-        //再利用用のプールに移動
-        _notUsedLabelPool.Add(removedLabel);
+        int removeIndex = _activeStuckPool.IndexOf(targetObj);
 
-        for(int i = removeIndex; i <= _activeLabelPool.Count - 1; i++)
+        //オブジェクトの削除処理
+        base.RemoveActiveObject(targetObj);
+        targetObj.gameObject.SetActive(false);
+
+        //残ったオブジェクトの再配置
+        for (int i = removeIndex; i <= _activeStuckPool.Count - 1; i++)
         {
             //再配置を行う
-            Vector2 replacePos = CalcLabelPos(i, _activeLabelPool);
-            _activeLabelPool[i].MyRect.anchoredPosition = replacePos;
+            Vector2 replacePos = CalcLabelPos(i, _activeStuckPool);
+            _activeStuckPool[i].MyRect.anchoredPosition = replacePos;
         }
 
         //列数計算
         int rowLength = CalcLabelRowLength();
-        if(rowLength == -1)
+        if (rowLength == -1)
         {
             if (_whenEmptyDisplay != null)
             {
@@ -108,7 +106,7 @@ public class LabelFieldManager : MonoBehaviour
 
     public List<string> ReturnActiveLabelTxts()
     {
-        List<string> activeLabelTxts = _activeLabelPool.Select(x => x.MyLabelName).ToList();
+        List<string> activeLabelTxts = _activeStuckPool.Select(x => x.MyLabelName).ToList();
         return activeLabelTxts;
     }
 
@@ -118,13 +116,7 @@ public class LabelFieldManager : MonoBehaviour
     private Label InstantiateLabel(string labelName)
     {
         //生成済みのラベル(_labelPool)から現在利用していないものを探す
-        Label notUsedLabel = null;
-        if(_notUsedLabelPool.Count != 0)
-        {
-            //配列の末尾からオブジェクトを使う
-            notUsedLabel = _notUsedLabelPool[_notUsedLabelPool.Count - 1];
-            _notUsedLabelPool.RemoveAt(_notUsedLabelPool.Count - 1);
-        }
+        Label notUsedLabel = ReturnNotUsedObject();
 
         Label targetLabel = null;
         if(notUsedLabel == null)
@@ -137,7 +129,7 @@ public class LabelFieldManager : MonoBehaviour
         {
             targetLabel = notUsedLabel;
         }
-        targetLabel.ActivateLabel(labelName, RemoveLabel);
+        targetLabel.ActivateLabel(labelName, RemoveActiveObject);
 
         return targetLabel;
     }
@@ -179,8 +171,8 @@ public class LabelFieldManager : MonoBehaviour
     /// </summary>
     private int CalcLabelRowLength()
     {
-        if (_activeLabelPool.Count == 0) return -1;
-        float lastLabelYPos = _activeLabelPool[_activeLabelPool.Count - 1].MyRect.anchoredPosition.y;
+        if (_activeStuckPool.Count == 0) return -1;
+        float lastLabelYPos = _activeStuckPool[_activeStuckPool.Count - 1].MyRect.anchoredPosition.y;
         //一番上列の余白分を修正する
         lastLabelYPos += _fieldMargin.y;
         float rowLength = -(lastLabelYPos / _labelSpacing.y);

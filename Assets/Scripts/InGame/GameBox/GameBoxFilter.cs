@@ -4,23 +4,20 @@ using System.Linq;
 /// <summary>
 /// GameDatasSingletonにあるGameDatasからフィルタリングしたものをGameBoxManagerにセットしてUI反映する
 /// </summary>
-public class GameBoxFilter
+public static class GameBoxFilter
 {
-    public List<GameData> FilteringGameDatas(FilterCondition filterCondition)
+    public static List<GameData> FilteringGameDatas(FilterCondition filterCondition, List<GameData> filteringTargetList)
     {
-        return filtering(filterCondition);
+        return filtering(filterCondition, filteringTargetList);
     }
 
     /// <summary>
     /// GameDataクラスを利用してフィルタリングを行う。インスタンス1つに格納されたものはandだが、複数インスタンスはorで絞られる
     /// </summary>
-    private List<GameData> filtering(FilterCondition filterCondition)
+    private static List<GameData> filtering(FilterCondition filterCondition, List<GameData> filteringTargetList)
     {
-        GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
-        List<GameData> allData = new List<GameData>(gameDatasSingleton.AllGameDatas);
-
         //フィルタリングされたゲームデータが入るクラス
-        List<GameData> filterdGames = new List<GameData>(allData);
+        List<GameData> filterdGames = new List<GameData>(filteringTargetList);
         
         //ゲームのステータス
         List<GameData> statusCandidate = new List<GameData>();
@@ -89,7 +86,7 @@ public class GameBoxFilter
     /// <summary>
     /// ゲームタイトルは部分一致でもリストに追加する
     /// </summary>
-    private List<GameData> filterGameName(List<string> gameNames, List<GameData> currentGameDatas)
+    private static List<GameData> filterGameName(List<string> gameNames, List<GameData> currentGameDatas)
     {
         if (gameNames == null || gameNames.Count == 0)
         {
@@ -108,7 +105,7 @@ public class GameBoxFilter
     /// <summary>
     /// 開発者名は完全一致
     /// </summary>
-    private List<GameData> filterGameDev(List<string> devs, List<GameData> currentGameDatas)
+    private static List<GameData> filterGameDev(List<string> devs, List<GameData> currentGameDatas)
     {
         if(devs.Count() == 0)
         {
@@ -127,7 +124,7 @@ public class GameBoxFilter
     /// <summary>
     /// ソフトウェアでのフィルタリング
     /// </summary>
-    private List<GameData> filterSoft(string soft, List<GameData> currentGameDatas)
+    private static List<GameData> filterSoft(string soft, List<GameData> currentGameDatas)
     {
         if(soft == null || soft == "")
         {
@@ -140,7 +137,7 @@ public class GameBoxFilter
         }
     }
 
-    private List<GameData> filterTag(List<string> tags, List<GameData> currentGameDatas)
+    private static List<GameData> filterTag(List<string> tags, List<GameData> currentGameDatas)
     {
         if(tags.Count() == 0)
         {
@@ -156,7 +153,7 @@ public class GameBoxFilter
         }
     }
 
-    private List<GameData> filterStatus(GameStatus status, List<GameData> currentGameDatas)
+    private static List<GameData> filterStatus(GameStatus status, List<GameData> currentGameDatas)
     {
         currentGameDatas = currentGameDatas.Where(x => x.Status == status).ToList();
         return currentGameDatas;

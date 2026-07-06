@@ -1,8 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CandidateBoxManager : MonoBehaviour
+public class CandidateBoxManager : ObjectStuckPool<CandidateBox>
 {
     //一度に表示する単語数
     [SerializeField] int _oneTimeWords;
@@ -10,7 +11,6 @@ public class CandidateBoxManager : MonoBehaviour
     [SerializeField] Canvas _canvas;
 
     private Vector2 _startAnchoredPos = Vector2.zero;
-    private List<CandidateBox> _createdBoxPool = new List<CandidateBox>();
 
     //oneTimeWordsずつ分割したワードリスト(1ページぶんづつ)
     private List<List<string>> _pages = new List<List<string>>();
@@ -21,11 +21,7 @@ public class CandidateBoxManager : MonoBehaviour
     //マネージャーの初期化処理
     private void Init()
     {
-        foreach (CandidateBox cb in _createdBoxPool)
-        {
-            cb.LeaveThis();
-            cb.gameObject.SetActive(false);
-        }
+        ClearActiveStucks();
         _currentPageIndex = -1;
         _currentSelectBoxIndex = -1;
         _pages = new List<List<string>>();
@@ -34,6 +30,13 @@ public class CandidateBoxManager : MonoBehaviour
     public void ClearBoxs()
     {
         Init();
+    }
+
+    public override void RemoveActiveObject(CandidateBox targetObj)
+    {
+        targetObj.LeaveThis();
+        targetObj.gameObject.SetActive(false);
+        base.RemoveActiveObject(targetObj);
     }
 
     /// <summary>
@@ -107,7 +110,7 @@ public class CandidateBoxManager : MonoBehaviour
             return null;
         }
 
-        return _createdBoxPool[_currentSelectBoxIndex]._pureTxt;
+        return _activeStuckPool[_currentSelectBoxIndex]._pureTxt;
     }
 
     /// <summary>
@@ -115,51 +118,60 @@ public class CandidateBoxManager : MonoBehaviour
     /// </summary>
     private void CreateCandidateBox(List<string> page)
     {
-        int currentCreateCounts = 0;
+        //現在生成されているボックスがあれば全て消す
+        ClearActiveStucks();
+
         //与えられたリストの最初から表示するぶんboxを生成する
         for(int i = 0; i < page.Count; i++)
         {
-            if(_createdBoxPool.Count - 1 >= i)
+            //CandidateBoxの生成
+            CandidateBox targetBox = null;
+            if (_notUsedStuckPool.Count > 0) //使用されていないboxが存在する
             {
-                _createdBoxPool[i].gameObject.SetActive(true);
+                targetBox = ReturnNotUsedObject();
+                _activeStuckPool.Add(targetBox);
+                targetBox.gameObject.SetActive(true);
             }
-            else //プールのボックスが不足している場合はインスタンスする
+            else
             {
-                //生成する座標を求める
-                Vector2 previousFloorPos;
-                if(i == 0)
-                {
-                    previousFloorPos = _startAnchoredPos;
-                }
-                else
-                {
-                    GameObject previousObject = _createdBoxPool[i - 1].gameObject;
-                    RectTransform previousRectTransform = previousObject.GetComponent<RectTransform>();
-                    Vector2 previousPos = previousRectTransform.anchoredPosition;
-                    previousFloorPos = new Vector2(previousPos.x ,previousPos.y - previousRectTransform.sizeDelta.y * previousRectTransform.transform.localScale.y);
-                }
-                InstCandidateBox(previousFloorPos);
+                //プールのボックスが不足している場合はインスタンスする
+                targetBox = InstCandidateBox();
             }
-            _createdBoxPool[i].SetLabel(page[i]);
-            currentCreateCounts++;
-        }
+            targetBox.SetLabel(page[i]);
 
-        //使用しなかったpool内のboxを非アクティブにする
-        for(int i = _createdBoxPool.Count; i > currentCreateCounts; i--)
-        {
-            _createdBoxPool[i - 1].gameObject.SetActive(false);
+            //生成したラベルを正しい位置に移動させる
+            Vector2 createPos = new Vector2();
+            if(i == 0)
+            {
+                createPos = _startAnchoredPos;
+            }
+            else
+            {
+                //現在生成されている最新のcandidateBox(一番下)
+                GameObject previousObject = _activeStuckPool[i - 1].gameObject;
+                RectTransform previousRectTransform = previousObject.GetComponent<RectTransform>();
+                Vector2 previousPos = previousRectTransform.anchoredPosition;
+                createPos = new Vector2(previousPos.x, previousPos.y - previousRectTransform.sizeDelta.y * previousRectTransform.transform.localScale.y);
+            }
+            MoveCandidateBoxPos(targetBox, createPos);
         }
     }
 
     /// <summary>
-    /// 実際にオブジェクトを生成
+    /// 実際にオブジェクトを生成してアクティブリストに追加する
     /// </summary>
     /// <param name="previousFloorPos">開始点のAnchoredPosition</param>
-    private void InstCandidateBox(Vector2 previousFloorPos)
+    private CandidateBox InstCandidateBox()
     {
         GameObject inst =  Instantiate(_candidateBoxPref, parent: this.gameObject.transform);
-        inst.GetComponent<RectTransform>().anchoredPosition = previousFloorPos;
-        _createdBoxPool.Add(inst.GetComponent<CandidateBox>());
+        CandidateBox candidateBox = inst.GetComponent<CandidateBox>();
+        _activeStuckPool.Add(candidateBox);
+        return candidateBox;
+    }
+
+    private void MoveCandidateBoxPos(CandidateBox candidateBox, Vector2 targetPos)
+    {
+        candidateBox.GetComponent<RectTransform>().anchoredPosition = targetPos;
     }
 
     private List<List<string>> DivisionWordsList(List<string> estimateWords)
@@ -204,7 +216,7 @@ public class CandidateBoxManager : MonoBehaviour
     {
         if(_currentSelectBoxIndex != -1)
         {
-            _createdBoxPool[_currentSelectBoxIndex].LeaveThis();
+            _activeStuckPool[_currentSelectBoxIndex].LeaveThis();
         }
         RecursiveMoveSelectBox(move);
     }
@@ -230,7 +242,7 @@ public class CandidateBoxManager : MonoBehaviour
             return;
         }
 
-        _createdBoxPool[nextSelect].SelectThis();
+        _activeStuckPool[nextSelect].SelectThis();
         _currentSelectBoxIndex = nextSelect;
     }
 }

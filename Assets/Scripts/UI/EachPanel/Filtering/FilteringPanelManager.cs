@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -10,12 +11,14 @@ public class FilteringPanelManager : UIPanel
     [SerializeField] private TagFilterManager _tagFilterManager;
     [SerializeField] private DeveropperFilterManager _deveropperFilterManager;
     [SerializeField] private UIActBase _confirmButton;
+    [SerializeField] private UIActBase _closeButton;
     [SerializeField] private GameBoxsManager _gameBoxsManager;
 
     protected override void Awake()
     {
         base.Awake();
         _confirmButton.ClickAct += ActivateFilteringProc;
+        _closeButton.ClickAct += OnCloseProc;
     }
 
     public override void InitPanel()
@@ -23,16 +26,36 @@ public class FilteringPanelManager : UIPanel
         base.InitPanel();
     }
 
+    protected override void OnCloseProc()
+    {
+        _statusManager.PanelCloseProc();
+
+        _gameNameManager.PanelCloseProc();
+        _toolsFilterManager.PanelCloseProc();
+        _tagFilterManager.PanelCloseProc();
+        _deveropperFilterManager.PanelCloseProc();
+
+        base.OnCloseProc();
+    }
+
     public void ActivateFilteringProc()
     {
-        GameBoxFilter gameBoxFilter = new GameBoxFilter();
         FilterCondition currentFilterCondition = GenerateFilterConditions();
-        List<GameData> filterdGameData = gameBoxFilter.FilteringGameDatas(currentFilterCondition);
+
+        GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
+        List<GameData> registerGameDatas = new List<GameData>();
+        if(currentFilterCondition == null)
+        {
+            registerGameDatas = gameDatasSingleton.AllGameDatas;
+            currentFilterCondition = null;
+        }
+        else
+        {
+            registerGameDatas = GameBoxFilter.FilteringGameDatas(currentFilterCondition, gameDatasSingleton.AllGameDatas);
+        }
 
         //シングルトンに登録する
-        GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
-        gameDatasSingleton.SetCurrentDisplayGames(filterdGameData, currentFilterCondition);
-
+        gameDatasSingleton.SetCurrentDisplayGames(registerGameDatas, currentFilterCondition);
         _gameBoxsManager.GenerateBoxs(gameDatasSingleton.CurrentDisplayGames);
         OnCloseProc();
     }
@@ -56,6 +79,12 @@ public class FilteringPanelManager : UIPanel
             ConvertOrToList(filteringTags),
             ConvertOrToList(filteringDevs),
             filteringTools);
+
+        //もしフィルタリング条件が初期値と等しい場合(フィルタリングが行われず、全てのゲームを表示する場合)はnullを返す
+        if (isNotFiltering(filterCondition))
+        {
+            return null;
+        }
 
         return filterCondition;
     }
@@ -86,5 +115,18 @@ public class FilteringPanelManager : UIPanel
         }
 
         return ConvertedList;
+    }
+
+    private bool isNotFiltering(FilterCondition conditions)
+    {
+        int statusKinds = Enum.GetValues(typeof(GameStatus)).Length;
+        if (conditions.Statuses.Count == statusKinds)
+        {
+            if (conditions.GameNames.Count == 0 && conditions.GameTags.Count == 0 && conditions.GameDevs.Count == 0 && conditions.Softs.Count == 0)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

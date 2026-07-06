@@ -9,22 +9,22 @@ public class ZoomUIAct : UIActBase
     [SerializeField] private float _zoomInSpeed;
     [SerializeField] private float _zoomOutSpeed;
 
-    ZoomInOut zoomInOut;
+    private ZoomInOut _zoomInOut;
     private void Awake()
     {
-        zoomInOut = new ZoomInOut(gameObject, _zoomScale, _zoomInSpeed, _zoomOutSpeed);
+        _zoomInOut = new ZoomInOut(gameObject, _zoomScale, _zoomInSpeed, _zoomOutSpeed);
     }
 
     //アニメーションの発火処理をオーバーライドして追加する
     public override void OnPointerEnter()
     {
-        zoomInOut.ZoomIn();
+        _zoomInOut.ZoomIn();
         base.OnPointerEnter();
     }
 
     public override void OnPointerExit()
     {
-        zoomInOut.ZoomOut();
+        _zoomInOut.ZoomOut();
         base.OnPointerExit();
     }
 }

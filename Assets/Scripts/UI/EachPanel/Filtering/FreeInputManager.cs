@@ -21,18 +21,32 @@ public class FreeInputManager : MonoBehaviour
     private Action _nextSelectBox;
     private Action _previousSelectBox;
 
-    /// <summary>
-    /// オブジェクトがアクティブになった際に実行
-    /// </summary>
-    private void OnEnable()
+    private void Awake()
     {
-        ActivatePickUpCandidateProc();
-        _recordLastInput = "";
         _freeInputEnterController = new FreeInputEnterController(RegisterInput, RefrelctCandidateTxt, _candidateBoxManager);
         _myFieldRectTransform = _myInputField.GetComponent<RectTransform>();
 
         _nextSelectBox = () => _candidateBoxManager.MovePerSelectBox(true);
         _previousSelectBox = () => _candidateBoxManager.MovePerSelectBox(false);
+    }
+
+    /// <summary>
+    /// オブジェクトがアクティブになった際に実行
+    /// </summary>
+    private void OnEnable()
+    {
+        //パネルが消えている間にゲーム情報が更新されている可能性があるため、これだけ再ロードする
+        ActivatePickUpCandidateProc();
+    }
+
+    /// <summary>
+    /// 終了時処理
+    /// </summary>
+    public void RefleshField()
+    {
+        _recordLastInput = "";
+        ClearBox();
+        _myInputField.text = "";
     }
 
     /// <summary>

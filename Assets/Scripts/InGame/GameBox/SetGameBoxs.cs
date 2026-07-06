@@ -17,24 +17,37 @@ public class SetGameBoxs
     public async UniTask SetAllGameBoxfromLocal()
     {
         await UniTask.RunOnThreadPool(_gameDataManager.LoadGameDataFromJsons);
-        List<GameData> gameDatas = _gameDatasSingleton.AllGameDatas;
-        _gameBoxsManager.GenerateBoxs(gameDatas);
+        List<GameData> allGameDatas = _gameDatasSingleton.AllGameDatas;
+        FilterCondition currentConditions = _gameDatasSingleton.CurrentFilterCondition;
+
+        List<GameData> displayGameDatas = allGameDatas;
+        //フィルタリングを通す
+        if (currentConditions != null)
+        {
+            displayGameDatas = GameBoxFilter.FilteringGameDatas(currentConditions, allGameDatas);
+        }
+        _gameDatasSingleton.SetCurrentDisplayGames(displayGameDatas, currentConditions);
+        
+        //uiの生成
+        _gameBoxsManager.GenerateBoxs(displayGameDatas);
     }
 
     public async UniTask SetAllGameBoxfromNet()
     {
         await UniTask.RunOnThreadPool(_gameDataManager.LoadGameDataFromSpSt);
-        List<GameData> gameDatas = _gameDatasSingleton.AllGameDatas;
-        _gameBoxsManager.GenerateBoxs(gameDatas);
-    }
+        List<GameData> allGameDatas = _gameDatasSingleton.AllGameDatas;
+        FilterCondition currentConditions = _gameDatasSingleton.CurrentFilterCondition;
 
-    /// <summary>
-    /// ゲームの読み込みを行わず、現在シングルトンに登録されているものからゲームボックスを生成
-    /// </summary>
-    public void NoLoadSetAllGameBox()
-    {
-        List<GameData> gameDatas = _gameDatasSingleton.AllGameDatas;
-        _gameBoxsManager.GenerateBoxs(gameDatas);
+        List<GameData> displayGameDatas = allGameDatas;
+        //フィルタリングを通す
+        if(currentConditions != null)
+        {
+            displayGameDatas = GameBoxFilter.FilteringGameDatas(currentConditions, allGameDatas);
+        }
+        _gameDatasSingleton.SetCurrentDisplayGames(displayGameDatas, currentConditions);
+
+        //uiの生成
+        _gameBoxsManager.GenerateBoxs(displayGameDatas);
     }
 
     public void NoLoadSetCurrentDisplayGameBox()

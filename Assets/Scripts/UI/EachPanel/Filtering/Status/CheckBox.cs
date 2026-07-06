@@ -17,15 +17,28 @@ public class CheckBox : UIActBase
         base.OnClickAct();
     }
 
+    public void CheckMarkSwitchActive(bool isActive)
+    {
+        if (isActive)
+        {
+            CheckMark.SetActive(true);
+        }
+        else
+        {
+            CheckMark.SetActive(false);
+        }
+    }
+
     private void SwitchCheckMark()
     {
         if (CheckMark.activeInHierarchy)
         {
-            CheckMark.SetActive(false);
+            CheckMarkSwitchActive(false);
         }
         else
         {
-            CheckMark.SetActive(true);
+            CheckMarkSwitchActive(true);
         }
     }
+
 }
