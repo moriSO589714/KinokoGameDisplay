@@ -12,5 +12,6 @@
         DirectoryActs.CompleteDirDelete(gameJsonPath);
 
         gameData.Status = GameStatus.NotDownloaded;
+        UnityEngine.Debug.Log("changeStatus 02");
     }
 }

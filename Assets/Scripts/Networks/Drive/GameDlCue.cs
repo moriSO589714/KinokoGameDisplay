@@ -146,6 +146,7 @@ public class GameDlCue : MonoBehaviour
                 //終了したタスクを終了済みとしてリストから除去する
                 DestroyProgressTask();
             }
+            GameDatasSingleton gs = GameDatasSingleton.Instance;
         }
 
         doTaskFlag = false;

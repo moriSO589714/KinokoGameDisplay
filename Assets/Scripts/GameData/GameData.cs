@@ -31,7 +31,7 @@ public class GameData
     public string GameImageName; //ゲームのサムネのファイル名(〇〇.png)
     public string[] GameTags; //ゲームに付与されているタグ
     [MustItem]
-    public GameStatus Status; //ゲームの状態(ダウンロードされているかなど)
+    public GameStatus Status;//ゲームの状態(ダウンロードされているかなど)
 }
 
 /// <summary>

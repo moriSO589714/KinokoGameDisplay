@@ -52,7 +52,6 @@ public class GameDlProc
         if (_doingTaskFlag)
         {
             _doingTaskFlag = false;
-            GameData.Status = GameStatus.NotDownloaded;
         }
     }
 
