@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using Cysharp.Threading.Tasks.Triggers;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//通常マネージャーの場所がボックス生成の始点となる
 public class BoxManager : MonoBehaviour
 {
     [SerializeField] float _boxInterval;
@@ -10,13 +12,15 @@ public class BoxManager : MonoBehaviour
     protected RectTransform _myRectTransform;
     protected float _firstTimeMyYPos;
     protected List<Box> _boxPool = new List<Box>();
+    //_lastBoxYPosはBoxからみた座標なので、Managerとの相対座標
     protected float _lastBoxYPos = 0;
 
     protected virtual void Awake()
     {
         _myRectTransform = this.GetComponent<RectTransform>();
         _firstTimeMyYPos = _myRectTransform.anchoredPosition.y;
-        _lastBoxYPos = _firstTimeMyYPos;
+        //1個目の生成はインターバルを必要としないので打ち消し用に加算
+        _lastBoxYPos += _boxInterval;
     }
 
     /// <summary>
@@ -33,7 +37,14 @@ public class BoxManager : MonoBehaviour
             float limitYPos = (_boxPool.Count - 1) * _boxInterval;
             if(targetYPos >= limitYPos)
             {
-                targetYPos = limitYPos;
+                if (_boxPool.Count == 1)
+                {
+                    targetYPos = _firstTimeMyYPos;
+                }
+                else
+                {
+                    targetYPos = limitYPos;
+                }
             }
         }
         else if(scrollDirection > 0)//下へ
@@ -51,10 +62,9 @@ public class BoxManager : MonoBehaviour
     protected virtual GameObject InstanceBox<T>(T originData, float lastBoxYPos, GameObject boxPref)
     {
         float createYPos = lastBoxYPos - _boxInterval;
-        GameObject instancedBox = Instantiate(boxPref);
+        GameObject instancedBox = Instantiate(boxPref, parent:this.gameObject.transform);
         RectTransform instancedRectTransform = instancedBox.GetComponent<RectTransform>();
         instancedRectTransform.anchoredPosition = new Vector2(instancedRectTransform.anchoredPosition.x, createYPos);
-        instancedRectTransform.transform.SetParent(this.transform, false);
         Box box = instancedBox.GetComponent<Box>();
         box.SetDataMyBox(originData);
 
@@ -71,6 +81,6 @@ public class BoxManager : MonoBehaviour
             _boxPool.RemoveAt(i);
         }
 
-        _lastBoxYPos = _firstTimeMyYPos;
+        _lastBoxYPos = _boxInterval;
     }
 }

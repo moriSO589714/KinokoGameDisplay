@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +9,6 @@ public class WaitBox : Box
     [SerializeField] UIActBase _downArrowButton;
     [SerializeField] UIActBase _immediatelyDlButton;
     [SerializeField] UIActBase _deleteTask;
-
 
     public GameDlTask _myGameDlTask { get; private set; }
 

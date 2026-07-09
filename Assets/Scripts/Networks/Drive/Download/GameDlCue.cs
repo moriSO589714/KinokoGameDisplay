@@ -46,6 +46,9 @@ public class GameDlCue : MonoBehaviour
         AddGameDlTask(targetError.Task);
     }
 
+    /// <summary>
+    /// 故意でダウンロードタスクを終了させる際に利用するメソッド
+    /// </summary>
     public void DeleteTaskFromIndex(int index, string taskName)
     {
         HandleTaskList((index, taskName), (-1, null));
@@ -248,6 +251,13 @@ public class GameDlCue : MonoBehaviour
             StopProgressTask(GameDlTasksList[0].TaskName);
         }
 
+        //削除するタスクが正常終了していない(ダウンロードが終了していない)場合、ゲームデータのステータスをNotDownloadにする
+        GameDlProc targetTaskInstance = GameDlTasksList[currentIndex].TaskInstance;
+        if (!targetTaskInstance.EndTaskFlag)
+        {
+            targetTaskInstance.GameData.Status = GameStatus.NotDownloaded;
+        }
+        //リストから削除
         GameDlTasksList.RemoveAt(currentIndex);
     }
 

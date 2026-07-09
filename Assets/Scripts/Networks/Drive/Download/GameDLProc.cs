@@ -1,7 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -9,6 +7,8 @@ using System.Threading;
 public class GameDlProc
 {
     public GameData GameData { get; private set; }
+    //ダウンロードプロセスが終了した際にtrueとなる
+    public bool EndTaskFlag { get; private set; } = false;
 
     private OnNetDriveMetaData _onNetDriveMetaData = null;
     private OnNetDriveGetFile _onNetDriveFetFile = null;
@@ -152,6 +152,8 @@ public class GameDlProc
 
         //ダウンロードに利用した一時保存関係のファイル・フォルダを全て削除する
         DirectoryActs.CompleteDirDelete(tempGameDLPath);
+
+        EndTaskFlag = true;
     }
 
     private LastGameDLState CheckLastStatus(string gameID, string tempSliceGamePath)

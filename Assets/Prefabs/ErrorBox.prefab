@@ -821,7 +821,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -23.32, y: -3}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &4220774640491597654
@@ -840,6 +840,7 @@ MonoBehaviour:
   _upArrowButton: {fileID: 0}
   _downArrowButton: {fileID: 0}
   _immediatelyDlButton: {fileID: 0}
+  _deleteTask: {fileID: 0}
   _errorDescriptionTxt: {fileID: 3849084671644857065}
   _recoveryButton: {fileID: 3647812054610970847}
   _deleteErrorButton: {fileID: 3086645513438360406}
