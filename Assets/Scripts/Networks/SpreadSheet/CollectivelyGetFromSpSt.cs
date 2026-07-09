@@ -215,8 +215,6 @@ public class CollectivelyGetFromSpSt
         }
         //ステータスをNotDownloadにする
         returnGameData.Status = GameStatus.NotDownloaded;
-        Debug.Log("changeStatus 01");
         return returnGameData;
     }
-
 }
