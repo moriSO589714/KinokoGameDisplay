@@ -44,7 +44,7 @@ public class FileSpliting
     /// <param name="splicedBite">分割する要領の指定(単位はバイト)</param>
     /// <param name="splicedFilePath">分割されるファイルのパス</param>
     /// <param name="saveinPath">分割後のファイル群が保存されるフォルダのパス</param>
-    public void DivideZipFile(int splicedBite ,string splicedFilePath, string saveinPath)
+    public void DivideZipFile(long splicedBite ,string splicedFilePath, string saveinPath)
     {
         //ファイルサイズ
         FileInfo fileInfo = new FileInfo(splicedFilePath);

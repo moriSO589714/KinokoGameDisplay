@@ -6,6 +6,4 @@ public class CmdSceneManager : BasedSingletonInMono<CmdSceneManager>
 {
     public InputFieldManager InputFieldManager;
     public OutPutManager OutPutManager;
-
-
 }

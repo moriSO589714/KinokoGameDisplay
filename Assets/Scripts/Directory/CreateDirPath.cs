@@ -82,6 +82,20 @@ public static class CreateDirPath
         return zipFilePath;
     }
 
+    public static string TempGamePathForUpload(string tempDirPath, string gameId)
+    {
+        List<string> paths = new List<string>(2) { tempDirPath, gameId };
+        string tempGamePath = MergePath(paths);
+        return tempGamePath;
+    }
+
+    public static string SlicedFilesPathForUpload(string tempGamePath)
+    {
+        List<string> paths = new List<string>(2) { tempGamePath, _slicedDirName };
+        string slicedFilesPath = MergePath(paths);
+        return slicedFilesPath;
+    }
+
     private static string MergePath(List<string> paths)
     {
         string stuckPath = "";

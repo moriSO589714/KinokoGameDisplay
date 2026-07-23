@@ -28,8 +28,14 @@ public class OnNetDriveUploadFileforDv : OnNetDriveUploadFile
         //アップロード用のファイルストリームを作成
         FileStream fileStream = new FileStream(filePath, FileMode.Open);
 
+        string fileExtention = Path.GetExtension(filePath);
+        string driveImage = "application/";
+        if(fileExtention == ".png" || fileExtention == ".jpg") 
+        {
+            driveImage = "image/";
+        }
         //アップロード用リクエストの作成
-        FilesResource.CreateMediaUpload request = _driveService.Files.Create(fileResource, fileStream, "application/" + Path.GetExtension(filePath));
+        FilesResource.CreateMediaUpload request = _driveService.Files.Create(fileResource, fileStream, driveImage + Path.GetExtension(filePath));
         //アップロード時のドライブIDを返す用リクエストに含める
         request.Fields = "id";
         //アップロードの実行

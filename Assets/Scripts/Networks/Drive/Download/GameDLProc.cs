@@ -58,7 +58,7 @@ public class GameDlProc
     /// <summary>
     /// 固有IDからゲームデータをローカルに保存する
     /// </summary>
-    public void DLGame()
+    private void DLGame()
     {
         string gameId = GameData.GameID;
         string driveId = GameData.GameDriveId;

@@ -16,6 +16,7 @@ public class CmdLoader : MonoBehaviour
         _cmdSceneManager = CmdSceneManager.Instance;
         SetCommandReceiver();
         _cmdSceneManager.InputFieldManager._setCommandReceiver = SetCommandReceiver;
+        new LoadFlexibleDir().SetFlexibleDirByJson();
     }
 
     private void SetCommandReceiver()

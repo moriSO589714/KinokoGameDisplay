@@ -36,37 +36,8 @@ public class GameDataManager
         List<GameData> gameDatas = new List<GameData>();
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
         CollectivelyGetFromSpSt collectivelyGetFromSpSt = new CollectivelyGetFromSpSt();
-        
-        //スプレッドシートから全てのGameDataを取得してくる
-        string jsonPathKey = AllDirs.GetInstance().JsonPathKey;
-        string spId = AllDirs.GetInstance().SpreadSheetID;
 
         List<GameData> gotGameDatas = collectivelyGetFromSpSt.AllGameDataFromSpSt();
         gameDatasSingleton.AddGameDataList(gotGameDatas);
-
-
-        //条件をもとにスプレッドシートからGameDataを取得してくる
-        //(最終使わないなら消す)
-        /*
-        string jsonPathKey = AllDirs.GetInstance().JsonPathKey;
-        string spId = AllDirs.GetInstance().SpreadSheetID;
-        OnNetGameInfo onNetGameInfo = null;
-        if (!CheckInEnvironment.CheckDoingNet())
-        {
-            onNetGameInfo = new OnNetGameInfoFromTest();
-        }
-        else
-        {
-            CreateAPIService createAPIService = new CreateAPIService(jsonPathKey);
-            SheetsService sheetsService = createAPIService.CreateSheetAPIService();
-            onNetGameInfo = new OnNetGameInfoFromSpSt(sheetsService, spId);
-        }
-
-        foreach(GameData g in filterObjects)
-        {
-            List<GameData> getDatas = collectivelyGetFromSpSt.FilterGameDataFromSpSt(g);
-            gameDatasSingleton.AddGameDataList(getDatas);
-        }
-        */
     }
 }

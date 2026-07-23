@@ -15,6 +15,8 @@ public class FlexibleDirs
     public string JsonsDirPath;
     //イメージ写真が保存されるディレクトリ
     public string ImageFolderPath;
+    //ゲームデータが保存されているドライブのID(最も上層)
+    public string GameSavedDriveID;
     //スプレッドシートのID
     public string SpreadSheetID;
     //スプレッドシートでデータテーブルの範囲が始まるセルの場所(列,行)
