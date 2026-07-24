@@ -46,7 +46,7 @@ public class DeleteGameAllInfoFromSpSt
         int gameIdIndex = elementOrder.IndexOf(_gameIDVariableNameOnGameData);
         //スプレッドシートから取得したリストから当てはまる行のインデックスを取得する
         int targetGameIndexInList = -1;
-        for(int i = 0; i <= sheetDatas.Count; i++)
+        for(int i = 0; i <= sheetDatas.Count - 1; i++)
         {
             if (sheetDatas[i][gameIdIndex] == targetGameId)
             {

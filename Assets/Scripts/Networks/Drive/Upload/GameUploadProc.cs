@@ -19,7 +19,7 @@ public class GameUploadProc
     private OnNetDriveGetName _onNetDriveGetName = null;
     private OnNetDelete _onNetDelete = null;
 
-    private CancellationTokenSource _onMovingCts;
+    private CancellationToken _ct = new CancellationToken();
 
     private string _gameOriginalId = "";
     private string _driveId = "";
@@ -37,13 +37,13 @@ public class GameUploadProc
         _onNetDelete = onNetDelete;
     }
 
-    public async UniTask UploadGameInUniTask(CancellationTokenSource cts, GameData gameData, bool forceUpload = false)
+    public async UniTask UploadGameInUniTask(CancellationToken ct, GameData gameData, bool forceUpload = false)
     {
-        _onMovingCts = cts;
+        _ct = ct;
 
         try
         {
-            await UniTask.RunOnThreadPool(() => UploadGame(forceUpload, gameData), cancellationToken: cts.Token);
+            await UniTask.RunOnThreadPool(() => UploadGame(forceUpload, gameData), cancellationToken: ct);
         }
         catch (System.Exception e)
         {
@@ -123,7 +123,7 @@ public class GameUploadProc
             _onNetDriveUploadFile.UploadFile(uploadTargetFolderDriveId, uploadFilePath);
 
             //トークンがキャンセルされていれば例外を投げて処理を中断
-            _onMovingCts.Token.ThrowIfCancellationRequested();
+            _ct.ThrowIfCancellationRequested();
 
             Debug.Log($"{counter++}/{uploadFilesPaths.Count()}をアップロード済み");
         }
@@ -135,7 +135,7 @@ public class GameUploadProc
             NetworkThumbnailManager networkThumbnailManager = new NetworkThumbnailManager();
 
             //トークンがキャンセルされていれば例外を投げて処理を中断
-            _onMovingCts.Token.ThrowIfCancellationRequested();
+            _ct.ThrowIfCancellationRequested();
 
             imageDriveId = networkThumbnailManager.UploadThumbnail(_onNetDriveUploadFile, gameIdFolderDriveId, localImagePath, tempGamePath, gameId);
         }
@@ -156,12 +156,9 @@ public class GameUploadProc
         List<string> registerSheetFormat = ElementOrderManager.GameDataToSheetFormat(sheetElementOrder, gameData);
 
         //トークンがキャンセルされていれば例外を投げて処理を中断
-        _onMovingCts.Token.ThrowIfCancellationRequested();
+        _ct.ThrowIfCancellationRequested();
 
         //スプレッドシートの新規行に追加
         _onNetAppEndGameInfo.AppEndGameInfo(registerSheetFormat);
-
-        //デバッグ用
-        Debug.Log("END UPLOAD");
     }
 }

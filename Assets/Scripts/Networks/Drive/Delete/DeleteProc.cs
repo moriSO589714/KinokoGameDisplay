@@ -10,6 +10,8 @@ public class DeleteProc
     OnNetGetParentId _onNetGetParentId;
     OnNetDriveGetName _onNetDriveGetName;
 
+    private CancellationToken _ct = new CancellationToken();
+
     public DeleteProc(OnNetDelete onNetDelete, OnNetGetParentId onNetGetParentId, OnNetDriveGetName onNetDriveGetName)
     {
         _onNetDelete = onNetDelete;
@@ -19,6 +21,7 @@ public class DeleteProc
 
     public async UniTask UniDeleteDriveGame(string gameDriveId, string gameOriginalId, CancellationToken ct)
     {
+        _ct = ct;
         await UniTask.RunOnThreadPool(() => DeleteDriveGameData(gameDriveId, gameOriginalId), cancellationToken: ct);
     }
 
@@ -44,10 +47,10 @@ public class DeleteProc
             throw new System.Exception("削除するゲームの親Driveフォルダの名前がゲームの固有IDと一致しません。親フォルダ名＞＞" + parentFolderName);
         }
 
+        _ct.ThrowIfCancellationRequested();
+
         //スプレッドシート上の対象ゲームに関する情報を削除する
         DeleteGameAllInfoFromSpSt deleteGameAllInfoFromSpSt = new DeleteGameAllInfoFromSpSt();
         deleteGameAllInfoFromSpSt.DeleteGameInfo(gameOriginalId);
-
-        Debug.Log("END_DELETE");
     }
 }

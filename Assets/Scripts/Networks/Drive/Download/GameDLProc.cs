@@ -15,6 +15,8 @@ public class GameDlProc
     private bool _doingTaskFlag = false;
     private GameDlProgress _gameDlProgress = null;
 
+    private CancellationToken _ct = new CancellationToken();
+
     /// <summary>
     /// 対象のゲームの現在の状態を表す列挙型
     /// </summary>
@@ -88,6 +90,8 @@ public class GameDlProc
         Dictionary<string, string> metaDic = _onNetDriveMetaData.GetFileList(driveId);
         Dictionary<string, string> needDlFileDic = new Dictionary<string, string>();
 
+        _ct.ThrowIfCancellationRequested();
+
         DLData newDLData = null;
 
         //スライスされたファイルが既に存在する場合(ダウンロードしかけ)
@@ -123,6 +127,8 @@ public class GameDlProc
             _gameDlProgress.MaxDLfiles = (int)newDLData.SplitFileNum;
         }
 
+        _ct.ThrowIfCancellationRequested();
+
         //拡張子が.000以外のファイルを進捗を表示させながら保存する
         foreach (var pair in needDlFileDic)
         {
@@ -135,6 +141,8 @@ public class GameDlProc
             {
                 _gameDlProgress.NowDLedFileCount++;
             }
+
+            _ct.ThrowIfCancellationRequested();
         }
 
 
@@ -149,7 +157,6 @@ public class GameDlProc
         string thisGameJsonPath = CreateDirPath.GameJsonPath(savedJsonsPath: allDirs.JsonsDirPath, gameId: gameId);
         //ダウンロード済みデータとしてjsonに保存
         JSONTools.SerializeJson(GameData, thisGameJsonPath);
-
         //ダウンロードに利用した一時保存関係のファイル・フォルダを全て削除する
         DirectoryActs.CompleteDirDelete(tempGameDLPath);
 

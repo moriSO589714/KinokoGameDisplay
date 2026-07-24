@@ -35,7 +35,7 @@ public class GameBox : Box
         _myGameData = originGameData;
         SetTitle(originGameData.GameTitle);
         SetDescription(originGameData.GameDescription);
-        SetImage(originGameData.GameImageName);
+        SetImage(originGameData.GameID);
         SetGameDirName(originGameData.GameDirName);
         ChangeButtonImage();
     }
@@ -57,16 +57,16 @@ public class GameBox : Box
         string setDescription = StrTools.ReplaceOverWords(description, DescriptionWordsRemit);
         DescriptionField.text = setDescription;
     }
-    private void SetImage(string imageName)
+    private void SetImage(string gameId)
     {
         Sprite setSprite = NoImageSprite;
-        if(imageName == "" || imageName == null)
+        if(gameId == "" || gameId == null)
         {
             GameImage.sprite = setSprite;
             return;
         }
 
-        Sprite imageSprite = LoadPicSpriteByPath(imageName);
+        Sprite imageSprite = LoadPicSpriteByPath(gameId);
         if (imageSprite != null)
         {
             setSprite = imageSprite;
@@ -113,8 +113,9 @@ public class GameBox : Box
     private Sprite LoadPicSpriteByPath(string imageName)
     {
         AllDirs allDirs = AllDirs.GetInstance();
-        //画像ファイルの名前からパスに変換する
-        string imageFilePath = Path.Combine(allDirs.ImageFolderPath, imageName);
+        string imageExtention = allDirs.ImageExtention;
+        //gameIDから画像のパスにする
+        string imageFilePath = Path.Combine(allDirs.ImageFolderPath, imageName + imageExtention);
         Sprite sprite = null;
         if (File.Exists(imageFilePath))
         {

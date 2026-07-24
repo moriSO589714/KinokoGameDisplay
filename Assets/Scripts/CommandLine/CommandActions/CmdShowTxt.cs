@@ -24,8 +24,5 @@ public class CmdShowTxt : MonoBehaviour
 
         //終了時のアクションを登録する
         _cmdSceneManager.InputFieldManager._whenEndCurrentAction += () => { Debug.Log("オウム返しを終了します"); };
-
-
-
     }
 }

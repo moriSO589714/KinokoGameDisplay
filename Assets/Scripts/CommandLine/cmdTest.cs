@@ -11,7 +11,15 @@ public class cmdTest : MonoBehaviour
 
     void Start()
     {
-        TryGameUploadProc();
+        try
+        {
+        
+            TryGameUploadProc();
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogException(e);
+        }
         Debug.Log("end");
     }
 
@@ -83,7 +91,7 @@ public class cmdTest : MonoBehaviour
         gameData.GameTags = new string[3] { "アクションゲーム", "脱出ゲーム", "パズル" };
 
         string localGamePath = "C:/Users/souza/Downloads/ForTestApp";
-        string localImagePath = "E:/pictures/PICT0011.jpg";
+        string localImagePath = "C:/Users/souza/Pictures/スクリーンショット/Screenshot 2026-02-17 093932.png";
 
         DriveService driveService = NetworksSingleton.Instance.ReturnDriveService();
         OnNetDriveUploadFile ondu = new OnNetDriveUploadFileforDv(driveService);
@@ -99,7 +107,7 @@ public class cmdTest : MonoBehaviour
         GameData uploadGameDetail = GameDataForUpload.CreateGameDataForUpload(gameData, localGamePath, localImagePath);
         CancellationTokenSource cts = new CancellationTokenSource();
         _cts = cts;
-        new GameUploadProc(onc, ondu, appendInfo, onNetGetParentId, onNetDriveGetName, onNetDelete).UploadGameInUniTask(cts, uploadGameDetail);
+        new GameUploadProc(onc, ondu, appendInfo, onNetGetParentId, onNetDriveGetName, onNetDelete).UploadGameInUniTask(cts.Token, uploadGameDetail);
     }
 
     private void TryUploadImage()
