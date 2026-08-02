@@ -8,18 +8,11 @@ using UnityEngine;
 public class cmdTest : MonoBehaviour
 {
     CancellationTokenSource _cts = null;
+    [SerializeField] EstimateCmdLibManager _object;
 
     void Start()
     {
-        try
-        {
-        
-            TryGameUploadProc();
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogException(e);
-        }
+        WordEmtCell wec = _object.GetEstimateCmdLib();
         Debug.Log("end");
     }
 

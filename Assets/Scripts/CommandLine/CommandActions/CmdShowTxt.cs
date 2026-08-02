@@ -20,7 +20,7 @@ public class CmdShowTxt : MonoBehaviour
     public void SayReceiveMessage()
     {
         //inputFieldのメッセージ送信先を切り替える
-        _cmdSceneManager.InputFieldManager.ChangeAction(_cmdSceneManager.OutPutManager.ReceiveMessage);
+        _cmdSceneManager.InputFieldManager.ChangeAction(_cmdSceneManager.OutPutManager.ReceiveMessage, null);
 
         //終了時のアクションを登録する
         _cmdSceneManager.InputFieldManager._whenEndCurrentAction += () => { Debug.Log("オウム返しを終了します"); };

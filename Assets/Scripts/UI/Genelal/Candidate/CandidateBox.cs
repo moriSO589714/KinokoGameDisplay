@@ -35,13 +35,13 @@ public class CandidateBox : MonoBehaviour
         CancellActive();
     }
 
-    private void SetActive()
+    protected virtual void SetActive()
     {
         gameObject.GetComponent<Image>().sprite = _selectedSprite;
         _txtBox.color = Color.white;
     }
 
-    private void CancellActive()
+    protected virtual void CancellActive()
     {
         gameObject.GetComponent<Image>().sprite = _normalSprite;
         _txtBox.color = Color.black;

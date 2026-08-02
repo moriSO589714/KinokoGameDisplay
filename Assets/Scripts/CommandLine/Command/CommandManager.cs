@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
@@ -6,11 +7,14 @@ using UnityEngine.Events;
 public class CommandManager : MonoBehaviour
 {
     [SerializeField] CommandNode _commandLibrary;
+    [SerializeField] EstimateCmdLibManager _estimateCmdLibManager;
 
     [SerializeField] string _notFindCommandMessage = "";
+
     private const char _sequence = ' ';
     
     private CmdSceneManager _cmdSceneManager = new CmdSceneManager();
+    
     private void Awake()
     {
         _cmdSceneManager = CmdSceneManager.Instance;
@@ -28,6 +32,11 @@ public class CommandManager : MonoBehaviour
             return;
         }
         executeCommand.Invoke();
+    }
+
+    public WordEmtCell GetCmdLib()
+    {
+        return _estimateCmdLibManager.GetEstimateCmdLib();
     }
 
     private UnityEvent SearchMethodFromLibray(string[] splitCommandArray, CommandNode currentNode)

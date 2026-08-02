@@ -936,6 +936,7 @@ MonoBehaviour:
   _oneTimeWords: 5
   _candidateBoxPref: {fileID: 6117120830968945463, guid: 21aa226c049fe444686ed0fa94e359cf, type: 3}
   _canvas: {fileID: 1869892736}
+  _instanceDirection: 0
 --- !u!1 &125971766
 GameObject:
   m_ObjectHideFlags: 0
@@ -4009,6 +4010,7 @@ MonoBehaviour:
   _oneTimeWords: 10
   _candidateBoxPref: {fileID: 6117120830968945463, guid: 21aa226c049fe444686ed0fa94e359cf, type: 3}
   _canvas: {fileID: 1869892736}
+  _instanceDirection: 0
 --- !u!224 &554803755
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4218,6 +4220,7 @@ MonoBehaviour:
   _oneTimeWords: 10
   _candidateBoxPref: {fileID: 6117120830968945463, guid: 21aa226c049fe444686ed0fa94e359cf, type: 3}
   _canvas: {fileID: 1869892736}
+  _instanceDirection: 0
 --- !u!224 &616265799
 RectTransform:
   m_ObjectHideFlags: 0
@@ -12332,6 +12335,7 @@ MonoBehaviour:
   _oneTimeWords: 5
   _candidateBoxPref: {fileID: 6117120830968945463, guid: 21aa226c049fe444686ed0fa94e359cf, type: 3}
   _canvas: {fileID: 1869892736}
+  _instanceDirection: 0
 --- !u!1 &1754967825
 GameObject:
   m_ObjectHideFlags: 0

@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CmdSceneManager : BasedSingletonInMono<CmdSceneManager>
 {
-    public InputFieldManager InputFieldManager;
+    //この変数はUnityのインスペクタ上からアタッチする---------
+    public CmdInputFieldManager InputFieldManager;
     public OutPutManager OutPutManager;
+    //--------------------------------------------------------
 }

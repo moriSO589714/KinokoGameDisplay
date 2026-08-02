@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 public class WordEstimater
@@ -18,7 +19,7 @@ public class WordEstimater
     /// <param name="returnDepth">入力しかけの単語以降、何単語目までの候補を返すか(0なら書きかけの単語部のみ)</param>
     /// <returns></returns>
     public List<string> ReturnEstimatedStrs(string input, int returnDepth)
-    {
+    {        
         string[] splitInput = input.Split(_separateMark, StringSplitOptions.RemoveEmptyEntries);
 
         //キャッシュに同一の検索が保存されていないか確認

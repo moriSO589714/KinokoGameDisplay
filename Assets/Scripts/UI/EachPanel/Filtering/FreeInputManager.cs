@@ -101,11 +101,12 @@ public class FreeInputManager : MonoBehaviour
         //前回の入力から入力値が変更されている場合
         if(_recordLastInput != inputTxt)
         {
+            _recordLastInput = inputTxt;
             //予測単語群を取得
             List<string> estimateWords = _pickUpCandidateElementProc.CreateCandidates(inputTxt);
 
             //予測単語が無い場合はパネルを初期化して終了
-            if(estimateWords == null || estimateWords.Count() == 0)
+            if(estimateWords == null || estimateWords.Count == 0)
             {
                 ClearBox();
                 return;

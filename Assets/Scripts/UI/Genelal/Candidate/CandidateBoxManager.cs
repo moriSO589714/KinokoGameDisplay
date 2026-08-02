@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class CandidateBoxManager : ObjectStuckPool<CandidateBox>
@@ -9,6 +7,8 @@ public class CandidateBoxManager : ObjectStuckPool<CandidateBox>
     [SerializeField] int _oneTimeWords;
     [SerializeField] GameObject _candidateBoxPref;
     [SerializeField] Canvas _canvas;
+    //候補を表示させる方向(true => 上方向, false => 下方向)
+    [SerializeField] bool _instanceDirection = false;
 
     private Vector2 _startAnchoredPos = Vector2.zero;
 
@@ -151,7 +151,7 @@ public class CandidateBoxManager : ObjectStuckPool<CandidateBox>
                 GameObject previousObject = _activeStuckPool[i - 1].gameObject;
                 RectTransform previousRectTransform = previousObject.GetComponent<RectTransform>();
                 Vector2 previousPos = previousRectTransform.anchoredPosition;
-                createPos = new Vector2(previousPos.x, previousPos.y - previousRectTransform.sizeDelta.y * previousRectTransform.transform.localScale.y);
+                createPos = new Vector2(previousPos.x, previousPos.y + previousRectTransform.sizeDelta.y * previousRectTransform.transform.localScale.y * GetDirection(_instanceDirection));
             }
             MoveCandidateBoxPos(targetBox, createPos);
         }
@@ -225,7 +225,7 @@ public class CandidateBoxManager : ObjectStuckPool<CandidateBox>
     {
         int nextSelect = _currentSelectBoxIndex + move;
         //次のページに行く必要がある場合
-        if(nextSelect >= _pages[_currentPageIndex].Count)
+        if (nextSelect >= _pages[_currentPageIndex].Count)
         {
             int end = _pages[_currentPageIndex].Count - _currentSelectBoxIndex;
             MovePerPage(true);
@@ -233,7 +233,7 @@ public class CandidateBoxManager : ObjectStuckPool<CandidateBox>
             RecursiveMoveSelectBox(move - end);
             return;
         }
-        else if(nextSelect < 0)//前のページに行く必要がある場合
+        else if (nextSelect < 0)//前のページに行く必要がある場合
         {
             int end = _currentSelectBoxIndex + 1;
             MovePerPage(false);
@@ -244,5 +244,17 @@ public class CandidateBoxManager : ObjectStuckPool<CandidateBox>
 
         _activeStuckPool[nextSelect].SelectThis();
         _currentSelectBoxIndex = nextSelect;
+    }
+
+    private int GetDirection(bool booleanDirection)
+    {
+        if (booleanDirection)
+        {
+            return 1;
+        }
+        else
+        {
+            return -1;
+        }
     }
 }
