@@ -9,10 +9,11 @@ using UnityEngine.UI;
 /// </summary>
 public class CmdInputFieldManager : MonoBehaviour
 {
-    [SerializeField]private InputField _myInputField;
+    [SerializeField] private CmdSceneManager _cmdSceneManager;
+    [SerializeField] private InputField _myInputField;
     private Action<string> _throwMessageMethod;
     private FreeInputEnterController _freeInputEnterController;
-
+    private CmdSceneManager _sceneManager = null;
 
     [SerializeField] private string _resetWord;
     //コマンド受信に切り替えるメソッド
@@ -24,6 +25,7 @@ public class CmdInputFieldManager : MonoBehaviour
     [SerializeField] private CandidateBoxManager _candidateBoxManager;
     [SerializeField] private MonitorPlayerInput _monitorPlayerInput;
     [SerializeField] private Vector2 _candidateStartPos;
+
     //予測変換に利用するフィールド
     private string _recordLastInput;
     private bool _isWordEstimateActive = false;
@@ -36,7 +38,7 @@ public class CmdInputFieldManager : MonoBehaviour
         _nextSelectBox = () => _candidateBoxManager.MovePerSelectBox(true);
         _previousSelectBox = () => _candidateBoxManager.MovePerSelectBox(false);
 
-        _freeInputEnterController = new FreeInputEnterController(TryAction, ReflectCandidiateValue, _candidateBoxManager);
+        _freeInputEnterController = new FreeInputEnterController(TryAction, ReflectCandidiateValue, _candidateBoxManager);     
     }
 
     public void ChangeAction(Action<string> tryAct, WordEmtCell newLibrary)
@@ -94,6 +96,7 @@ public class CmdInputFieldManager : MonoBehaviour
     private void TryAction()
     {
         string inputFieldTxt = _myInputField.text;
+        _cmdSceneManager.OutPutManager.ReceiveMessage(inputFieldTxt, true);
 
         //強制終了時用(強制的にデフォルトに戻る)
         if(inputFieldTxt == _resetWord)

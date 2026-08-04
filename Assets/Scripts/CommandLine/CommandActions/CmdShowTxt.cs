@@ -11,7 +11,7 @@ public class CmdShowTxt : MonoBehaviour
 
     public void SayHelloWorld()
     {
-        _cmdSceneManager.OutPutManager.ReceiveMessage("HelloWorld");
+        _cmdSceneManager.OutPutManager.ReceiveMessage("HelloWorld", false);
     }
 
     /// <summary>
@@ -20,7 +20,7 @@ public class CmdShowTxt : MonoBehaviour
     public void SayReceiveMessage()
     {
         //inputFieldのメッセージ送信先を切り替える
-        _cmdSceneManager.InputFieldManager.ChangeAction(_cmdSceneManager.OutPutManager.ReceiveMessage, null);
+        _cmdSceneManager.InputFieldManager.ChangeAction( str => _cmdSceneManager.OutPutManager.ReceiveMessage(str, false), null);
 
         //終了時のアクションを登録する
         _cmdSceneManager.InputFieldManager._whenEndCurrentAction += () => { Debug.Log("オウム返しを終了します"); };

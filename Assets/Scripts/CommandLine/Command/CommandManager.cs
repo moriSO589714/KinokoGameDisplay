@@ -28,7 +28,7 @@ public class CommandManager : MonoBehaviour
         //対応するコマンドが存在しない場合は何も処理を行わない
         if (executeCommand == null)
         {
-            _cmdSceneManager.OutPutManager.ReceiveMessage(_notFindCommandMessage);
+            _cmdSceneManager.OutPutManager.ReceiveMessage(_notFindCommandMessage, false);
             return;
         }
         executeCommand.Invoke();

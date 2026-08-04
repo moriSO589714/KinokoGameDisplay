@@ -421,7 +421,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 490862777}
-  - component: {fileID: 490862776}
+  - component: {fileID: 490862778}
   m_Layer: 5
   m_Name: OutPutManager
   m_TagString: Untagged
@@ -429,18 +429,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &490862776
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 490862775}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a5f59beb38672f46abc8d907f56c837, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!224 &490862777
 RectTransform:
   m_ObjectHideFlags: 0
@@ -452,7 +440,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 930072714}
   m_Father: {fileID: 1171412743}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -460,6 +449,22 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &490862778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 490862775}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a5f59beb38672f46abc8d907f56c837, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _outputTextBoxPool: {fileID: 930072713}
+  _outputTextBoxPref: {fileID: 2060035672442800935, guid: 8895e2ac68bc4034289b3464dab5c00c, type: 3}
+  _outputTextInterval: 20
+  _firstCreatePos: {x: -826, y: -359}
 --- !u!1 &519321468
 GameObject:
   m_ObjectHideFlags: 0
@@ -534,6 +539,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _object: {fileID: 335445382}
+  _outputManager: {fileID: 490862778}
 --- !u!4 &639616464
 Transform:
   m_ObjectHideFlags: 0
@@ -733,6 +739,41 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!1 &930072713
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 930072714}
+  m_Layer: 5
+  m_Name: OutBoxTextPool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &930072714
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 930072713}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 490862777}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &933713176
 GameObject:
   m_ObjectHideFlags: 0
@@ -797,7 +838,7 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 0
     m_MaxSize: 40
-    m_Alignment: 0
+    m_Alignment: 3
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
@@ -1165,7 +1206,7 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 0
     m_MaxSize: 50
-    m_Alignment: 0
+    m_Alignment: 3
     m_AlignByGeometry: 0
     m_RichText: 0
     m_HorizontalOverflow: 1
@@ -1752,7 +1793,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   InputFieldManager: {fileID: 2146526241}
-  OutPutManager: {fileID: 490862776}
+  OutPutManager: {fileID: 490862778}
 --- !u!4 &2136254717
 Transform:
   m_ObjectHideFlags: 0
@@ -1806,8 +1847,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -33.95, y: -477}
-  m_SizeDelta: {x: 1682.65, y: 67.39}
+  m_AnchoredPosition: {x: -33.95, y: -467.48}
+  m_SizeDelta: {x: 1682.65, y: 145.05}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2146526237
 MonoBehaviour:
@@ -1963,6 +2004,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34ac990e1b4b6bd44a4402f867a5633b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _cmdSceneManager: {fileID: 2136254716}
   _myInputField: {fileID: 2146526237}
   _resetWord: exit
   _candidateBoxManager: {fileID: 652153397}

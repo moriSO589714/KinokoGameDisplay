@@ -6,6 +6,6 @@ public class CmdSceneManager : BasedSingletonInMono<CmdSceneManager>
 {
     //この変数はUnityのインスペクタ上からアタッチする---------
     public CmdInputFieldManager InputFieldManager;
-    public OutPutManager OutPutManager;
+    public OutputManager OutPutManager;
     //--------------------------------------------------------
 }

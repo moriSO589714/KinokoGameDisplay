@@ -9,11 +9,21 @@ public class cmdTest : MonoBehaviour
 {
     CancellationTokenSource _cts = null;
     [SerializeField] EstimateCmdLibManager _object;
+    [SerializeField] OutputManager _outputManager;
+    string uuid = "";
+    int counter = 0;
 
     void Start()
     {
-        WordEmtCell wec = _object.GetEstimateCmdLib();
         Debug.Log("end");
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+
+        }
     }
 
     private void OnDisable()
