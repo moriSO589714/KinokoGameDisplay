@@ -14,7 +14,7 @@ public class cmdTest : MonoBehaviour
     int counter = 0;
 
     void Start()
-    {
+    {        
         Debug.Log("end");
     }
 

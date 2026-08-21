@@ -12,8 +12,9 @@ public class ForceReplaceWord
     //置き換えられる語の辞書<内部で扱う語, UIで表示される語>になる。
     public readonly Dictionary<string, string> ReplacedWordDictionary = new Dictionary<string, string>() 
     {
-        {"~", " "}
-
+        {"~", " "},
+        {"|", "　" },
+        {"\n", "*!*" }
     };
     //GameDataクラスでは配列として格納する必要がある文字列群をスプレッドシート上で一つの文字列として扱うための区切り文字
     public readonly string ArrayWordForSheet = "#";
@@ -30,6 +31,19 @@ public class ForceReplaceWord
         foreach(var pair in ReplacedWordDictionary)
         {
             resultText = resultText.Replace(pair.Value, pair.Key);
+        }
+        return resultText;
+    }
+
+    /// <summary>
+    /// UIなどに表示する際に特殊文字に置き換えられているものを元に戻す
+    /// </summary>
+    public string ReturnReplacedWord(string replacedWord)
+    {
+        string resultText = replacedWord;
+        foreach(var pair in ReplacedWordDictionary)
+        {
+            resultText = resultText.Replace(pair.Key, pair.Value);
         }
         return resultText;
     }

@@ -5,7 +5,12 @@ using UnityEngine;
 public class CmdSceneManager : BasedSingletonInMono<CmdSceneManager>
 {
     //この変数はUnityのインスペクタ上からアタッチする---------
-    public CmdInputFieldManager InputFieldManager;
-    public OutputManager OutPutManager;
+    [SerializeField] private CmdInputFieldManager _inputFieldManager;
+    [SerializeField] private OutputManager _outPutManager;
+
+    public CmdInputFieldManager InputFieldManager { get { return _inputFieldManager; }}
+    public OutputManager OutPutManager { get { return _outPutManager; }}
     //--------------------------------------------------------
+
+    
 }

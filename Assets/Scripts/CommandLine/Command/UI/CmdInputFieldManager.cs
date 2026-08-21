@@ -9,17 +9,18 @@ using UnityEngine.UI;
 /// </summary>
 public class CmdInputFieldManager : MonoBehaviour
 {
-    [SerializeField] private CmdSceneManager _cmdSceneManager;
     [SerializeField] private InputField _myInputField;
     private Action<string> _throwMessageMethod;
     private FreeInputEnterController _freeInputEnterController;
-    private CmdSceneManager _sceneManager = null;
+    private CmdSceneManager _cmdSceneManager = null;
 
     [SerializeField] private string _resetWord;
     //コマンド受信に切り替えるメソッド
     public Action _setCommandReceiver;
     //現在登録されているアクションが切り替えられる際に実行されるアクション
     public Action _whenEndCurrentAction;
+    //コマンド受信モードに切り替える際に実行するアクション。モードの終了処理など
+    public Action _endModeAction;
 
     //予測変換に利用する各インスタンス
     [SerializeField] private CandidateBoxManager _candidateBoxManager;
@@ -41,7 +42,7 @@ public class CmdInputFieldManager : MonoBehaviour
         _freeInputEnterController = new FreeInputEnterController(TryAction, ReflectCandidiateValue, _candidateBoxManager);     
     }
 
-    public void ChangeAction(Action<string> tryAct, WordEmtCell newLibrary)
+    public void ChangeAction(Action<string> tryAct, WordEmtCell newLibrary = null)
     {
         ClearCandidateBox();
         _whenEndCurrentAction?.Invoke();
@@ -93,15 +94,22 @@ public class CmdInputFieldManager : MonoBehaviour
         _freeInputEnterController.WhenSubmitInputField();
     }
 
+    public void ReturnCommandReceive()
+    {
+        _endModeAction?.Invoke();
+        _setCommandReceiver?.Invoke();
+    }
+
     private void TryAction()
     {
+        if (_cmdSceneManager == null) _cmdSceneManager = CmdSceneManager.Instance;
         string inputFieldTxt = _myInputField.text;
-        _cmdSceneManager.OutPutManager.ReceiveMessage(inputFieldTxt, true);
+        _cmdSceneManager.OutPutManager.ReceiveMessage(inputFieldTxt, OutPutTextLogColorSets.UserDefault, true);
 
         //強制終了時用(強制的にデフォルトに戻る)
         if(inputFieldTxt == _resetWord)
         {
-            _setCommandReceiver?.Invoke();
+            ReturnCommandReceive();
         }
         else//現在の受信メソッドへ入力内容を送る
         {

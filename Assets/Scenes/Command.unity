@@ -168,6 +168,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _commandManager: {fileID: 1305501374}
+  _cmdSceneManager: {fileID: 2136254716}
 --- !u!1 &33754125
 GameObject:
   m_ObjectHideFlags: 0
@@ -302,6 +303,7 @@ MonoBehaviour:
   ChildrenNodes:
   - {fileID: 196761130}
   - {fileID: 33754126}
+  - {fileID: 2021799339}
   OnAction:
     m_PersistentCalls:
       m_Calls: []
@@ -368,6 +370,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1817293547}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &474440079
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 474440080}
+  - component: {fileID: 474440081}
+  m_Layer: 0
+  m_Name: CmdUploadGame
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &474440080
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 474440079}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1547290603}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &474440081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 474440079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d965d3bc39d81b4fb3598979f16c35d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &485820994
 GameObject:
   m_ObjectHideFlags: 0
@@ -463,8 +509,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _outputTextBoxPool: {fileID: 930072713}
   _outputTextBoxPref: {fileID: 2060035672442800935, guid: 8895e2ac68bc4034289b3464dab5c00c, type: 3}
-  _outputTextInterval: 20
-  _firstCreatePos: {x: -826, y: -359}
+  _outputTextInterval: 10
+  _firstCreatePos: {x: -890, y: -359}
+  _userMessageTextColor: {r: 0.017755438, g: 0.5377358, b: 0.021119816, a: 1}
+  _accentMessageTextColor: {r: 0.7075472, g: 0.110137075, b: 0.122470975, a: 1}
+  _defaultTextColor: {r: 0.08828764, g: 0.08677464, b: 0.09433961, a: 1}
 --- !u!1 &519321468
 GameObject:
   m_ObjectHideFlags: 0
@@ -1007,6 +1056,66 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1333918399
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1333918400}
+  - component: {fileID: 1333918401}
+  m_Layer: 0
+  m_Name: upload
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1333918400
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1333918399}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2021799338}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1333918401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1333918399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae64f93361d6fde42b24d1faeedf54f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ChildrenNodes: []
+  OnAction:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 474440081}
+        m_TargetAssemblyTypeName: CmdUploadGame, Assembly-CSharp
+        m_MethodName: FirstCmdCall
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1366988166
 GameObject:
   m_ObjectHideFlags: 0
@@ -1252,6 +1361,7 @@ Transform:
   m_Children:
   - {fileID: 485820995}
   - {fileID: 519321469}
+  - {fileID: 474440080}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1683464682
@@ -1530,6 +1640,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2021799338}
+  - component: {fileID: 2021799339}
   m_Layer: 0
   m_Name: game
   m_TagString: Untagged
@@ -1549,9 +1660,27 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1333918400}
   m_Father: {fileID: 282566735}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2021799339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2021799337}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae64f93361d6fde42b24d1faeedf54f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ChildrenNodes:
+  - {fileID: 1333918401}
+  OnAction:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &2041512304
 GameObject:
   m_ObjectHideFlags: 0
@@ -1792,8 +1921,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5e0d48f255316241b9b85a93748eb2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  InputFieldManager: {fileID: 2146526241}
-  OutPutManager: {fileID: 490862778}
+  _inputFieldManager: {fileID: 2146526241}
+  _outPutManager: {fileID: 490862778}
 --- !u!4 &2136254717
 Transform:
   m_ObjectHideFlags: 0
@@ -2004,7 +2133,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34ac990e1b4b6bd44a4402f867a5633b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cmdSceneManager: {fileID: 2136254716}
   _myInputField: {fileID: 2146526237}
   _resetWord: exit
   _candidateBoxManager: {fileID: 652153397}

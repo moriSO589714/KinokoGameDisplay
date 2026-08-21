@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class CmdLoader : MonoBehaviour
 {
-    CmdSceneManager _cmdSceneManager;
     WordEmtCell _cmdLib;
     [SerializeField] CommandManager _commandManager;
+    //AwakeでSceneManagerのInstanceから取得したくないため、このクラスではインスペクタでアタッチして参照する
+    [SerializeField] CmdSceneManager _cmdSceneManager;
     private void Awake()
     {
         InitLoad();
@@ -14,15 +15,16 @@ public class CmdLoader : MonoBehaviour
 
     private void InitLoad()
     {
-        _cmdSceneManager = CmdSceneManager.Instance;
+        GameDataManager gameDataManager = new GameDataManager();
+        new LoadFlexibleDir().SetFlexibleDirByJson();
+        gameDataManager.LoadGameDataFromJsons();
         _cmdLib = _commandManager.GetCmdLib();
         SetCommandReceiver();
         _cmdSceneManager.InputFieldManager._setCommandReceiver = SetCommandReceiver;
-        new LoadFlexibleDir().SetFlexibleDirByJson();
     }
 
     private void SetCommandReceiver()
-    {
+    {        
         _cmdSceneManager.InputFieldManager.ChangeAction(_commandManager.ReceiveCommand, _cmdLib);             
     }
 }

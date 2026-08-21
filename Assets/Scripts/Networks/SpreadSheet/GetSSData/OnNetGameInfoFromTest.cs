@@ -12,6 +12,9 @@ public class OnNetGameInfoFromTest : OnNetGameInfo
 {
     public List<List<string>> GetGameInfo(Vector2 startPos, Vector2 endPos)
     {
+        //テスト用の遅延を発生させる
+        System.Threading.Thread.Sleep((int)Mathf.Floor(CheckInEnvironment.waitSecondsOnGetSheetData * 1000));
+
         //テスト用の替えデータ
         List<List<string>> alternaDataSet = AlternaDatas.SpStAlternaDatas;
         

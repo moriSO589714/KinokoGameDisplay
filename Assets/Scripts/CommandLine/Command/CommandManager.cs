@@ -12,23 +12,20 @@ public class CommandManager : MonoBehaviour
     [SerializeField] string _notFindCommandMessage = "";
 
     private const char _sequence = ' ';
-    
-    private CmdSceneManager _cmdSceneManager = new CmdSceneManager();
-    
-    private void Awake()
-    {
-        _cmdSceneManager = CmdSceneManager.Instance;
-    }
+
+    private CmdSceneManager _cmdSceneManager = null;
 
     public void ReceiveCommand(string command)
     {
+        if (_cmdSceneManager == null) _cmdSceneManager = CmdSceneManager.Instance;
+
         string[] splitCommand = command.Split(_sequence);
         UnityEvent executeCommand = SearchMethodFromLibray(splitCommand, _commandLibrary);
 
         //対応するコマンドが存在しない場合は何も処理を行わない
         if (executeCommand == null)
         {
-            _cmdSceneManager.OutPutManager.ReceiveMessage(_notFindCommandMessage, false);
+            _cmdSceneManager.OutPutManager.ReceiveMessage(_notFindCommandMessage, OutPutTextLogColorSets.AccentDefault);
             return;
         }
         executeCommand.Invoke();

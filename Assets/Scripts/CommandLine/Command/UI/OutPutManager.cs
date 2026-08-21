@@ -11,9 +11,19 @@ public class OutputManager : ObjectStuckPool<OutputTextBox>
 
     [SerializeField] private Vector2 _firstCreatePos;
 
-    public string ReceiveMessage(string message, bool isUserMessage, string specifiedUUID = null)
+    [SerializeField] private Color _userMessageTextColor;
+    [SerializeField] private Color _accentMessageTextColor;
+    [SerializeField] private Color _defaultTextColor;
+
+    public string ReceiveMessage(string message,Color textColor, bool isUserMessage = false, string specifiedUUID = null)
     {
-        return Output(message, isUserMessage, specifiedUUID);
+        return Output(message, textColor, isUserMessage, specifiedUUID);
+    }
+
+    public string ReceiveMessage(string message, OutPutTextLogColorSets outPutTextLogColorSets, bool isUserMessage = false, string specifiedUUID = null)
+    {
+        Color textColor = GetTextColor(outPutTextLogColorSets);
+        return Output(message, textColor, isUserMessage, specifiedUUID);
     }
 
     public string ReturnText(string uuid)
@@ -22,13 +32,13 @@ public class OutputManager : ObjectStuckPool<OutputTextBox>
         return outputTextBox._thisMessage;
     }
 
-    private string Output(string message, bool isUserMessage, string specifiedUUID = null)
+    private string Output(string message,Color textColor, bool isUserMessage, string specifiedUUID = null)
     {
         string returnUUID = "";
         if(specifiedUUID == null)
         {
             //テキストボックスを生成
-            OutputTextBox outputTextBox = InstantiateTextBox(message, isUserMessage);
+            OutputTextBox outputTextBox = InstantiateTextBox(message, textColor, isUserMessage);
             returnUUID = outputTextBox._identificationUUID;
             float slideHeight = CalcSlideHeight(outputTextBox);
             TransferActiveTextBox(slideHeight);
@@ -46,7 +56,7 @@ public class OutputManager : ObjectStuckPool<OutputTextBox>
             //元の高さを取得
             RectTransform outputTextBoxRect = outputTextBox.GetComponent<RectTransform>();
             float previousHeight = outputTextBoxRect.sizeDelta.y;
-            outputTextBox.ActivateThis(message, outputTextBox._isUserMessage, specifiedUUID);
+            outputTextBox.ActivateThis(message, textColor, outputTextBox._isUserMessage, specifiedUUID);
             //高さの変化量
             float changeHeight = outputTextBoxRect.sizeDelta.y - previousHeight;
             TransferActiveTextBox(changeHeight, _activeStuckPool.IndexOf(outputTextBox) - 1);
@@ -55,7 +65,7 @@ public class OutputManager : ObjectStuckPool<OutputTextBox>
         return returnUUID;
     }
 
-    private OutputTextBox InstantiateTextBox(string message, bool isUserMessage)
+    private OutputTextBox InstantiateTextBox(string message, Color textColor, bool isUserMessage = false)
     {
         OutputTextBox notUsed = ReturnNotUsedObject();
 
@@ -72,7 +82,7 @@ public class OutputManager : ObjectStuckPool<OutputTextBox>
 
         target.gameObject.SetActive(true);
         string uuid = UUIDGenerator.GenerateUUID();
-        target.ActivateThis(message, isUserMessage, uuid);
+        target.ActivateThis(message, textColor, isUserMessage, uuid);
 
         //位置を初期位置に移動
         target.gameObject.GetComponent<RectTransform>().anchoredPosition = _firstCreatePos;
@@ -120,4 +130,45 @@ public class OutputManager : ObjectStuckPool<OutputTextBox>
             rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x, rectTransform.anchoredPosition.y + slideHeight);
         }
     }
+
+
+    /// <summary>
+    /// enumに対応した色を返す
+    /// </summary>
+    private Color GetTextColor(OutPutTextLogColorSets outPutTextLogColorSets)
+    {
+        switch (outPutTextLogColorSets)
+        {
+            case OutPutTextLogColorSets.SystemDefault:
+                return _defaultTextColor;
+            case OutPutTextLogColorSets.UserDefault:
+                return _userMessageTextColor;
+            case OutPutTextLogColorSets.AccentDefault:
+                return _accentMessageTextColor;
+            case OutPutTextLogColorSets.Black:
+                return Color.black;
+            case OutPutTextLogColorSets.White:
+                return Color.white;
+            case OutPutTextLogColorSets.Red:
+                return Color.red;
+            case OutPutTextLogColorSets.Blue:
+                return Color.blue;
+            case OutPutTextLogColorSets.Yellow:
+                return Color.yellow;
+            default:
+                return _defaultTextColor;
+        }
+    }
+}
+
+public enum OutPutTextLogColorSets
+{
+    SystemDefault,
+    UserDefault,
+    AccentDefault,
+    Black,
+    White,
+    Red,
+    Blue,
+    Yellow
 }

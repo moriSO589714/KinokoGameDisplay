@@ -19,7 +19,7 @@ public class GameData
     [MustItem]
     public string GameDirName; //ゲームのフォルダ名
     [MustItem]
-    public string GameExeName; //ゲームの実行ファイルの名前
+    public string GameExeName; //GameDirNameのフォルダ名から見た実行形式ファイルの相対パス。(直下ならGame.exe、何かフォルダを挟むならtestFolder/Game.exeみたいな感じ)
     [MustItem]
     public string GameID; //ゲームの固有番号
     public string GameVersion; //ゲームのバージョン(2504011225の形)
