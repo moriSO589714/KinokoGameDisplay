@@ -23,6 +23,7 @@ public class GameBox : Box
     [SerializeField] Sprite DownloadingButtonSprite;
     public GameData _myGameData { get; private set; }
 
+    private ForceReplaceWord _forceReplaceWord = new ForceReplaceWord();
     /// <summary>
     /// 各種データのセット
     /// </summary>
@@ -48,13 +49,17 @@ public class GameBox : Box
     private void SetTitle(string gameTitle)
     {
         if (gameTitle == null || gameTitle == "") return;
-        string setStr = StrTools.ReplaceOverWords(gameTitle, TitleWordsRemit);
+        //置き換え文字を戻す
+        string displayStr = _forceReplaceWord.ReturnReplacedWord(gameTitle);
+        string setStr = StrTools.ReplaceOverWords(displayStr, TitleWordsRemit);
         Title.text = setStr;
     }
     private void SetDescription(string description)
     {
         if (description == "" || description == null) return;
-        string setDescription = StrTools.ReplaceOverWords(description, DescriptionWordsRemit);
+        //置き換え文字を戻す
+        string displayStr = _forceReplaceWord.ReturnReplacedWord(description);
+        string setDescription = StrTools.ReplaceOverWords(displayStr, DescriptionWordsRemit);
         DescriptionField.text = setDescription;
     }
     private void SetImage(string gameId)
@@ -101,7 +106,9 @@ public class GameBox : Box
     private void SetGameDirName(string gameDirName)
     {
         if (gameDirName == null || gameDirName == "") return;
-        string setGameDirName = StrTools.ReplaceOverWords(gameDirName, GameDirNameWordsRemit);
+        //置き換え文字を戻す
+        string displayStr = _forceReplaceWord.ReturnReplacedWord(gameDirName);
+        string setGameDirName = StrTools.ReplaceOverWords(displayStr, GameDirNameWordsRemit);
         GameDirName.text = setGameDirName;
     }
 

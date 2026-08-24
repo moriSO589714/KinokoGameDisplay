@@ -30,11 +30,6 @@ public static class GameDataForUpload
             return false;
         }
 
-        if (originData.GameSoftwareType == null || originData.GameSoftwareType == "")
-        {
-            return false;
-        }
-
         return true;
     }
 
@@ -49,14 +44,23 @@ public static class GameDataForUpload
         originData.GameDirName = forceReplaceWord.ReplacedWord(originData.GameDirName);
         originData.GameExeName = forceReplaceWord.ReplacedWord(originData.GameExeName);
         originData.GameDescription = forceReplaceWord.ReplacedWord(originData.GameDescription);
-        for(int i = 0; i <= originData.GameDevelopper.Count() - 1; i++)
+        originData.GameDescription = forceReplaceWord.ReplaceNewLineWord(originData.GameDescription);
+
+        if(originData.GameDevelopper != null)
         {
-            originData.GameDevelopper[i] = forceReplaceWord.ReplacedWord(originData.GameDevelopper[i]);
+            for(int i = 0; i <= originData.GameDevelopper.Count() - 1; i++)
+            {
+                originData.GameDevelopper[i] = forceReplaceWord.ReplacedWord(originData.GameDevelopper[i]);
+            }
         }
-        for (int i = 0; i <= originData.GameTags.Count() - 1; i++)
+        if(originData.GameTags != null)
         {
-            originData.GameTags[i] = forceReplaceWord.ReplacedWord(originData.GameTags[i]);
+            for (int i = 0; i <= originData.GameTags.Count() - 1; i++)
+            {
+                originData.GameTags[i] = forceReplaceWord.ReplacedWord(originData.GameTags[i]);
+            }
         }
+
         return originData;
     }
 }

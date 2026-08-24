@@ -130,7 +130,7 @@ public class GameUploadProc
 
         //サムネ画像のアップロード
         string imageDriveId = "";
-        if(localImagePath != null || localImagePath != "")
+        if(localImagePath != null && localImagePath != "")
         {
             NetworkThumbnailManager networkThumbnailManager = new NetworkThumbnailManager();
 
@@ -138,8 +138,8 @@ public class GameUploadProc
             _ct.ThrowIfCancellationRequested();
 
             imageDriveId = networkThumbnailManager.UploadThumbnail(_onNetDriveUploadFile, gameIdFolderDriveId, localImagePath, tempGamePath, gameId);
+            Debug.Log("サムネ画像のアップロード終了");
         }
-        Debug.Log("サムネ画像のアップロード終了");
 
         //一時データの削除
         DirectoryActs.CompleteDirDelete(tempGamePath);

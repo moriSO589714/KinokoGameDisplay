@@ -8,7 +8,7 @@ using UnityEngine;
 public static class CheckInEnvironment
 {
     //インターネット利用時に実際に通信を行うか
-    public static bool isOnNet = false;
+    public static bool isOnNet = true;
     //テスト環境でダウンロード処理時に発生させる遅延(秒)
     public static float waitSecondsOnDownload = 0.8f;
     //テスト環境でスプレッドシートの情報取得時に発生させる遅延(秒)

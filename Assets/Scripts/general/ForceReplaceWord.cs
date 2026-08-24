@@ -12,21 +12,27 @@ public class ForceReplaceWord
     //置き換えられる語の辞書<内部で扱う語, UIで表示される語>になる。
     public readonly Dictionary<string, string> ReplacedWordDictionary = new Dictionary<string, string>() 
     {
-        {"~", " "},
-        {"|", "　" },
-        {"\n", "*!*" }
+
     };
+
     //GameDataクラスでは配列として格納する必要がある文字列群をスプレッドシート上で一つの文字列として扱うための区切り文字
     public readonly string ArrayWordForSheet = "#";
+    public readonly string ReplacedNewLine = "*!*";
+    public readonly string NewLineSymbol = "\n";
 
     //内部で扱う語として登録されているため、ユーザーが入力することができない文字
-    public List<string> UnAvailableWordsList => new List<string>(ReplacedWordDictionary.Keys) { ArrayWordForSheet };
+    public List<string> UnAvailableWordsList => new List<string>(ReplacedWordDictionary.Keys) { ArrayWordForSheet, NewLineSymbol };
 
     /// <summary>
     /// 置き換えする単語の辞書に従って引数の文字から置き換えを行う
     /// </summary>
     public string ReplacedWord(string originalText)
     {
+        if(originalText == null || originalText == "")
+        {
+            return originalText;
+        }
+
         string resultText = originalText;
         foreach(var pair in ReplacedWordDictionary)
         {
@@ -67,4 +73,16 @@ public class ForceReplaceWord
         result += string.Join(ArrayWordForSheet, strArray);
         return result;
     }
+
+    /// <summary>
+    /// 置き換え用文字列で表された改行をcsharpで利用できる改行記号(\n)に置き換える
+    /// </summary>
+    public string ReplaceNewLineWord(string originalText)
+    {
+        if(originalText == null || originalText == "") return originalText;
+
+        return originalText.Replace(ReplacedNewLine, NewLineSymbol);
+    }
+
+
 }

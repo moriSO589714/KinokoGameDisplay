@@ -1,5 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 using Google.Apis.Drive.v3;
+using Google.Apis.Sheets.v4;
 using SFB;
 using System;
 using System.Collections;
@@ -25,9 +26,12 @@ public class CmdUploadGame : MonoBehaviour
 
     OnNetDriveUploadFile _onNetDriveUploadFile;
     OnNetCreateFolder _onNetCreateFolder;
+    OnNetAppEndGameInfo _onNetAppEndGameInfo;
     OnNetGetParentId _onNetGetParentId;
     OnNetDriveGetName _onNetDriveGetName;
     OnNetDelete _onNetDelete;
+    CancellationTokenSource _ctsForUpload;
+
 
     WordEmtCell _categoryWec;
     WordEmtCell _tagsLib;
@@ -38,7 +42,8 @@ public class CmdUploadGame : MonoBehaviour
     {
         if (_cmdSceneManager == null) _cmdSceneManager = CmdSceneManager.Instance;
         _cmdSceneManager.OutPutManager.ReceiveMessage("アップロードモードに変更します", OutPutTextLogColorSets.SystemDefault);
-        _cmdSceneManager.InputFieldManager._endModeAction = End;
+        _cmdSceneManager.InputFieldManager._endModeAction += End;
+        _cmdSceneManager.InputFieldManager._endModeAction += () => { _ctsForUpload?.Cancel(); };
         Init();
         //スプシのロード中にコマンドの受付を行わないようにしておく
         _cmdSceneManager.InputFieldManager.ChangeAction(new CmdNothing().MessageGird);
@@ -110,7 +115,7 @@ public class CmdUploadGame : MonoBehaviour
         {
             _isUploadAvailable = true;
             _cmdSceneManager.OutPutManager.ReceiveMessage
-                ($"※※アップロードが行えます。アップロードを実行する場合は「{_uploadWord}」を送信してください※※", OutPutTextLogColorSets.AccentDefault);         
+                ($"※※アップロードが行えます。アップロードを実行する場合は「{_uploadWord}」を送信してください※※", OutPutTextLogColorSets.Blue);         
         }
     }
 
@@ -132,6 +137,9 @@ public class CmdUploadGame : MonoBehaviour
         if(message == _uploadWord && _isUploadAvailable)
         {
             //アップロード開始のメソッド(MessageGirdに入力先を変えておく)
+            _cmdSceneManager.InputFieldManager.ChangeAction(new CmdNothing().MessageGird);
+            _cmdSceneManager.OutPutManager.ReceiveMessage("アップロードを開始します", OutPutTextLogColorSets.SystemDefault);
+            UploadGame();
             return;
         }
 
@@ -216,8 +224,11 @@ public class CmdUploadGame : MonoBehaviour
         if (CheckInEnvironment.isOnNet)
         {
             DriveService driveService = NetworksSingleton.Instance.ReturnDriveService();
+            SheetsService sheetsService = NetworksSingleton.Instance.ReturnSheetsService();
             _onNetDriveUploadFile = new OnNetDriveUploadFileforDv(driveService);
             _onNetCreateFolder = new OnNetCreateFolderforDv(driveService);
+            string sheetId = AllDirs.GetInstance().SpreadSheetID;
+            _onNetAppEndGameInfo = new OnNetAppEndGameInfoToSpSt(sheetsService, sheetId);
             _onNetGetParentId = new OnNetGetParentIdfromDv(driveService);
             _onNetDriveGetName = new OnNetDriveGetNamefromDv(driveService);
             _onNetDelete = new OnNetDeleteforDv(driveService);
@@ -226,6 +237,7 @@ public class CmdUploadGame : MonoBehaviour
         {
             _onNetDriveUploadFile = new OnNetDriveUploadFileforTest();
             _onNetCreateFolder = new OnNetCreateFolderforTest();
+            _onNetAppEndGameInfo = new OnNetAppEndGameInfoToTest();
             _onNetGetParentId = new OnNetGetParentIdfromTest();
             _onNetDriveGetName = new OnNetDriveGetNamefromTest();
             _onNetDelete = new OnNetDeleteforTest();
@@ -305,6 +317,7 @@ public class CmdUploadGame : MonoBehaviour
         if (Directory.Exists(message))
         {
             _localGamePath = message;
+            _gameDataForUpload.GameDirName = Path.GetFileName(_localGamePath);
             //実行ファイル設定後に変更された場合など、実行ファイルとフォルダの相対パスが破綻するのを防ぐため、実行ファイルのパスを初期化
             _gameDataForUpload.GameExeName = "";
             _cmdSceneManager.OutPutManager.ReceiveMessage("登録完了。項目選択に戻ります", OutPutTextLogColorSets.SystemDefault);
@@ -464,6 +477,27 @@ public class CmdUploadGame : MonoBehaviour
         registerAct(renewList.ToArray());
         _cmdSceneManager.OutPutManager.ReceiveMessage($"{itemName}を登録しました。続けて登録可能です。項目選択に戻る場合は「{_returnWord}」を送信してください", OutPutTextLogColorSets.SystemDefault);
         return;
+    }
+
+    private async UniTask UploadGame()
+    {
+        _cmdSceneManager.OutPutManager.ReceiveMessage("ゲーム情報を最適化中", OutPutTextLogColorSets.SystemDefault);
+        GameData uploadGameData = GameDataForUpload.CreateGameDataForUpload(_gameDataForUpload, _localGamePath, _localImagePath);
+        _cmdSceneManager.OutPutManager.ReceiveMessage("ゲーム情報の最適化が完了", OutPutTextLogColorSets.SystemDefault);
+
+        _ctsForUpload = new CancellationTokenSource();
+        GameUploadProc gameUploadProc = new GameUploadProc(_onNetCreateFolder, _onNetDriveUploadFile, _onNetAppEndGameInfo, _onNetGetParentId, _onNetDriveGetName, _onNetDelete);
+        try
+        {
+            await gameUploadProc.UploadGameInUniTask(_ctsForUpload.Token, uploadGameData);
+            _cmdSceneManager.OutPutManager.ReceiveMessage("アップロードが正常に終了しました", OutPutTextLogColorSets.SystemDefault);
+        }
+        catch (Exception e) 
+        {
+            _cmdSceneManager.OutPutManager.ReceiveMessage($"アップロード中にエラーが発生しました\nエラー内容>>{e}", OutPutTextLogColorSets.AccentDefault);
+            Debug.Log(e);
+        }
+        ReturnCmdReceive();
     }
 }
 
