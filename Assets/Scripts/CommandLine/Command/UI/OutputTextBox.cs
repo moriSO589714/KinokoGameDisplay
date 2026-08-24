@@ -1,9 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Reflection;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class OutputTextBox : MonoBehaviour
 {
     [SerializeField] private Text _txtObject;
+    [SerializeField] private Text _timeTxtObject;
 
     //falseはシステムからのメッセージ
     public bool _isUserMessage { get; private set; }
@@ -16,6 +19,7 @@ public class OutputTextBox : MonoBehaviour
         _thisMessage = message;
         _txtObject.text = message;
         _isUserMessage = isUserMessage;
+        _timeTxtObject.text = ReturnTime();
         if(UUID != null)
         {
             _identificationUUID = UUID;
@@ -29,5 +33,11 @@ public class OutputTextBox : MonoBehaviour
         csf.SetLayoutHorizontal();
         csf.SetLayoutVertical();
         LayoutRebuilder.ForceRebuildLayoutImmediate(csf.GetComponent<RectTransform>());
+    }
+
+    private string ReturnTime()
+    {
+        DateTime dateTime = DateTime.Now;
+        return dateTime.ToString("HH:mm:ss");
     }
 }

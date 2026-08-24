@@ -12,7 +12,7 @@ public static class CheckInEnvironment
     //テスト環境でダウンロード処理時に発生させる遅延(秒)
     public static float waitSecondsOnDownload = 0.8f;
     //テスト環境でスプレッドシートの情報取得時に発生させる遅延(秒)
-    public static float waitSecondsOnGetSheetData = 8f;
+    public static float waitSecondsOnGetSheetData = 0.5f;
 
     /// <summary>
     /// 実行環境がUnityEditorかどうか、Editorならtrueを返す

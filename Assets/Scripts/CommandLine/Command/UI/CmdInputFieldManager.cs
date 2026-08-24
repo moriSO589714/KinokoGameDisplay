@@ -59,6 +59,11 @@ public class CmdInputFieldManager : MonoBehaviour
         _currentWordEstimater = new WordEstimater(newLibrary, " ");
     }
 
+    public void ChangeInputfieldVal(string val)
+    {
+        _myInputField.text = val;
+    }
+
     public void OnValueChange()
     {
         if (_isWordEstimateActive == false) return;
@@ -104,6 +109,7 @@ public class CmdInputFieldManager : MonoBehaviour
     {
         if (_cmdSceneManager == null) _cmdSceneManager = CmdSceneManager.Instance;
         string inputFieldTxt = _myInputField.text;
+        ClearInputField();
         _cmdSceneManager.OutPutManager.ReceiveMessage(inputFieldTxt, OutPutTextLogColorSets.UserDefault, true);
 
         //強制終了時用(強制的にデフォルトに戻る)
@@ -113,10 +119,8 @@ public class CmdInputFieldManager : MonoBehaviour
         }
         else//現在の受信メソッドへ入力内容を送る
         {
-            _throwMessageMethod?.Invoke(_myInputField.text);
+            _throwMessageMethod?.Invoke(inputFieldTxt);
         }
-
-        ClearInputField();
     }
 
     private void ClearInputField()

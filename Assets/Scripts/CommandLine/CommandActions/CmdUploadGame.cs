@@ -1,8 +1,10 @@
 ﻿using Cysharp.Threading.Tasks;
 using Google.Apis.Drive.v3;
+using SFB;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using UnityEditor.VersionControl;
@@ -150,10 +152,48 @@ public class CmdUploadGame : MonoBehaviour
                 _cmdSceneManager.InputFieldManager.ChangeAction(ReceiveDescription);
                 break;
             case CmdUploadContent.folderpath:
+                _cmdSceneManager.OutPutManager.ReceiveMessage("ゲームが入っているフォルダパスを送信してください", OutPutTextLogColorSets.SystemDefault);
+                try
+                {
+                    string selectedPath = new OpenFilePanel().OpenFolderPanelAndReturnPath();
+                    if(selectedPath != null) _cmdSceneManager.InputFieldManager.ChangeInputfieldVal(selectedPath);
+                    _cmdSceneManager.InputFieldManager.ChangeAction(ReceiveGameFolderPath);
+                }
+                catch (System.Exception e)
+                {
+                    _cmdSceneManager.OutPutManager.ReceiveMessage("エラーが発生しました。項目を再送信してください。", OutPutTextLogColorSets.AccentDefault);
+                    Debug.Log(e);
+                }                
                 break;
             case CmdUploadContent.exepath:
+                _cmdSceneManager.OutPutManager.ReceiveMessage("ゲームの実行ファイルのパスを送信してください。", OutPutTextLogColorSets.SystemDefault);
+                try
+                {
+                    ExtensionFilter filter = new ExtensionFilter("All File", "*");
+                    string selectedPath = new OpenFilePanel().OpenFilePanelAndReturnPath(new ExtensionFilter[1] {filter});
+                    if (selectedPath != null) _cmdSceneManager.InputFieldManager.ChangeInputfieldVal(selectedPath);
+                    _cmdSceneManager.InputFieldManager.ChangeAction(ReceiveGameExePath);
+                }
+                catch (System.Exception e)
+                {
+                    _cmdSceneManager.OutPutManager.ReceiveMessage("エラーが発生しました。項目を再送信してください。", OutPutTextLogColorSets.AccentDefault);
+                    Debug.Log(e);
+                }
                 break;
             case CmdUploadContent.imagepath:
+                _cmdSceneManager.OutPutManager.ReceiveMessage("サムネイル画像のパスを送信してください", OutPutTextLogColorSets.SystemDefault);
+                try
+                {
+                    ExtensionFilter filter = new ExtensionFilter("Image File", "png");
+                    string selectPath = new OpenFilePanel().OpenFilePanelAndReturnPath(new ExtensionFilter[1] { filter });
+                    if (selectPath != null) _cmdSceneManager.InputFieldManager.ChangeInputfieldVal(selectPath);
+                    _cmdSceneManager.InputFieldManager.ChangeAction(ReceiveImagePath);
+                }
+                catch(System.Exception e)
+                {
+                    _cmdSceneManager.OutPutManager.ReceiveMessage("エラーが発生しました。項目名を再送信してください。", OutPutTextLogColorSets.AccentDefault);
+                    Debug.Log(e);
+                }
                 break;
             case CmdUploadContent.deveroppers:
                 _cmdSceneManager.OutPutManager.ReceiveMessage("ゲームの開発者名を送信してください。(複数送信可)\n既に送信した開発者名を再度送信することで取り消しが可能です", OutPutTextLogColorSets.SystemDefault);
@@ -253,6 +293,90 @@ public class CmdUploadGame : MonoBehaviour
             registerVal => { _gameDataForUpload.GameTags = registerVal; }, "タグ");
     }
 
+    private void ReceiveGameFolderPath(string message)
+    {
+        if (JudgementReturn(message))
+        {
+            CmdUploadModeEntrance();
+            return;
+        }
+
+        //フォルダが存在するか確認
+        if (Directory.Exists(message))
+        {
+            _localGamePath = message;
+            //実行ファイル設定後に変更された場合など、実行ファイルとフォルダの相対パスが破綻するのを防ぐため、実行ファイルのパスを初期化
+            _gameDataForUpload.GameExeName = "";
+            _cmdSceneManager.OutPutManager.ReceiveMessage("登録完了。項目選択に戻ります", OutPutTextLogColorSets.SystemDefault);
+        }
+        else
+        {
+            _cmdSceneManager.OutPutManager.ReceiveMessage("送信されたパスは存在しません", OutPutTextLogColorSets.AccentDefault);
+        }
+
+        CmdUploadModeEntrance();
+    }
+
+    private void ReceiveGameExePath(string message)
+    {
+        if (JudgementReturn(message))
+        {
+            CmdUploadModeEntrance();
+            return;
+        }
+
+        //ファイルが存在するかを確認する
+        if (!File.Exists(message))
+        {
+            _cmdSceneManager.OutPutManager.ReceiveMessage("送信されたファイルパスは存在しません", OutPutTextLogColorSets.AccentDefault);
+            CmdUploadModeEntrance();
+            return;
+        }
+
+        if(_localGamePath == null || _localGamePath == "")
+        {
+            _cmdSceneManager.OutPutManager.ReceiveMessage("ゲームが入ったフォルダのパスが登録されていません。実行ファイルのパスを登録するには先にフォルダパスを登録してください", OutPutTextLogColorSets.AccentDefault);
+            CmdUploadModeEntrance();
+            return;
+        }
+
+        //ファイルがゲームフォルダの下にあるかを確認する。あるなら相対パスに編集する
+        string gameDirectoryPath = _localGamePath + "\\";
+        if (message.StartsWith(_localGamePath))
+        {
+            //相対パスに編集する
+            string registerVal = message.Replace(gameDirectoryPath, "");
+            //値を登録
+            _gameDataForUpload.GameExeName = registerVal;
+            _cmdSceneManager.OutPutManager.ReceiveMessage("登録完了。項目選択に戻ります", OutPutTextLogColorSets.SystemDefault);
+        }
+        else
+        {
+            _cmdSceneManager.OutPutManager.ReceiveMessage("実行ファイルがゲームフォルダの中に存在しません。実行ファイルは登録されたフォルダ以下の階層に配置されている必要があります", OutPutTextLogColorSets.AccentDefault);
+        }
+        CmdUploadModeEntrance();
+    }
+
+    private void ReceiveImagePath(string message)
+    {
+        if (JudgementReturn(message))
+        {
+            CmdUploadModeEntrance();
+            return;
+        }
+
+        //ファイルが存在するか確認する
+        if (!File.Exists(message))
+        {
+            _cmdSceneManager.OutPutManager.ReceiveMessage("送信されたファイルパスは存在しません", OutPutTextLogColorSets.AccentDefault);
+            CmdUploadModeEntrance();
+            return;
+        }
+
+        _localImagePath = message;
+        _cmdSceneManager.OutPutManager.ReceiveMessage("サムネイル画像のパスを登録しました", OutPutTextLogColorSets.SystemDefault);
+        CmdUploadModeEntrance();
+    }
     //=======================================================================================================================================================
     
     private bool JudgementReturn(string message)
