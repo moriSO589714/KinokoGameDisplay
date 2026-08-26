@@ -55,6 +55,11 @@ public class CmdUploadGame : MonoBehaviour
         LoadSpreadSheet(cts.Token);
     }
 
+    private void OnDestroy()
+    {
+        End();
+    }
+
     public async UniTask LoadSpreadSheet(CancellationToken cts)
     {
         GameDataManager gameDataManager = new GameDataManager();
@@ -261,6 +266,8 @@ public class CmdUploadGame : MonoBehaviour
         _gameDataForUpload = null;
         _localGamePath = null;
         _localImagePath = null;
+        _ctsForUpload.Cancel();
+        _ctsForUpload = null;
     }
 
     private string MergeArray(string[] array)
@@ -481,16 +488,17 @@ public class CmdUploadGame : MonoBehaviour
 
     private async UniTask UploadGame()
     {
-        _cmdSceneManager.OutPutManager.ReceiveMessage("ゲーム情報を最適化中", OutPutTextLogColorSets.SystemDefault);
+        string logId = _cmdSceneManager.OutPutManager.ReceiveMessage("ゲーム情報を最適化中", OutPutTextLogColorSets.SystemDefault);
         GameData uploadGameData = GameDataForUpload.CreateGameDataForUpload(_gameDataForUpload, _localGamePath, _localImagePath);
-        _cmdSceneManager.OutPutManager.ReceiveMessage("ゲーム情報の最適化が完了", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.ReceiveMessage("ゲーム情報の最適化が完了", OutPutTextLogColorSets.SystemDefault, specifiedUUID:logId);
 
         _ctsForUpload = new CancellationTokenSource();
+        GameUpProgress gameUpProgress = new GameUpProgress();
+        gameUpProgress.OnChangeProgressAct += (string message) => DuringUploadLogger(message, logId);
         GameUploadProc gameUploadProc = new GameUploadProc(_onNetCreateFolder, _onNetDriveUploadFile, _onNetAppEndGameInfo, _onNetGetParentId, _onNetDriveGetName, _onNetDelete);
         try
         {
-            await gameUploadProc.UploadGameInUniTask(_ctsForUpload.Token, uploadGameData);
-            _cmdSceneManager.OutPutManager.ReceiveMessage("アップロードが正常に終了しました", OutPutTextLogColorSets.SystemDefault);
+            await gameUploadProc.UploadGameInUniTask(_ctsForUpload.Token, uploadGameData, gameUpProgress: gameUpProgress);
         }
         catch (Exception e) 
         {
@@ -498,6 +506,11 @@ public class CmdUploadGame : MonoBehaviour
             Debug.Log(e);
         }
         ReturnCmdReceive();
+    }
+
+    private void DuringUploadLogger(string message, string logId)
+    {
+        _cmdSceneManager.OutPutManager.ReceiveMessage(message, OutPutTextLogColorSets.SystemDefault, specifiedUUID:logId);
     }
 }
 
