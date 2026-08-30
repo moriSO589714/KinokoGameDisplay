@@ -20,11 +20,12 @@ public class OnNetDeleteRowToSpSt : OnNetDeleteRow
         AllDirs allDirs = AllDirs.GetInstance();
         int startColumn = (int)allDirs.SpreadSheetStartCellPos.x;
         char alphabetOfSheet = new AZLibrary().AlphabetLibrary[startColumn - 1];
-        string clearRange = alphabetOfSheet + deleteRow + ":" + deleteRow;
+        //Zはスプレッドシートの最後の列数を意図したもの。AAなど続くようになった場合は変更する必要がある
+        string clearRange = alphabetOfSheet + deleteRow.ToString() + ":" + "Z" + deleteRow.ToString();
         //ClearValuesRequestはAPIの設計上必要なもの。インスタンスしただけのもので問題ない。
         var request = _sheetsService.Spreadsheets.Values
                         .Clear(new ClearValuesRequest() ,_sheetId, clearRange);
 
-        request.Execute();
+        var response = request.Execute();       
     }
 }

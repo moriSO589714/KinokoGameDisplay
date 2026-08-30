@@ -115,6 +115,7 @@ public class CmdInputFieldManager : MonoBehaviour
         //強制終了時用(強制的にデフォルトに戻る)
         if(inputFieldTxt == _resetWord)
         {
+            _cmdSceneManager.OutPutManager.ReceiveMessage("現在のモードを強制終了し、コマンド受信モードに戻ります。", OutPutTextLogColorSets.SystemDefault);
             ReturnCommandReceive();
         }
         else//現在の受信メソッドへ入力内容を送る

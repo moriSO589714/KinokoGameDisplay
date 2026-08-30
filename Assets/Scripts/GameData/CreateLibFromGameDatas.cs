@@ -26,6 +26,13 @@ public static class CreateLibFromGameDatas
         return toolsLib;
     }
 
+    public static WordEmtCell CreateGameIdLib(List<GameData> gameDatasList)
+    {
+        string[] gameIdFromGameDatas = gameDatasList.Select(x => x.GameID).ToArray();
+        WordEmtCell gameIdLib = PickUpElementFromStrArray(gameIdFromGameDatas);
+        return gameIdLib;
+    }
+
     public static List<string> CreateTitlesLib(List<GameData> gameDatasList)
     {
         List<string> titlesFromGameDatas = gameDatasList.Select(x => x.GameTitle).ToList();

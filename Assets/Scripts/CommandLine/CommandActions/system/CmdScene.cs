@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// シーン遷移を行う
 /// </summary>
-public class CmdScene : MonoBehaviour
+public class CmdScene : CmdAct
 {
     private CommonStateManager stateManager;
     private void Awake()

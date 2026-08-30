@@ -11,9 +11,8 @@ using System.Threading;
 using UnityEditor.VersionControl;
 using UnityEngine;
 
-public class CmdUploadGame : MonoBehaviour
+public class CmdUploadGame : CmdAct
 {
-    CmdSceneManager _cmdSceneManager;
 
     string _returnWord = "return";
     string _uploadWord = "upload";
@@ -38,13 +37,12 @@ public class CmdUploadGame : MonoBehaviour
     WordEmtCell _devsLib;
     WordEmtCell _toolsLib;
 
-    public void FirstCmdCall()
+    public override void FirstCall()
     {
-        if (_cmdSceneManager == null) _cmdSceneManager = CmdSceneManager.Instance;
+        base.FirstCall();
         _cmdSceneManager.OutPutManager.ReceiveMessage("アップロードモードに変更します", OutPutTextLogColorSets.SystemDefault);
-        _cmdSceneManager.InputFieldManager._endModeAction += End;
         _cmdSceneManager.InputFieldManager._endModeAction += () => { _ctsForUpload?.Cancel(); };
-        Init();
+
         //スプシのロード中にコマンドの受付を行わないようにしておく
         _cmdSceneManager.InputFieldManager.ChangeAction(new CmdNothing().MessageGird);
         CancellationTokenSource cts = new CancellationTokenSource();
@@ -53,11 +51,6 @@ public class CmdUploadGame : MonoBehaviour
 
         //実行
         LoadSpreadSheet(cts.Token);
-    }
-
-    private void OnDestroy()
-    {
-        End();
     }
 
     public async UniTask LoadSpreadSheet(CancellationToken cts)
@@ -76,8 +69,8 @@ public class CmdUploadGame : MonoBehaviour
         catch(Exception e)
         {
             ctsForLogAnim.Cancel();
-            _cmdSceneManager.OutPutManager.ReceiveMessage("ゲームデータの取得に失敗しました。", OutPutTextLogColorSets.SystemDefault);
-            ReturnCmdReceive();
+            _cmdSceneManager.OutPutManager.ReceiveMessage("ゲーム情報の取得に失敗しました。", OutPutTextLogColorSets.SystemDefault);
+            ReturnCmdReceiveMode();
             return;
         }
         ctsForLogAnim.Cancel();
@@ -124,18 +117,11 @@ public class CmdUploadGame : MonoBehaviour
         }
     }
 
-    private void ReturnCmdReceive()
-    {
-        _cmdSceneManager.OutPutManager.ReceiveMessage("コマンド受付モードに戻ります", OutPutTextLogColorSets.SystemDefault);
-        //コマンド受付に戻す
-        _cmdSceneManager.InputFieldManager.ReturnCommandReceive();
-    }
-
     private void SwitchInputContent(string message)
     {
         if(message == _returnWord)
         {
-            ReturnCmdReceive();
+            ReturnCmdReceiveMode();
             return;
         }
 
@@ -223,7 +209,7 @@ public class CmdUploadGame : MonoBehaviour
         }
     }
 
-    private void Init()
+    protected override void Init()
     {
         _gameDataForUpload = new GameData();
         if (CheckInEnvironment.isOnNet)
@@ -261,12 +247,12 @@ public class CmdUploadGame : MonoBehaviour
         });
     }
 
-    private void End()
+    protected override void End()
     {
         _gameDataForUpload = null;
         _localGamePath = null;
         _localImagePath = null;
-        _ctsForUpload.Cancel();
+        _ctsForUpload?.Cancel();
         _ctsForUpload = null;
     }
 
@@ -505,7 +491,7 @@ public class CmdUploadGame : MonoBehaviour
             _cmdSceneManager.OutPutManager.ReceiveMessage($"アップロード中にエラーが発生しました\nエラー内容>>{e}", OutPutTextLogColorSets.AccentDefault);
             Debug.Log(e);
         }
-        ReturnCmdReceive();
+        ReturnCmdReceiveMode();
     }
 
     private void DuringUploadLogger(string message, string logId)

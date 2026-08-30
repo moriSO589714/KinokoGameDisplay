@@ -19,6 +19,7 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
     private WordEmtCell _tagsLib;
     private WordEmtCell _devsLib;
     private WordEmtCell _toolsLib;
+    private WordEmtCell _gameIdLib;
     private List<string> _titlesLib;
 
     //ゲームデータをリストにセット
@@ -65,6 +66,12 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
     {
         _toolsLib = CreateLibFromGameDatas.CreateToolsLib(AllGameDatas);
         return _toolsLib;
+    }
+
+    public WordEmtCell ReturnGameIdLib()
+    {
+        _gameIdLib = CreateLibFromGameDatas.CreateGameIdLib(AllGameDatas);
+        return _gameIdLib;
     }
 
     public List<string> ReturnTitlesLib()
