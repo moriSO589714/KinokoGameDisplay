@@ -7,7 +7,8 @@ public class ToolInputManager : FreeInputManager
     protected override void ActivatePickUpCandidateProc()
     {
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
-        WordEmtCell wecLib = gameDatasSingleton.ReturnToolsLib();
+        List<GameData> gameDatas = gameDatasSingleton.AllGameDatas;
+        WordEmtCell wecLib = CreateLibFromGameDatas.CreateToolsLib(gameDatas);
         _pickUpCandidateElementProc = new PickUpCandidateElementForWE(wecLib);
     }
 }

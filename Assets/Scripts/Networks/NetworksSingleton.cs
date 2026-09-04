@@ -52,7 +52,7 @@ public class NetworksSingleton : BasedSingleton<NetworksSingleton>
         }
         else
         {
-            int liminalRow = ReturnLiminalRow(false);
+            int liminalRow = ReturnLiminalRow(true);
             List<string> elementOrder = ReturnElementOrder(false);
             _allGameDataOnSpSt = new GetDataFromSpStAPI().GetAllGameData(liminalRow, elementOrder);
             return _allGameDataOnSpSt;

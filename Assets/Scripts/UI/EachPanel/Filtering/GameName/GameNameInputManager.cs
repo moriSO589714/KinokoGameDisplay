@@ -7,7 +7,8 @@ public class GameNameInputManager : FreeInputManager
     protected override void ActivatePickUpCandidateProc()
     {
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
-        List<string> titlesLib = gameDatasSingleton.ReturnTitlesLib();
+        List<GameData> gameDatas = gameDatasSingleton.AllGameDatas;
+        List<string> titlesLib = CreateLibFromGameDatas.CreateTitlesLib(gameDatas);
         _pickUpCandidateElementProc = new PickUpCandidateElementForContains(titlesLib);
     }
 }

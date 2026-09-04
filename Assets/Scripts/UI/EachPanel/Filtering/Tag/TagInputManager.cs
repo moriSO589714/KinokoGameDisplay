@@ -8,7 +8,8 @@ public class TagInputManager : FreeInputManager
     protected override void ActivatePickUpCandidateProc()
     {
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
-        WordEmtCell wecLib = gameDatasSingleton.ReturnTagsLib();
+        List<GameData> gameDatas = gameDatasSingleton.AllGameDatas;
+        WordEmtCell wecLib = CreateLibFromGameDatas.CreateTagsLib(gameDatas);
         _pickUpCandidateElementProc = new PickUpCandidateElementForWE(wecLib);
     }
 }

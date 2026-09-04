@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using UnityEngine;
 
-public class CmdOnlineDelete : CmdAct
+public class CmdOnlineDelete : CmdDelete
 {
     private OnNetGetParentId _onNetGetParentId;
     private OnNetDriveGetName _onNetDriveGetName;
@@ -14,8 +14,6 @@ public class CmdOnlineDelete : CmdAct
     private DeleteProc _deleteProc;
 
     private CancellationTokenSource _forDeleteCts;
-
-    WordEmtCell _gameIdLib;
 
     protected override void Init()
     {
@@ -49,7 +47,7 @@ public class CmdOnlineDelete : CmdAct
     public override void FirstCall()
     {
         base.FirstCall();
-        _cmdSceneManager.OutPutManager.ReceiveMessage("削除モードに変更します", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.ReceiveMessage("オンラインゲーム削除モードに変更します", OutPutTextLogColorSets.SystemDefault);
         //モードから出る時にトークンをキャンセルするようにしておく
         _cmdSceneManager.InputFieldManager._endModeAction += () => { _forDeleteCts?.Cancel(); };
         //スプシのロード中でコマンドの受付を行わないようにしておく
@@ -84,7 +82,11 @@ public class CmdOnlineDelete : CmdAct
 
         //wecとして取得する
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
-        _gameIdLib = gameDatasSingleton.ReturnGameIdLib();
+        List<GameData> gameDatas = gameDatasSingleton.AllGameDatas;
+        //ローカルのみに保存されているものを除く
+        gameDatas.RemoveAll(x => x.Status == GameStatus.ByLocal);
+        //idを取り出してwecにする
+        _gameIdLib = CreateLibFromGameDatas.CreateGameIdLib(gameDatas);
 
         //処理にキャンセルが入っていた場合
         if (token.IsCancellationRequested)
@@ -96,77 +98,13 @@ public class CmdOnlineDelete : CmdAct
         CmdDeleteEntrance();
     }
 
-    private void CmdDeleteEntrance()
+    protected override bool CheckGameStatus(GameStatus status)
     {
-        _cmdSceneManager.InputFieldManager.ChangeAction(ReceiveGameId, _gameIdLib);
-        _cmdSceneManager.OutPutManager.ReceiveMessage("削除したいゲームのゲームIDを送信してください", OutPutTextLogColorSets.SystemDefault);
+        if (status == GameStatus.ByLocal) return false;
+        return true;
     }
 
-    private void ReceiveGameId(string message)
-    {
-        //送信されたゲームidを持つGameDataクラスを取得してくる
-        GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
-        List<GameData> allGameDataList = new List<GameData>(gameDatasSingleton.AllGameDatas);
-        List<GameData> matchGameData = allGameDataList.Where(x => x.GameID == message).ToList();
-
-        if(matchGameData.Count < 1)
-        {
-            _cmdSceneManager.OutPutManager.ReceiveMessage("合致するIDを持つゲームが存在しません", OutPutTextLogColorSets.AccentDefault);
-            CmdDeleteEntrance();
-            return;
-        }
-
-        if(matchGameData.Count > 1)
-        {
-            _cmdSceneManager.OutPutManager.ReceiveMessage("合致するIDを持つゲームが複数存在します", OutPutTextLogColorSets.AccentDefault);
-            CmdDeleteEntrance();
-            return;
-        }
-
-        GameData targetGameData = matchGameData[0];
-
-        //ローカルで追加されたゲームである場合は弾く
-        if(targetGameData.Status == GameStatus.ByLocal)
-        {
-            _cmdSceneManager.OutPutManager.ReceiveMessage("対象のゲームはローカルにしか存在しないため、このコマンドでは削除することができません", OutPutTextLogColorSets.AccentDefault);
-            CmdDeleteEntrance();
-            return;
-        }
-
-        CheckDelete(targetGameData);
-    }
-
-    private void CheckDelete(GameData deleteTarget)
-    {
-        string gameTitle = deleteTarget.GameTitle;
-        string gameId = deleteTarget.GameID;
-        string gameVersion = deleteTarget.GameVersion;
-        string[] gameDevelopper = deleteTarget.GameDevelopper;
-
-        string checkLog = $"削除するゲームの確認を行ってください。この操作は取り消せません、誤ったゲームを指定していないか確認をお願いします\n" +
-            $"削除を行う場合はゲームのタイトル名を送信してください\n【ゲーム情報】\n・ゲームタイトル：{gameTitle}" +
-            $"\n・ゲームID：{gameId}\n・ゲームのバージョン(最終更新日)：{gameVersion}\n・ゲーム開発者名：{string.Join(",", gameDevelopper)}";
-
-        _cmdSceneManager.OutPutManager.ReceiveMessage(checkLog, OutPutTextLogColorSets.SystemDefault);
-        _cmdSceneManager.InputFieldManager.ChangeAction((string val) => ReceiveTitle(val, deleteTarget));
-    }
-
-    private void ReceiveTitle(string message, GameData targetGameData)
-    {
-        //タイトルに一致するか確認する
-        if(message == targetGameData.GameTitle)
-        {
-            DoDelete(targetGameData);
-        }
-        else
-        {
-            _cmdSceneManager.OutPutManager.ReceiveMessage("タイトルと一致していません", OutPutTextLogColorSets.AccentDefault);
-            CmdDeleteEntrance();
-            return;
-        }
-    }
-
-    private async UniTask DoDelete(GameData targetGameData)
+    protected override async UniTask DoDelete(GameData targetGameData)
     {
         _cmdSceneManager.OutPutManager.ReceiveMessage("ゲームの削除を開始します", OutPutTextLogColorSets.SystemDefault);
         _cmdSceneManager.InputFieldManager.ChangeAction(new CmdNothing().MessageGird);

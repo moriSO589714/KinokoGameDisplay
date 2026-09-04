@@ -77,9 +77,10 @@ public class CmdUploadGame : CmdAct
 
         //各項目のwecを取得する
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
-        _tagsLib = gameDatasSingleton.ReturnTagsLib();
-        _devsLib = gameDatasSingleton.ReturnDeveroppersLib();
-        _toolsLib = gameDatasSingleton.ReturnToolsLib();
+        List<GameData> gameDatas = gameDatasSingleton.AllGameDatas;
+        _tagsLib = CreateLibFromGameDatas.CreateTagsLib(gameDatas);
+        _devsLib = CreateLibFromGameDatas.CreateDeveropperLib(gameDatas);
+        _toolsLib = CreateLibFromGameDatas.CreateToolsLib(gameDatas);
 
         //処理にキャンセルが入っていた場合
         if (cts.IsCancellationRequested)

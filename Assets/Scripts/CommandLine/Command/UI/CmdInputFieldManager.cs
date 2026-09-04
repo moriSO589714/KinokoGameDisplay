@@ -99,6 +99,9 @@ public class CmdInputFieldManager : MonoBehaviour
         _freeInputEnterController.WhenSubmitInputField();
     }
 
+    /// <summary>
+    /// 強制的にコマンド受信モードに変更する際に行う
+    /// </summary>
     public void ReturnCommandReceive()
     {
         _endModeAction?.Invoke();
@@ -110,6 +113,7 @@ public class CmdInputFieldManager : MonoBehaviour
         if (_cmdSceneManager == null) _cmdSceneManager = CmdSceneManager.Instance;
         string inputFieldTxt = _myInputField.text;
         ClearInputField();
+        //送られてきたテキストをそのままログに流す(送信確認用)
         _cmdSceneManager.OutPutManager.ReceiveMessage(inputFieldTxt, OutPutTextLogColorSets.UserDefault, true);
 
         //強制終了時用(強制的にデフォルトに戻る)

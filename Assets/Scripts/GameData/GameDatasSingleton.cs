@@ -15,13 +15,6 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
     public List<GameData> CurrentDisplayGames { get; private set; } = new List<GameData>();
     public FilterCondition CurrentFilterCondition { get; private set; } = null;
 
-    //予測変換用辞書
-    private WordEmtCell _tagsLib;
-    private WordEmtCell _devsLib;
-    private WordEmtCell _toolsLib;
-    private WordEmtCell _gameIdLib;
-    private List<string> _titlesLib;
-
     //ゲームデータをリストにセット
     public void AddGameData(GameData gameData)
     {
@@ -37,6 +30,10 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
         }
         AllGameDatas.AddRange(addGameDataList);
     }
+    public void RemoveGameData(GameData gameData)
+    {
+        AllGameDatas.Remove(gameData);
+    }
 
     //リストのリセット
     public void ResetGameDataList()
@@ -48,36 +45,6 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
     {
         CurrentDisplayGames = currentGameDatas;
         CurrentFilterCondition = currentFilterCondition;
-    }
-
-    public WordEmtCell ReturnTagsLib()
-    {
-        _tagsLib = CreateLibFromGameDatas.CreateTagsLib(AllGameDatas);
-        return _tagsLib;
-    }
-
-    public WordEmtCell ReturnDeveroppersLib()
-    {
-        _devsLib = CreateLibFromGameDatas.CreateDeveropperLib(AllGameDatas);
-        return _devsLib;
-    }
-
-    public WordEmtCell ReturnToolsLib()
-    {
-        _toolsLib = CreateLibFromGameDatas.CreateToolsLib(AllGameDatas);
-        return _toolsLib;
-    }
-
-    public WordEmtCell ReturnGameIdLib()
-    {
-        _gameIdLib = CreateLibFromGameDatas.CreateGameIdLib(AllGameDatas);
-        return _gameIdLib;
-    }
-
-    public List<string> ReturnTitlesLib()
-    {
-        _titlesLib = CreateLibFromGameDatas.CreateTitlesLib(AllGameDatas);
-        return _titlesLib;
     }
 
     private bool CheckGameData(GameData gameData)

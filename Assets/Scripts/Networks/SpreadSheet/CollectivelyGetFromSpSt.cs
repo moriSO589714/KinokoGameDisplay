@@ -15,7 +15,7 @@ public class CollectivelyGetFromSpSt
         NetworksSingleton networksSingleton = NetworksSingleton.Instance;
         List<string> elementOrder = networksSingleton.ReturnElementOrder(false);
 
-        List<List<string>> allGameInfoList = networksSingleton.ReturnGameInfoAllData(false);
+        List<List<string>> allGameInfoList = networksSingleton.ReturnGameInfoAllData(true);
         List<GameData> returnList = new List<GameData>();
         //1行ずつGameDataクラスにする
         foreach(List<string> strList in allGameInfoList)

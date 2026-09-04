@@ -7,7 +7,8 @@ public class DeveropperInputManager : FreeInputManager
     protected override void ActivatePickUpCandidateProc()
     {
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
-        WordEmtCell wecLib = gameDatasSingleton.ReturnDeveroppersLib();
+        List<GameData> gameDatas = gameDatasSingleton.AllGameDatas;
+        WordEmtCell wecLib = CreateLibFromGameDatas.CreateDeveropperLib(gameDatas);
         _pickUpCandidateElementProc = new PickUpCandidateElementForWE(wecLib);
     }
 }

@@ -16,9 +16,6 @@ public class cmdTest : MonoBehaviour
 
     void Start()
     {
-        int i = 91;
-        int i2 = 100;
-        Debug.Log("aaa" + i + "bbb" + i2);
         Debug.Log("end");
     }
 
