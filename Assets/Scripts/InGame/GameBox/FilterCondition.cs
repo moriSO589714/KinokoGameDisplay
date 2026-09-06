@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 
 
-public class FilterCondition 
+public class FilterCondition
 {
+    public readonly string[] _filteringCategory = new string[5] { "status", "title", "tag", "developper", "softs" };
+
     public List<GameStatus> Statuses { get; private set; } = new List<GameStatus>();
     public List<List<string>> GameNames { get; private set; } = new List<List<string>>();
     public List<List<string>> GameTags { get; private set; } = new List<List<string>>();

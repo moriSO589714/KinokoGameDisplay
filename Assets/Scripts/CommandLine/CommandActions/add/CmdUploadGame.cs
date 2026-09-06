@@ -3,18 +3,14 @@ using Google.Apis.Drive.v3;
 using Google.Apis.Sheets.v4;
 using SFB;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using UnityEditor.VersionControl;
 using UnityEngine;
 
 public class CmdUploadGame : CmdAct
 {
-
-    string _returnWord = "return";
     string _uploadWord = "upload";
 
     GameData _gameDataForUpload = null;
@@ -95,11 +91,12 @@ public class CmdUploadGame : CmdAct
 
     private void CmdUploadModeEntrance()
     {
+        CmdReturn cmdReturn = new CmdReturn(ReturnCmdReceiveMode);
 
-        _cmdSceneManager.InputFieldManager.ChangeAction(SwitchInputContent, _categoryWec);
+        _cmdSceneManager.InputFieldManager.ChangeAction((string message) => SwitchInputContent(message, cmdReturn), _categoryWec);
         
         _cmdSceneManager.OutPutManager.ReceiveMessage
-            ($"設定する項目名を送信してください。(return で1つ前に戻れます)" +
+            ($"設定する項目名を送信してください。({cmdReturn.ReturnWord}で1つ前に戻れます)" +
             $"\n・{CmdUploadContent.title}:{_gameDataForUpload?.GameTitle}" +
             $"\n・{CmdUploadContent.description}:{_gameDataForUpload?.GameDescription}" +
             $"\n・{CmdUploadContent.folderpath}:{_localGamePath ?? ""}" +
@@ -118,11 +115,10 @@ public class CmdUploadGame : CmdAct
         }
     }
 
-    private void SwitchInputContent(string message)
+    private void SwitchInputContent(string message, CmdReturn cmdReturn)
     {
-        if(message == _returnWord)
+        if (cmdReturn.ReturnCheck(message))
         {
-            ReturnCmdReceiveMode();
             return;
         }
 
@@ -141,15 +137,17 @@ public class CmdUploadGame : CmdAct
             return;
         }
 
+        CmdReturn returnCmdUploadModeEntrance = new CmdReturn(CmdUploadModeEntrance);
+
         switch (content) 
         {
             case CmdUploadContent.title:
                 _cmdSceneManager.OutPutManager.ReceiveMessage("タイトル名を送信してください", OutPutTextLogColorSets.SystemDefault);
-                _cmdSceneManager.InputFieldManager.ChangeAction(ReceiveTitle);
+                _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveTitle(message, returnCmdUploadModeEntrance));
                 break;
             case CmdUploadContent.description:
                 _cmdSceneManager.OutPutManager.ReceiveMessage("ゲームの説明を送信してください。( *!* で改行することができます)", OutPutTextLogColorSets.SystemDefault);
-                _cmdSceneManager.InputFieldManager.ChangeAction(ReceiveDescription);
+                _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveDescription(message, returnCmdUploadModeEntrance));
                 break;
             case CmdUploadContent.folderpath:
                 _cmdSceneManager.OutPutManager.ReceiveMessage("ゲームが入っているフォルダパスを送信してください", OutPutTextLogColorSets.SystemDefault);
@@ -157,7 +155,7 @@ public class CmdUploadGame : CmdAct
                 {
                     string selectedPath = new OpenFilePanel().OpenFolderPanelAndReturnPath();
                     if(selectedPath != null) _cmdSceneManager.InputFieldManager.ChangeInputfieldVal(selectedPath);
-                    _cmdSceneManager.InputFieldManager.ChangeAction(ReceiveGameFolderPath);
+                    _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveGameFolderPath(message, returnCmdUploadModeEntrance));
                 }
                 catch (System.Exception e)
                 {
@@ -172,7 +170,7 @@ public class CmdUploadGame : CmdAct
                     ExtensionFilter filter = new ExtensionFilter("All File", "*");
                     string selectedPath = new OpenFilePanel().OpenFilePanelAndReturnPath(new ExtensionFilter[1] {filter});
                     if (selectedPath != null) _cmdSceneManager.InputFieldManager.ChangeInputfieldVal(selectedPath);
-                    _cmdSceneManager.InputFieldManager.ChangeAction(ReceiveGameExePath);
+                    _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveGameExePath(message, returnCmdUploadModeEntrance));
                 }
                 catch (System.Exception e)
                 {
@@ -187,7 +185,7 @@ public class CmdUploadGame : CmdAct
                     ExtensionFilter filter = new ExtensionFilter("Image File", "png");
                     string selectPath = new OpenFilePanel().OpenFilePanelAndReturnPath(new ExtensionFilter[1] { filter });
                     if (selectPath != null) _cmdSceneManager.InputFieldManager.ChangeInputfieldVal(selectPath);
-                    _cmdSceneManager.InputFieldManager.ChangeAction(ReceiveImagePath);
+                    _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveImagePath(message, returnCmdUploadModeEntrance));
                 }
                 catch(System.Exception e)
                 {
@@ -197,15 +195,15 @@ public class CmdUploadGame : CmdAct
                 break;
             case CmdUploadContent.deveroppers:
                 _cmdSceneManager.OutPutManager.ReceiveMessage("ゲームの開発者名を送信してください。(複数送信可)\n既に送信した開発者名を再度送信することで取り消しが可能です", OutPutTextLogColorSets.SystemDefault);
-                _cmdSceneManager.InputFieldManager.ChangeAction(ReceiveAddDeveroppers, _devsLib);
+                _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveAddDeveroppers(message, returnCmdUploadModeEntrance), _devsLib);
                 break;
             case CmdUploadContent.softwaretype:
                 _cmdSceneManager.OutPutManager.ReceiveMessage("使用したツール・ソフトウェアを送信してください。", OutPutTextLogColorSets.SystemDefault);
-                _cmdSceneManager.InputFieldManager.ChangeAction(ReceiveTool, _toolsLib);
+                _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveTool(message, returnCmdUploadModeEntrance), _toolsLib);
                 break;
             case CmdUploadContent.tags:
                 _cmdSceneManager.OutPutManager.ReceiveMessage("追加するタグを送信してください。(複数送信可)\n既に送信した開発者名を再度送信することで取り消しが可能です。", OutPutTextLogColorSets.SystemDefault);
-                _cmdSceneManager.InputFieldManager.ChangeAction(ReceiveAddTags, _tagsLib);
+                _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveAddTags(message, returnCmdUploadModeEntrance), _tagsLib);
                 break;
         }
     }
@@ -269,43 +267,49 @@ public class CmdUploadGame : CmdAct
 
     //各項目の登録用関数
     //=======================================================================================================================================================
-    private void ReceiveTitle(string message)
+    private void ReceiveTitle(string message, CmdReturn cmdReturn)
     {
+        if (cmdReturn.ReturnCheck(message)) return;
+
         CheckMessageAndRegisterSingle(message,
             registerVal => { _gameDataForUpload.GameTitle = registerVal; }, $"ゲームタイトルを「{message}」で登録しました");
     }
 
-    private void ReceiveDescription(string message)
+    private void ReceiveDescription(string message, CmdReturn cmdReturn)
     {
+        if (cmdReturn.ReturnCheck(message)) return;
+
         CheckMessageAndRegisterSingle(message,
             registerVal => { _gameDataForUpload.GameDescription = registerVal; }, $"ゲーム説明を登録しました");
     }
 
-    private void ReceiveTool(string message)
+    private void ReceiveTool(string message, CmdReturn cmdReturn)
     {
+        if (cmdReturn.ReturnCheck(message)) return;
+
         CheckMessageAndRegisterSingle(message,
             registeVal => { _gameDataForUpload.GameSoftwareType = registeVal; }, $"ツール・ソフトウェアを「{message}」で登録しました");
     }
 
-    private void ReceiveAddDeveroppers(string message)
+    private void ReceiveAddDeveroppers(string message, CmdReturn cmdReturn)
     {
+        if (cmdReturn.ReturnCheck(message)) return;
+
         CheckMessageAndRegisterArray(message, _gameDataForUpload.GameDevelopper,
             registerVal => { _gameDataForUpload.GameDevelopper = registerVal; }, "開発者");
     }
 
-    private void ReceiveAddTags(string message)
+    private void ReceiveAddTags(string message, CmdReturn cmdReturn)
     {
+        if (cmdReturn.ReturnCheck(message)) return;
+
         CheckMessageAndRegisterArray(message, _gameDataForUpload.GameTags,
             registerVal => { _gameDataForUpload.GameTags = registerVal; }, "タグ");
     }
 
-    private void ReceiveGameFolderPath(string message)
+    private void ReceiveGameFolderPath(string message, CmdReturn cmdReturn)
     {
-        if (JudgementReturn(message))
-        {
-            CmdUploadModeEntrance();
-            return;
-        }
+        if (cmdReturn.ReturnCheck(message)) return;
 
         //フォルダが存在するか確認
         if (Directory.Exists(message))
@@ -324,13 +328,9 @@ public class CmdUploadGame : CmdAct
         CmdUploadModeEntrance();
     }
 
-    private void ReceiveGameExePath(string message)
+    private void ReceiveGameExePath(string message, CmdReturn cmdReturn)
     {
-        if (JudgementReturn(message))
-        {
-            CmdUploadModeEntrance();
-            return;
-        }
+        if (cmdReturn.ReturnCheck(message)) return;
 
         //ファイルが存在するかを確認する
         if (!File.Exists(message))
@@ -364,13 +364,9 @@ public class CmdUploadGame : CmdAct
         CmdUploadModeEntrance();
     }
 
-    private void ReceiveImagePath(string message)
+    private void ReceiveImagePath(string message, CmdReturn cmdReturn)
     {
-        if (JudgementReturn(message))
-        {
-            CmdUploadModeEntrance();
-            return;
-        }
+        if (cmdReturn.ReturnCheck(message)) return;
 
         //ファイルが存在するか確認する
         if (!File.Exists(message))
@@ -385,18 +381,6 @@ public class CmdUploadGame : CmdAct
         CmdUploadModeEntrance();
     }
     //=======================================================================================================================================================
-    
-    private bool JudgementReturn(string message)
-    {
-        if(message == _returnWord)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
 
     private string CheckErrorWordInMessage(string inputMessage)
     {
@@ -421,12 +405,6 @@ public class CmdUploadGame : CmdAct
 
     private void CheckMessageAndRegisterSingle(string inputMessage, Action<string> registerAct, string successMessage)
     {
-        if (JudgementReturn(inputMessage))
-        {
-            CmdUploadModeEntrance();
-            return;
-        }
-
         string errorWord = CheckErrorWordInMessage(inputMessage);
         if(errorWord != "")
         {
@@ -441,12 +419,6 @@ public class CmdUploadGame : CmdAct
 
     private void CheckMessageAndRegisterArray(string inputMessage, string[] formerArray, Action<string[]> registerAct, string itemName)
     {
-        if (JudgementReturn(inputMessage))
-        {
-            CmdUploadModeEntrance();
-            return;
-        }
-
         string errorWord = CheckErrorWordInMessage(inputMessage);
         if(errorWord != "")
         {
@@ -469,7 +441,7 @@ public class CmdUploadGame : CmdAct
         }
         renewList.Add(inputMessage);
         registerAct(renewList.ToArray());
-        _cmdSceneManager.OutPutManager.ReceiveMessage($"{itemName}を登録しました。続けて登録可能です。項目選択に戻る場合は「{_returnWord}」を送信してください", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.ReceiveMessage($"{itemName}を登録しました。続けて登録可能です。項目選択に戻る場合は「{new CmdReturn(null).ReturnWord}」を送信してください", OutPutTextLogColorSets.SystemDefault);
         return;
     }
 

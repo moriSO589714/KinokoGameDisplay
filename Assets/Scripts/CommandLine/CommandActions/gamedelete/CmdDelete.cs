@@ -10,12 +10,15 @@ public class CmdDelete : CmdAct
 
     protected virtual void CmdDeleteEntrance()
     {
-        _cmdSceneManager.InputFieldManager.ChangeAction(ReceiveGameId, _gameIdLib);
+        CmdReturn cmdReturn = new CmdReturn(ReturnCmdReceiveMode);
+        _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveGameId(message, cmdReturn), _gameIdLib);
         _cmdSceneManager.OutPutManager.ReceiveMessage("削除したいゲームのゲームIDを送信してください", OutPutTextLogColorSets.SystemDefault);
     }
 
-    protected virtual void ReceiveGameId(string message)
+    protected virtual void ReceiveGameId(string message, CmdReturn cmdReturn)
     {
+        if (cmdReturn.ReturnCheck(message)) return;
+
         //送信されたゲームidを持つGameDataクラスを取得してくる
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
         List<GameData> allGameDataList = new List<GameData>(gameDatasSingleton.AllGameDatas);
@@ -67,12 +70,16 @@ public class CmdDelete : CmdAct
         string checkLog = $"削除するゲームの確認を行ってください。この操作は取り消せません、誤ったゲームを指定していないか確認してください\n" +
             $"削除を行う場合はゲームのタイトル名を送信してください\n【ゲーム情報】" + gameTitle + gameId + gameVersion + gameDevelopper;
 
+        CmdReturn cmdReturn = new CmdReturn(() => CheckDelete(deleteTarget));
+
         _cmdSceneManager.OutPutManager.ReceiveMessage(checkLog, OutPutTextLogColorSets.SystemDefault);
-        _cmdSceneManager.InputFieldManager.ChangeAction((string val) => ReceiveTitle(val, deleteTarget));
+        _cmdSceneManager.InputFieldManager.ChangeAction((string val) => ReceiveTitle(val, deleteTarget, cmdReturn));
     }
 
-    protected virtual void ReceiveTitle(string message, GameData targetGameData)
+    protected virtual void ReceiveTitle(string message, GameData targetGameData, CmdReturn cmdReturn)
     {
+        if (cmdReturn.ReturnCheck(message)) return;
+
         //タイトルに一致するか確認する
         if (message == targetGameData.GameTitle)
         {
