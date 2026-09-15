@@ -7,9 +7,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Xml.Serialization;
 using UnityEngine;
 
-public class CmdUploadGame : CmdAct
+public class CmdUploadGame : CmdActForUseNetwork
 {
     string _uploadWord = "upload";
 
@@ -41,52 +42,39 @@ public class CmdUploadGame : CmdAct
 
         //スプシのロード中にコマンドの受付を行わないようにしておく
         _cmdSceneManager.InputFieldManager.ChangeAction(new CmdNothing().MessageGird);
-        CancellationTokenSource cts = new CancellationTokenSource();
-        //exitコマンドなどが入力された場合はunitaskの処理をキャンセルさせる
-        _cmdSceneManager.InputFieldManager._endModeAction += () => { cts.Cancel(); };
 
-        //実行
-        LoadSpreadSheet(cts.Token);
-    }
-
-    public async UniTask LoadSpreadSheet(CancellationToken cts)
-    {
-        GameDataManager gameDataManager = new GameDataManager();
-
-        string connectInternetLog = "インターネットに接続して、現在登録されているゲーム情報を取得しています";
-        string messageId = _cmdSceneManager.OutPutManager.ReceiveMessage(connectInternetLog, OutPutTextLogColorSets.SystemDefault);
-        CancellationTokenSource ctsForLogAnim = new CancellationTokenSource();
-        new CmdWaitingAnimInLog().LoopWaitingLog(connectInternetLog, OutPutTextLogColorSets.SystemDefault, messageId, ctsForLogAnim.Token);
-        
         try
         {
-            await UniTask.RunOnThreadPool(gameDataManager.LoadGameDataFromSpSt);
+            PrepareUsingNetwork();
         }
-        catch(Exception e)
+        catch (Exception e)
         {
-            ctsForLogAnim.Cancel();
-            _cmdSceneManager.OutPutManager.ReceiveMessage("ゲーム情報の取得に失敗しました。", OutPutTextLogColorSets.SystemDefault);
+            if (_ctsForLoadSpreadSheet.IsCancellationRequested) return;
+
+            _cmdSceneManager.OutPutManager.ReceiveMessage("ゲーム情報の取得に失敗しました。モードを終了します。", OutPutTextLogColorSets.AccentDefault);
             ReturnCmdReceiveMode();
+            Debug.LogException(e);
             return;
         }
-        ctsForLogAnim.Cancel();
+    }
 
+    protected override async UniTask LoadSpreadSheetData()
+    {
+        await base.LoadSpreadSheetData();
+        if (_ctsForLoadSpreadSheet.IsCancellationRequested) return;
+
+        SetLibs();
+        CmdUploadModeEntrance();
+    }
+
+    private void SetLibs()
+    {
         //各項目のwecを取得する
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
         List<GameData> gameDatas = gameDatasSingleton.AllGameDatas;
         _tagsLib = CreateLibFromGameDatas.CreateTagsLib(gameDatas);
         _devsLib = CreateLibFromGameDatas.CreateDeveropperLib(gameDatas);
         _toolsLib = CreateLibFromGameDatas.CreateToolsLib(gameDatas);
-
-        //処理にキャンセルが入っていた場合
-        if (cts.IsCancellationRequested)
-        {           
-            return;
-        }
-
-        _cmdSceneManager.OutPutManager.ReceiveMessage("接続成功。初期処理を実行中", OutPutTextLogColorSets.SystemDefault);
-
-        CmdUploadModeEntrance();
     }
 
     private void CmdUploadModeEntrance()
@@ -271,40 +259,52 @@ public class CmdUploadGame : CmdAct
     {
         if (cmdReturn.ReturnCheck(message)) return;
 
-        CheckMessageAndRegisterSingle(message,
-            registerVal => { _gameDataForUpload.GameTitle = registerVal; }, $"ゲームタイトルを「{message}」で登録しました");
+        var systemReply = CmdRegister.RegisterSingleCategory(message,
+                registerVal => { _gameDataForUpload.GameTitle = registerVal; } );
+
+        _cmdSceneManager.OutPutManager.ReceiveMessage(systemReply.replayMessage, systemReply.logColor);
+        CmdUploadModeEntrance();
     }
 
     private void ReceiveDescription(string message, CmdReturn cmdReturn)
     {
         if (cmdReturn.ReturnCheck(message)) return;
 
-        CheckMessageAndRegisterSingle(message,
-            registerVal => { _gameDataForUpload.GameDescription = registerVal; }, $"ゲーム説明を登録しました");
+        var systemReplay = CmdRegister.RegisterSingleCategory(message,
+                registerVal => { _gameDataForUpload.GameDescription = registerVal; });
+
+        _cmdSceneManager.OutPutManager.ReceiveMessage(systemReplay.replayMessage, systemReplay.logColor);
+        CmdUploadModeEntrance();
     }
 
     private void ReceiveTool(string message, CmdReturn cmdReturn)
     {
         if (cmdReturn.ReturnCheck(message)) return;
 
-        CheckMessageAndRegisterSingle(message,
-            registeVal => { _gameDataForUpload.GameSoftwareType = registeVal; }, $"ツール・ソフトウェアを「{message}」で登録しました");
+        var systemReplay = CmdRegister.RegisterSingleCategory(message,
+                registeVal => { _gameDataForUpload.GameSoftwareType = registeVal; });
+
+        _cmdSceneManager.OutPutManager.ReceiveMessage(systemReplay.replayMessage, systemReplay.logColor);        
     }
 
     private void ReceiveAddDeveroppers(string message, CmdReturn cmdReturn)
     {
         if (cmdReturn.ReturnCheck(message)) return;
 
-        CheckMessageAndRegisterArray(message, _gameDataForUpload.GameDevelopper,
-            registerVal => { _gameDataForUpload.GameDevelopper = registerVal; }, "開発者");
+        var systemReplay = CmdRegister.RegisterArrayCategory(message, _gameDataForUpload.GameDevelopper,
+                registerVal => { _gameDataForUpload.GameDevelopper = registerVal; });
+
+        _cmdSceneManager.OutPutManager.ReceiveMessage(systemReplay.replayMessage, systemReplay.logColor);
     }
 
     private void ReceiveAddTags(string message, CmdReturn cmdReturn)
     {
         if (cmdReturn.ReturnCheck(message)) return;
 
-        CheckMessageAndRegisterArray(message, _gameDataForUpload.GameTags,
-            registerVal => { _gameDataForUpload.GameTags = registerVal; }, "タグ");
+        var systemReply = CmdRegister.RegisterArrayCategory(message, _gameDataForUpload.GameTags,
+                registerVal => { _gameDataForUpload.GameTags = registerVal; });
+
+        _cmdSceneManager.OutPutManager.ReceiveMessage(systemReply.replayMessage, systemReply.logColor);
     }
 
     private void ReceiveGameFolderPath(string message, CmdReturn cmdReturn)
@@ -381,69 +381,6 @@ public class CmdUploadGame : CmdAct
         CmdUploadModeEntrance();
     }
     //=======================================================================================================================================================
-
-    private string CheckErrorWordInMessage(string inputMessage)
-    {
-        ForceReplaceWord forceReplaceWord = new ForceReplaceWord();
-        string containsErrorWord = "";
-        foreach(string word in forceReplaceWord.UnAvailableWordsList)
-        {
-            if (inputMessage.Contains(word))
-            {
-                containsErrorWord = word;
-                break;
-            }
-        }
-
-        if(containsErrorWord != "")
-        {
-            return containsErrorWord;
-        }
-
-        return "";
-    }
-
-    private void CheckMessageAndRegisterSingle(string inputMessage, Action<string> registerAct, string successMessage)
-    {
-        string errorWord = CheckErrorWordInMessage(inputMessage);
-        if(errorWord != "")
-        {
-            _cmdSceneManager.OutPutManager.ReceiveMessage($"不正な文字が含まれています。送信し直してください。不正文字>>>{errorWord}", OutPutTextLogColorSets.AccentDefault);
-        }
-
-        //GameDataインスタンスの特定のフィールドに登録
-        registerAct(inputMessage);
-        _cmdSceneManager.OutPutManager.ReceiveMessage(successMessage, OutPutTextLogColorSets.SystemDefault);
-        CmdUploadModeEntrance();
-    }
-
-    private void CheckMessageAndRegisterArray(string inputMessage, string[] formerArray, Action<string[]> registerAct, string itemName)
-    {
-        string errorWord = CheckErrorWordInMessage(inputMessage);
-        if(errorWord != "")
-        {
-            _cmdSceneManager.OutPutManager.ReceiveMessage($"不正な文字が含まれています。送信し直してください。不正文字>>>{errorWord}", OutPutTextLogColorSets.AccentDefault);
-        }
-
-        if(formerArray != null && formerArray.Contains(inputMessage))
-        {
-            List<string> newList = formerArray.ToList();
-            newList.Remove(inputMessage);
-            registerAct(newList.ToArray());
-            _cmdSceneManager.OutPutManager.ReceiveMessage($"{itemName}を削除しました。", OutPutTextLogColorSets.SystemDefault);
-            return;
-        }
-
-        List<string> renewList = new List<string>();
-        if(formerArray != null)
-        {
-            renewList = formerArray.ToList();
-        }
-        renewList.Add(inputMessage);
-        registerAct(renewList.ToArray());
-        _cmdSceneManager.OutPutManager.ReceiveMessage($"{itemName}を登録しました。続けて登録可能です。項目選択に戻る場合は「{new CmdReturn(null).ReturnWord}」を送信してください", OutPutTextLogColorSets.SystemDefault);
-        return;
-    }
 
     private async UniTask UploadGame()
     {

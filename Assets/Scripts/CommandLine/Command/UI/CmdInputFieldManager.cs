@@ -42,6 +42,14 @@ public class CmdInputFieldManager : MonoBehaviour
         _freeInputEnterController = new FreeInputEnterController(TryAction, ReflectCandidiateValue, _candidateBoxManager);     
     }
 
+    //2択の解答処理をアクションとして代入する用(引数がboolのメソッドをアクションとして登録するため)
+    public void ChangeAction(Action<bool> tryAct)
+    {
+        CmdWrapBool cmdWrapBool = new CmdWrapBool();
+        _cmdSceneManager.OutPutManager.ReceiveMessage($"「{cmdWrapBool.trueWord}」または「{cmdWrapBool.falseWord}」を送信してください", OutPutTextLogColorSets.SystemDefault);
+        ChangeAction((string message) => tryAct(cmdWrapBool.CmdMessageConvertBool(message)));
+    }
+
     public void ChangeAction(Action<string> tryAct, WordEmtCell newLibrary = null)
     {
         ClearCandidateBox();
@@ -58,6 +66,7 @@ public class CmdInputFieldManager : MonoBehaviour
         _isWordEstimateActive = true;
         _currentWordEstimater = new WordEstimater(newLibrary, " ");
     }
+
 
     public void ChangeInputfieldVal(string val)
     {
