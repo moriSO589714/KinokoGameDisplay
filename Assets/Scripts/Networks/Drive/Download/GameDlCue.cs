@@ -53,6 +53,17 @@ public class GameDlCue : MonoBehaviour
     {
         HandleTaskList((index, taskName), (-1, null));
     }
+    public void DeleteAllTasks()
+    {
+        ctsForRecovery?.Cancel();
+
+        //実行中以外の全てのタスクを破棄
+        List<GameDlTask> progressTask = new List<GameDlTask>(1) { onProgressTask };
+        GameDlTasksList = progressTask;
+
+        //実行中のタスクを破棄
+        DestroyProgressTask();
+    }
 
     /// <summary>
     /// エラータスクリストからタスクを削除する
@@ -61,6 +72,15 @@ public class GameDlCue : MonoBehaviour
     {
         ErrorTasksList[index].Task.TaskInstance.ForceEndThisProc();
         ErrorTasksList.RemoveAt(index);
+    }
+
+    public void DeleteAllErrorTasks()
+    {
+        foreach(GameDlError error in ErrorTasksList)
+        {
+            error.Task.TaskInstance.ForceEndThisProc();
+        }
+        ErrorTasksList = new List<GameDlError>();
     }
 
     /// <summary>
@@ -82,19 +102,14 @@ public class GameDlCue : MonoBehaviour
         HandleTaskList(current, target);
     }
 
+
     /// <summary>
     /// オブジェクト破棄時にダウンロード中・ダウンロード待ちのタスクを全て破棄する
     /// </summary>
     private void OnDestroy()
     {
-        ctsForRecovery?.Cancel();
-
-        //実行中以外の全てのタスクを破棄
-        List<GameDlTask> progressTask = new List<GameDlTask>(1) { onProgressTask };
-        GameDlTasksList = progressTask;
-
-        //実行中のタスクを破棄
-        DestroyProgressTask();
+        DeleteAllTasks();
+        DeleteAllErrorTasks();
     }
 
     private async UniTaskVoid StartLoopSequence()

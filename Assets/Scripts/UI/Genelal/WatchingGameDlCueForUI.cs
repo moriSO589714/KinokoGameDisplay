@@ -62,6 +62,11 @@ public class WatchingGameDlCueForUI : MonoBehaviour
     {
         return new List<GameDlError>(_gameDlCue.ErrorTasksList);
     }
+    
+    public string ReturnLastPercentage()
+    {
+        return _lastProgressPercentage.ToString();
+    }
 
     /// <summary>
     /// 現在実行中のタスクが更新された際に呼ばれる
@@ -87,7 +92,6 @@ public class WatchingGameDlCueForUI : MonoBehaviour
     {
         EndProgressTaskAct?.Invoke();
     }
-
 
     /// <summary>
     /// ダウンロードタスクが存在した状態から存在しない状態になった瞬間呼ばれる

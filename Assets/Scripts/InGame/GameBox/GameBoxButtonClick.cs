@@ -41,8 +41,5 @@ public class GameBoxButtonClick
             //アップデートするか確認するパネルを有効化。残りの処理はそっちに任せる
             _checkUpdatePanel.gameObject.SetActive(true);
         }
-
     }
-
-
 }
