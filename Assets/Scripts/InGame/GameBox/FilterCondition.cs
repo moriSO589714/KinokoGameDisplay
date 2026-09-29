@@ -4,20 +4,22 @@ using System.Runtime.InteropServices.WindowsRuntime;
 
 public class FilterCondition
 {
-    public readonly string[] _filteringCategory = new string[5] { "status", "title", "tag", "developper", "softs" };
+    public readonly string[] _filteringCategory = new string[6] { "status", "title", "tag", "developper", "id","softs" };
 
     public List<GameStatus> Statuses = new List<GameStatus>();
     public List<List<string>> GameNames = new List<List<string>>();
     public List<List<string>> GameTags = new List<List<string>>();
     public List<List<string>> GameDevs = new List<List<string>>();
+    public List<List<string>> GameIds = new List<List<string>>();
     public List<string> Softs = new List<string>();
 
-    public FilterCondition(List<GameStatus> statuses, List<List<string>> names, List<List<string>> tags, List<List<string>> devs, List<string> softs)
+    public FilterCondition(List<GameStatus> statuses, List<List<string>> names, List<List<string>> tags, List<List<string>> devs, List<List<string>> ids, List<string> softs)
     {
         Statuses = statuses;
         GameNames = names;
         GameTags = tags;
         GameDevs = devs;
+        GameIds = ids;
         Softs = softs;
     }
     public FilterCondition()
@@ -54,7 +56,11 @@ public class FilterCondition
         }
         else if(categoryName == _filteringCategory[4])
         {
-            return MergeWList(new List<List<string>> {Softs});
+            return MergeWList(GameIds);
+        }
+        else if(categoryName == _filteringCategory[5])
+        {
+            return MergeWList(new List<List<string>> { Softs });
         }
         else
         {

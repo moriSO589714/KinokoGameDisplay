@@ -22,4 +22,9 @@ public class CmdReturn
         }
         return false;
     }
+
+    public void ForceDoingAction()
+    {
+        ReturnAct.Invoke();
+    }
 }

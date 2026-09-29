@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class CmdDownloadProgressLog
 {
-    private string _baseParts = "ゲームをダウンロードしています。";
-    private string _titleParts = "・現在ダウンロード中のタイトル名：";
+    private string _baseParts = "【ダウンロード状況】";
+    private string _titleParts = "タイトル名：";
     private string _percentageParts = "進捗率：";
 
     private string _titleName = "";
@@ -13,14 +13,14 @@ public class CmdDownloadProgressLog
 
     public string MergeLog()
     {
-        string merge = $"{_baseParts}\n{_titleParts}{_titleName}\n{_percentageParts}{_percentage}";
+        string merge = $"{_baseParts}\n{_titleParts}{_titleName}\n{_percentageParts}{_percentage}％";
         return merge;
     }
 
     public string UpdateTitle(string title, string customePercentate = "0")
     {
         _titleName = title;
-        _percentageParts = customePercentate;
+        _percentage = customePercentate;
         string all = MergeLog();
         return all;
     }

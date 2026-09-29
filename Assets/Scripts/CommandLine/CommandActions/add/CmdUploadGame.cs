@@ -1,25 +1,12 @@
 ﻿using Cysharp.Threading.Tasks;
 using Google.Apis.Drive.v3;
 using Google.Apis.Sheets.v4;
-using SFB;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading;
-using System.Xml.Serialization;
 using UnityEngine;
 
 public class CmdUploadGame : CmdActForUseNetwork
 {
-    string _uploadWord = "upload";
-
-    GameData _gameDataForUpload = null;
-    string _localGamePath = null;
-    string _localImagePath = null;
-
-    bool _isUploadAvailable = false;
-
     OnNetDriveUploadFile _onNetDriveUploadFile;
     OnNetCreateFolder _onNetCreateFolder;
     OnNetAppEndGameInfo _onNetAppEndGameInfo;
@@ -28,16 +15,10 @@ public class CmdUploadGame : CmdActForUseNetwork
     OnNetDelete _onNetDelete;
     CancellationTokenSource _ctsForUpload;
 
-
-    WordEmtCell _categoryWec;
-    WordEmtCell _tagsLib;
-    WordEmtCell _devsLib;
-    WordEmtCell _toolsLib;
-
     public override void FirstCall()
     {
         base.FirstCall();
-        _cmdSceneManager.OutPutManager.ReceiveMessage("アップロードモードに変更します", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendMessage("アップロードモードに変更します", OutPutTextLogColorSets.SystemDefault);
         _cmdSceneManager.InputFieldManager._endModeAction += () => { _ctsForUpload?.Cancel(); };
 
         //スプシのロード中にコマンドの受付を行わないようにしておく
@@ -50,8 +31,7 @@ public class CmdUploadGame : CmdActForUseNetwork
         catch (Exception e)
         {
             if (_ctsForLoadSpreadSheet.IsCancellationRequested) return;
-
-            _cmdSceneManager.OutPutManager.ReceiveMessage("ゲーム情報の取得に失敗しました。モードを終了します。", OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendMessage("ゲーム情報の取得に失敗しました。モードを終了します。", OutPutTextLogColorSets.AccentDefault);
             ReturnCmdReceiveMode();
             Debug.LogException(e);
             return;
@@ -62,143 +42,18 @@ public class CmdUploadGame : CmdActForUseNetwork
     {
         await base.LoadSpreadSheetData();
         if (_ctsForLoadSpreadSheet.IsCancellationRequested) return;
-
-        SetLibs();
-        CmdUploadModeEntrance();
+        OtherPrepare();
     }
 
-    private void SetLibs()
+    private void OtherPrepare()
     {
-        //各項目のwecを取得する
-        GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
-        List<GameData> gameDatas = gameDatasSingleton.AllGameDatas;
-        _tagsLib = CreateLibFromGameDatas.CreateTagsLib(gameDatas);
-        _devsLib = CreateLibFromGameDatas.CreateDeveropperLib(gameDatas);
-        _toolsLib = CreateLibFromGameDatas.CreateToolsLib(gameDatas);
-    }
-
-    private void CmdUploadModeEntrance()
-    {
+        CmdGenericInfoInputOfAddGame cmdGenericInfoInputOfAddGame = new CmdGenericInfoInputOfAddGame(ReceiveInputedGameData);
         CmdReturn cmdReturn = new CmdReturn(ReturnCmdReceiveMode);
-
-        _cmdSceneManager.InputFieldManager.ChangeAction((string message) => SwitchInputContent(message, cmdReturn), _categoryWec);
-        
-        _cmdSceneManager.OutPutManager.ReceiveMessage
-            ($"設定する項目名を送信してください。({cmdReturn.ReturnWord}で1つ前に戻れます)" +
-            $"\n・{CmdUploadContent.title}:{_gameDataForUpload?.GameTitle}" +
-            $"\n・{CmdUploadContent.description}:{_gameDataForUpload?.GameDescription}" +
-            $"\n・{CmdUploadContent.folderpath}:{_localGamePath ?? ""}" +
-            $"\n・{CmdUploadContent.exepath}:{_gameDataForUpload?.GameExeName}" +
-            $"\n・{CmdUploadContent.imagepath}:{_localImagePath ?? ""}" +
-            $"\n・{CmdUploadContent.deveroppers}:{MergeArray(_gameDataForUpload?.GameDevelopper)}" +
-            $"\n・{CmdUploadContent.softwaretype}:{_gameDataForUpload?.GameSoftwareType}" +
-            $"\n・{CmdUploadContent.tags}:{MergeArray(_gameDataForUpload?.GameTags)}" , OutPutTextLogColorSets.SystemDefault);
-
-        //アップロードに必要なデータが最低限セットされているかを確認する
-        if(GameDataForUpload.QualityCheck(_gameDataForUpload, _localGamePath))
-        {
-            _isUploadAvailable = true;
-            _cmdSceneManager.OutPutManager.ReceiveMessage
-                ($"※※アップロードが行えます。アップロードを実行する場合は「{_uploadWord}」を送信してください※※", OutPutTextLogColorSets.Blue);         
-        }
-    }
-
-    private void SwitchInputContent(string message, CmdReturn cmdReturn)
-    {
-        if (cmdReturn.ReturnCheck(message))
-        {
-            return;
-        }
-
-        if(message == _uploadWord && _isUploadAvailable)
-        {
-            //アップロード開始のメソッド(MessageGirdに入力先を変えておく)
-            _cmdSceneManager.InputFieldManager.ChangeAction(new CmdNothing().MessageGird);
-            _cmdSceneManager.OutPutManager.ReceiveMessage("アップロードを開始します", OutPutTextLogColorSets.SystemDefault);
-            UploadGame();
-            return;
-        }
-
-        if(!Enum.TryParse<CmdUploadContent>(message, out var content))
-        {
-            _cmdSceneManager.OutPutManager.ReceiveMessage("送信された項目は存在しません", OutPutTextLogColorSets.AccentDefault);
-            return;
-        }
-
-        CmdReturn returnCmdUploadModeEntrance = new CmdReturn(CmdUploadModeEntrance);
-
-        switch (content) 
-        {
-            case CmdUploadContent.title:
-                _cmdSceneManager.OutPutManager.ReceiveMessage("タイトル名を送信してください", OutPutTextLogColorSets.SystemDefault);
-                _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveTitle(message, returnCmdUploadModeEntrance));
-                break;
-            case CmdUploadContent.description:
-                _cmdSceneManager.OutPutManager.ReceiveMessage("ゲームの説明を送信してください。( *!* で改行することができます)", OutPutTextLogColorSets.SystemDefault);
-                _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveDescription(message, returnCmdUploadModeEntrance));
-                break;
-            case CmdUploadContent.folderpath:
-                _cmdSceneManager.OutPutManager.ReceiveMessage("ゲームが入っているフォルダパスを送信してください", OutPutTextLogColorSets.SystemDefault);
-                try
-                {
-                    string selectedPath = new OpenFilePanel().OpenFolderPanelAndReturnPath();
-                    if(selectedPath != null) _cmdSceneManager.InputFieldManager.ChangeInputfieldVal(selectedPath);
-                    _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveGameFolderPath(message, returnCmdUploadModeEntrance));
-                }
-                catch (System.Exception e)
-                {
-                    _cmdSceneManager.OutPutManager.ReceiveMessage("エラーが発生しました。項目を再送信してください。", OutPutTextLogColorSets.AccentDefault);
-                    Debug.Log(e);
-                }                
-                break;
-            case CmdUploadContent.exepath:
-                _cmdSceneManager.OutPutManager.ReceiveMessage("ゲームの実行ファイルのパスを送信してください。", OutPutTextLogColorSets.SystemDefault);
-                try
-                {
-                    ExtensionFilter filter = new ExtensionFilter("All File", "*");
-                    string selectedPath = new OpenFilePanel().OpenFilePanelAndReturnPath(new ExtensionFilter[1] {filter});
-                    if (selectedPath != null) _cmdSceneManager.InputFieldManager.ChangeInputfieldVal(selectedPath);
-                    _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveGameExePath(message, returnCmdUploadModeEntrance));
-                }
-                catch (System.Exception e)
-                {
-                    _cmdSceneManager.OutPutManager.ReceiveMessage("エラーが発生しました。項目を再送信してください。", OutPutTextLogColorSets.AccentDefault);
-                    Debug.Log(e);
-                }
-                break;
-            case CmdUploadContent.imagepath:
-                _cmdSceneManager.OutPutManager.ReceiveMessage("サムネイル画像のパスを送信してください", OutPutTextLogColorSets.SystemDefault);
-                try
-                {
-                    ExtensionFilter filter = new ExtensionFilter("Image File", "png");
-                    string selectPath = new OpenFilePanel().OpenFilePanelAndReturnPath(new ExtensionFilter[1] { filter });
-                    if (selectPath != null) _cmdSceneManager.InputFieldManager.ChangeInputfieldVal(selectPath);
-                    _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveImagePath(message, returnCmdUploadModeEntrance));
-                }
-                catch(System.Exception e)
-                {
-                    _cmdSceneManager.OutPutManager.ReceiveMessage("エラーが発生しました。項目名を再送信してください。", OutPutTextLogColorSets.AccentDefault);
-                    Debug.Log(e);
-                }
-                break;
-            case CmdUploadContent.deveroppers:
-                _cmdSceneManager.OutPutManager.ReceiveMessage("ゲームの開発者名を送信してください。(複数送信可)\n既に送信した開発者名を再度送信することで取り消しが可能です", OutPutTextLogColorSets.SystemDefault);
-                _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveAddDeveroppers(message, returnCmdUploadModeEntrance), _devsLib);
-                break;
-            case CmdUploadContent.softwaretype:
-                _cmdSceneManager.OutPutManager.ReceiveMessage("使用したツール・ソフトウェアを送信してください。", OutPutTextLogColorSets.SystemDefault);
-                _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveTool(message, returnCmdUploadModeEntrance), _toolsLib);
-                break;
-            case CmdUploadContent.tags:
-                _cmdSceneManager.OutPutManager.ReceiveMessage("追加するタグを送信してください。(複数送信可)\n既に送信した開発者名を再度送信することで取り消しが可能です。", OutPutTextLogColorSets.SystemDefault);
-                _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveAddTags(message, returnCmdUploadModeEntrance), _tagsLib);
-                break;
-        }
-    }
+        cmdGenericInfoInputOfAddGame.StartInputData(cmdReturn);
+    }   
 
     protected override void Init()
     {
-        _gameDataForUpload = new GameData();
         if (CheckInEnvironment.isOnNet)
         {
             DriveService driveService = NetworksSingleton.Instance.ReturnDriveService();
@@ -220,173 +75,27 @@ public class CmdUploadGame : CmdActForUseNetwork
             _onNetDriveGetName = new OnNetDriveGetNamefromTest();
             _onNetDelete = new OnNetDeleteforTest();
         }
-
-        _categoryWec = WECLibCreater.CreateLibFromLineAndPriority
-            (new Dictionary<string, int> {
-                { CmdUploadContent.tags.ToString(), 0},
-                { CmdUploadContent.softwaretype.ToString(), 1},
-                { CmdUploadContent.deveroppers.ToString(), 2},
-                { CmdUploadContent.imagepath.ToString(), 3 },
-                { CmdUploadContent.exepath.ToString(), 4 },
-                { CmdUploadContent.folderpath.ToString(), 5},
-                { CmdUploadContent.description.ToString(), 6},
-                { CmdUploadContent.title.ToString(), 7}
-        });
     }
 
     protected override void End()
     {
-        _gameDataForUpload = null;
-        _localGamePath = null;
-        _localImagePath = null;
         _ctsForUpload?.Cancel();
         _ctsForUpload = null;
     }
-
-    private string MergeArray(string[] array)
+    
+    private void ReceiveInputedGameData(GameData uploadGameData, string localGamePath, string localImagePath)
     {
-        if(array == null || array.Count() == 0)
-        {
-            return "";
-        }
-
-        return String.Join(",", array);
+        //アップロード開始のメソッド(MessageGirdに入力先を変えておく)
+        _cmdSceneManager.InputFieldManager.ChangeAction(new CmdNothing().MessageGird);
+        _cmdSceneManager.OutPutManager.SendMessage("アップロードを開始します", OutPutTextLogColorSets.SystemDefault);
+        UploadGame(uploadGameData, localGamePath, localImagePath);
     }
 
-    //各項目の登録用関数
-    //=======================================================================================================================================================
-    private void ReceiveTitle(string message, CmdReturn cmdReturn)
+    private async UniTask UploadGame(GameData uploadGameInfo, string localGamePath, string localImagePath)
     {
-        if (cmdReturn.ReturnCheck(message)) return;
-
-        var systemReply = CmdRegister.RegisterSingleCategory(message,
-                registerVal => { _gameDataForUpload.GameTitle = registerVal; } );
-
-        _cmdSceneManager.OutPutManager.ReceiveMessage(systemReply.replayMessage, systemReply.logColor);
-        CmdUploadModeEntrance();
-    }
-
-    private void ReceiveDescription(string message, CmdReturn cmdReturn)
-    {
-        if (cmdReturn.ReturnCheck(message)) return;
-
-        var systemReplay = CmdRegister.RegisterSingleCategory(message,
-                registerVal => { _gameDataForUpload.GameDescription = registerVal; });
-
-        _cmdSceneManager.OutPutManager.ReceiveMessage(systemReplay.replayMessage, systemReplay.logColor);
-        CmdUploadModeEntrance();
-    }
-
-    private void ReceiveTool(string message, CmdReturn cmdReturn)
-    {
-        if (cmdReturn.ReturnCheck(message)) return;
-
-        var systemReplay = CmdRegister.RegisterSingleCategory(message,
-                registeVal => { _gameDataForUpload.GameSoftwareType = registeVal; });
-
-        _cmdSceneManager.OutPutManager.ReceiveMessage(systemReplay.replayMessage, systemReplay.logColor);        
-    }
-
-    private void ReceiveAddDeveroppers(string message, CmdReturn cmdReturn)
-    {
-        if (cmdReturn.ReturnCheck(message)) return;
-
-        var systemReplay = CmdRegister.RegisterArrayCategory(message, _gameDataForUpload.GameDevelopper,
-                registerVal => { _gameDataForUpload.GameDevelopper = registerVal; });
-
-        _cmdSceneManager.OutPutManager.ReceiveMessage(systemReplay.replayMessage, systemReplay.logColor);
-    }
-
-    private void ReceiveAddTags(string message, CmdReturn cmdReturn)
-    {
-        if (cmdReturn.ReturnCheck(message)) return;
-
-        var systemReply = CmdRegister.RegisterArrayCategory(message, _gameDataForUpload.GameTags,
-                registerVal => { _gameDataForUpload.GameTags = registerVal; });
-
-        _cmdSceneManager.OutPutManager.ReceiveMessage(systemReply.replayMessage, systemReply.logColor);
-    }
-
-    private void ReceiveGameFolderPath(string message, CmdReturn cmdReturn)
-    {
-        if (cmdReturn.ReturnCheck(message)) return;
-
-        //フォルダが存在するか確認
-        if (Directory.Exists(message))
-        {
-            _localGamePath = message;
-            _gameDataForUpload.GameDirName = Path.GetFileName(_localGamePath);
-            //実行ファイル設定後に変更された場合など、実行ファイルとフォルダの相対パスが破綻するのを防ぐため、実行ファイルのパスを初期化
-            _gameDataForUpload.GameExeName = "";
-            _cmdSceneManager.OutPutManager.ReceiveMessage("登録完了。項目選択に戻ります", OutPutTextLogColorSets.SystemDefault);
-        }
-        else
-        {
-            _cmdSceneManager.OutPutManager.ReceiveMessage("送信されたパスは存在しません", OutPutTextLogColorSets.AccentDefault);
-        }
-
-        CmdUploadModeEntrance();
-    }
-
-    private void ReceiveGameExePath(string message, CmdReturn cmdReturn)
-    {
-        if (cmdReturn.ReturnCheck(message)) return;
-
-        //ファイルが存在するかを確認する
-        if (!File.Exists(message))
-        {
-            _cmdSceneManager.OutPutManager.ReceiveMessage("送信されたファイルパスは存在しません", OutPutTextLogColorSets.AccentDefault);
-            CmdUploadModeEntrance();
-            return;
-        }
-
-        if(_localGamePath == null || _localGamePath == "")
-        {
-            _cmdSceneManager.OutPutManager.ReceiveMessage("ゲームが入ったフォルダのパスが登録されていません。実行ファイルのパスを登録するには先にフォルダパスを登録してください", OutPutTextLogColorSets.AccentDefault);
-            CmdUploadModeEntrance();
-            return;
-        }
-
-        //ファイルがゲームフォルダの下にあるかを確認する。あるなら相対パスに編集する
-        string gameDirectoryPath = _localGamePath + "\\";
-        if (message.StartsWith(_localGamePath))
-        {
-            //相対パスに編集する
-            string registerVal = message.Replace(gameDirectoryPath, "");
-            //値を登録
-            _gameDataForUpload.GameExeName = registerVal;
-            _cmdSceneManager.OutPutManager.ReceiveMessage("登録完了。項目選択に戻ります", OutPutTextLogColorSets.SystemDefault);
-        }
-        else
-        {
-            _cmdSceneManager.OutPutManager.ReceiveMessage("実行ファイルがゲームフォルダの中に存在しません。実行ファイルは登録されたフォルダ以下の階層に配置されている必要があります", OutPutTextLogColorSets.AccentDefault);
-        }
-        CmdUploadModeEntrance();
-    }
-
-    private void ReceiveImagePath(string message, CmdReturn cmdReturn)
-    {
-        if (cmdReturn.ReturnCheck(message)) return;
-
-        //ファイルが存在するか確認する
-        if (!File.Exists(message))
-        {
-            _cmdSceneManager.OutPutManager.ReceiveMessage("送信されたファイルパスは存在しません", OutPutTextLogColorSets.AccentDefault);
-            CmdUploadModeEntrance();
-            return;
-        }
-
-        _localImagePath = message;
-        _cmdSceneManager.OutPutManager.ReceiveMessage("サムネイル画像のパスを登録しました", OutPutTextLogColorSets.SystemDefault);
-        CmdUploadModeEntrance();
-    }
-    //=======================================================================================================================================================
-
-    private async UniTask UploadGame()
-    {
-        string logId = _cmdSceneManager.OutPutManager.ReceiveMessage("ゲーム情報を最適化中", OutPutTextLogColorSets.SystemDefault);
-        GameData uploadGameData = GameDataForUpload.CreateGameDataForUpload(_gameDataForUpload, _localGamePath, _localImagePath);
-        _cmdSceneManager.OutPutManager.ReceiveMessage("ゲーム情報の最適化が完了", OutPutTextLogColorSets.SystemDefault, specifiedUUID:logId);
+        string logId = _cmdSceneManager.OutPutManager.SendMessage("ゲーム情報を最適化中", OutPutTextLogColorSets.SystemDefault);
+        GameData uploadGameData = GameDataForUpload.CreateGameDataForUpload(uploadGameInfo, localGamePath, localImagePath);
+        _cmdSceneManager.OutPutManager.SendMessage("ゲーム情報の最適化が完了", OutPutTextLogColorSets.SystemDefault, specifiedUUID:logId);
 
         _ctsForUpload = new CancellationTokenSource();
         GameUpProgress gameUpProgress = new GameUpProgress();
@@ -398,7 +107,7 @@ public class CmdUploadGame : CmdActForUseNetwork
         }
         catch (Exception e) 
         {
-            _cmdSceneManager.OutPutManager.ReceiveMessage($"アップロード中にエラーが発生しました\nエラー内容>>{e}", OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendMessage($"アップロード中にエラーが発生しました\nエラー内容>>{e}", OutPutTextLogColorSets.AccentDefault);
             Debug.Log(e);
         }
         ReturnCmdReceiveMode();
@@ -406,18 +115,6 @@ public class CmdUploadGame : CmdActForUseNetwork
 
     private void DuringUploadLogger(string message, string logId)
     {
-        _cmdSceneManager.OutPutManager.ReceiveMessage(message, OutPutTextLogColorSets.SystemDefault, specifiedUUID:logId);
+        _cmdSceneManager.OutPutManager.SendMessage(message, OutPutTextLogColorSets.SystemDefault, specifiedUUID:logId);
     }
-}
-
-public enum CmdUploadContent 
-{
-    title,
-    description,
-    folderpath,
-    exepath,
-    imagepath,
-    deveroppers,
-    softwaretype,
-    tags,
 }

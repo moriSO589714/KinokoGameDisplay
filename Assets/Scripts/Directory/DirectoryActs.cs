@@ -60,4 +60,40 @@ public static class DirectoryActs
         CompleteDirDelete(path);
         CreateAndCheckDir(path);
     }
+
+    /// <summary>
+    /// 指定のパス以下のファイルを丸ごとコピーする
+    /// </summary>
+    /// <param name="copyedFolderPath">コピーされる対象のフォルダパス</param>
+    /// <param name="targetPath">コピー先のパス</param>
+    public static void CopyDirectory(string copyedFolderPath, string targetPath)
+    {
+        //コピー先のディレクトリがない場合は作成
+        if (!Directory.Exists(targetPath))
+        {
+            Directory.CreateDirectory(targetPath);
+            //ファイル属性もコピーする
+            File.SetAttributes(targetPath, File.GetAttributes(copyedFolderPath));
+        }
+
+        //コピー先のディレクトリ名の末尾に\を付ける
+        if (targetPath[targetPath.Length - 1] != Path.DirectorySeparatorChar)
+        {
+            targetPath = targetPath + Path.DirectorySeparatorChar;
+        }
+
+        //copyedFolderPath以下のファイルをコピー
+        string[] files = Directory.GetFiles(copyedFolderPath);
+        foreach(string file in files)
+        {
+            File.Copy(file, targetPath + Path.GetFileName(file), true);
+        }
+
+        //ディレクトリがある場合はこのメソッドを再帰的に呼び出してコピーする
+        string[] dirs = Directory.GetDirectories(copyedFolderPath);
+        foreach(string dir in dirs)
+        {
+            CopyDirectory(dir, targetPath + Path.GetFileName(dir));
+        }
+    }
 }

@@ -34,12 +34,12 @@ public class OutputManager : ObjectStuckPool<OutputTextBox>
         _monitorPlayerInput.OnMouseScroll += MoveOverallPanel;
     }
 
-    public string ReceiveMessage(string message,Color textColor, bool isUserMessage = false, string specifiedUUID = null)
+    public string SendMessage(string message,Color textColor, bool isUserMessage = false, string specifiedUUID = null)
     {
         return Output(message, textColor, isUserMessage, specifiedUUID);
     }
 
-    public string ReceiveMessage(string message, OutPutTextLogColorSets outPutTextLogColorSets, bool isUserMessage = false, string specifiedUUID = null)
+    public string SendMessage(string message, OutPutTextLogColorSets outPutTextLogColorSets, bool isUserMessage = false, string specifiedUUID = null)
     {
         Color textColor = GetTextColor(outPutTextLogColorSets);
         return Output(message, textColor, isUserMessage, specifiedUUID);

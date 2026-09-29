@@ -17,8 +17,8 @@ public static class GameBoxFilter
     private static List<GameData> filtering(FilterCondition filterCondition, List<GameData> filteringTargetList)
     {
         //フィルタリングされたゲームデータが入るクラス
-        List<GameData> filterdGames = new List<GameData>(filteringTargetList);
-        
+        List<GameData> filterdGames = new List<GameData>(filteringTargetList);              
+
         //ゲームのステータス
         List<GameData> statusCandidate = new List<GameData>();
         foreach(GameStatus status in filterCondition.Statuses)
@@ -51,6 +51,17 @@ public static class GameBoxFilter
         }
         filterdGames = new List<GameData>(gameNamesCandidate);
 
+        //ゲームのID
+        List<GameData> gameIdCandidate = new List<GameData>();
+        if(filterCondition.GameIds.Count == 0)
+        {
+            gameIdCandidate = filterdGames;
+        }
+        foreach(List<string> ids in filterCondition.GameIds)
+        {
+            gameIdCandidate.AddRange(filterId(ids, filterdGames));
+        }
+        filterdGames = new List<GameData>(gameIdCandidate);
 
         //ゲームの開発者
         List<GameData> devCandidate = new List<GameData>();
@@ -134,6 +145,22 @@ public static class GameBoxFilter
         {
             List<GameData> returnList = currentGameDatas.Where(x => x.GameSoftwareType == soft).ToList();
             return returnList;
+        }
+    }
+
+    private static List<GameData> filterId(List<string> ids, List<GameData> currentGameDatas)
+    {
+        if(ids.Count() == 0)
+        {
+            return currentGameDatas;
+        }
+        else
+        {
+            foreach(string id in ids)
+            {
+                currentGameDatas = currentGameDatas.Where(x => x.GameID == id).ToList();
+            }
+            return currentGameDatas;
         }
     }
 

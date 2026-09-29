@@ -13,6 +13,6 @@ public class CmdNothing
     public void MessageGird(string message)
     {
         CmdSceneManager cmdSceneManager = CmdSceneManager.Instance;
-        cmdSceneManager.OutPutManager.ReceiveMessage("現在コマンドの受付はできません。", OutPutTextLogColorSets.AccentDefault);
+        cmdSceneManager.OutPutManager.SendMessage("現在コマンドの受付はできません。", OutPutTextLogColorSets.AccentDefault);
     }
 }

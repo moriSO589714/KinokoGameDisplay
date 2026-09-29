@@ -78,6 +78,8 @@ public class FilteringPanelManager : UIPanel
             ConvertOrToList(filteringGameNames),
             ConvertOrToList(filteringTags),
             ConvertOrToList(filteringDevs),
+            //現状フィルタリングパネルでIDによるフィルタリングは行わないため、ここは空データを渡す
+            new List<List<string>>(),
             filteringTools);
 
         //もしフィルタリング条件が初期値と等しい場合(フィルタリングが行われず、全てのゲームを表示する場合)はnullを返す

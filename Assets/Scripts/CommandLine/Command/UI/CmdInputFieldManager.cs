@@ -46,7 +46,7 @@ public class CmdInputFieldManager : MonoBehaviour
     public void ChangeAction(Action<bool> tryAct)
     {
         CmdWrapBool cmdWrapBool = new CmdWrapBool();
-        _cmdSceneManager.OutPutManager.ReceiveMessage($"「{cmdWrapBool.trueWord}」または「{cmdWrapBool.falseWord}」を送信してください", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendMessage($"「{cmdWrapBool.trueWord}」または「{cmdWrapBool.falseWord}」を送信してください", OutPutTextLogColorSets.SystemDefault);
         ChangeAction((string message) => tryAct(cmdWrapBool.CmdMessageConvertBool(message)));
     }
 
@@ -123,12 +123,12 @@ public class CmdInputFieldManager : MonoBehaviour
         string inputFieldTxt = _myInputField.text;
         ClearInputField();
         //送られてきたテキストをそのままログに流す(送信確認用)
-        _cmdSceneManager.OutPutManager.ReceiveMessage(inputFieldTxt, OutPutTextLogColorSets.UserDefault, true);
+        _cmdSceneManager.OutPutManager.SendMessage(inputFieldTxt, OutPutTextLogColorSets.UserDefault, true);
 
         //強制終了時用(強制的にデフォルトに戻る)
         if(inputFieldTxt == _resetWord)
         {
-            _cmdSceneManager.OutPutManager.ReceiveMessage("現在のモードを強制終了し、コマンド受信モードに戻ります。", OutPutTextLogColorSets.SystemDefault);
+            _cmdSceneManager.OutPutManager.SendMessage("現在のモードを強制終了し、コマンド受信モードに戻ります。", OutPutTextLogColorSets.SystemDefault);
             ReturnCommandReceive();
         }
         else//現在の受信メソッドへ入力内容を送る
