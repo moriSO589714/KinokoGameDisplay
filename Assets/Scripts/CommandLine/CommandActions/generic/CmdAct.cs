@@ -35,7 +35,7 @@ public class CmdAct : MonoBehaviour
     /// <summary>
     /// コマンド受付モードに戻るメソッド
     /// </summary>
-    protected void ReturnCmdReceiveMode()
+    protected virtual void ReturnCmdReceiveMode()
     {
         _cmdSceneManager.OutPutManager.SendMessage("コマンド受付モードに戻ります", OutPutTextLogColorSets.SystemDefault);
         //コマンド受付に戻す

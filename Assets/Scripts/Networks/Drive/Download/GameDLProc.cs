@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using UnityEngine;
 
 public class GameDlProc
 {
@@ -11,7 +12,7 @@ public class GameDlProc
     public bool EndTaskFlag { get; private set; } = false;
 
     private OnNetDriveMetaData _onNetDriveMetaData = null;
-    private OnNetDriveGetFile _onNetDriveFetFile = null;
+    private OnNetDriveGetFile _onNetDriveGetFile = null;
     private bool _doingTaskFlag = false;
     private GameDlProgress _gameDlProgress = null;
 
@@ -31,7 +32,7 @@ public class GameDlProc
     public GameDlProc(OnNetDriveMetaData metaData, OnNetDriveGetFile onNetDriveFetFile, GameData gameData)
     {
         _onNetDriveMetaData = metaData;
-        _onNetDriveFetFile = onNetDriveFetFile;
+        _onNetDriveGetFile = onNetDriveFetFile;
         GameData = gameData;
     }
 
@@ -135,7 +136,7 @@ public class GameDlProc
             if (pair.Key.EndsWith(newDLData.DLDataInfoFileExtention)) continue;
             if (!_doingTaskFlag) return; //もし停止するようフラッグが変わっていた場合処理を中断する
 
-            _onNetDriveFetFile.GetFile(pair.Value, pair.Key, tempSlicedGameDLPath);
+            _onNetDriveGetFile.GetFile(pair.Value, pair.Key, tempSlicedGameDLPath);
 
             if(_gameDlProgress != null)
             {
@@ -157,6 +158,18 @@ public class GameDlProc
         string thisGameJsonPath = CreateDirPath.GameJsonPath(savedJsonsPath: allDirs.JsonsDirPath, gameId: gameId);
         //ダウンロード済みデータとしてjsonに保存
         JSONTools.SerializeJson(GameData, thisGameJsonPath);
+
+        //サムネイル画像(あれば)のダウンロード
+        ImageDlProc imageDlProc = new ImageDlProc(_onNetDriveGetFile, GameData);
+        try
+        {
+            imageDlProc.DLImage();
+        }
+        catch(System.Exception e)
+        {
+            Debug.LogError(e);
+        }
+
         //ダウンロードに利用した一時保存関係のファイル・フォルダを全て削除する
         DirectoryActs.CompleteDirDelete(tempGameDLPath);
 
@@ -245,7 +258,7 @@ public class GameDlProc
         string dlDataFileName = dlDataFileNameAndDriveId.Keys.First();
         string dlDataDriveId = dlDataFileNameAndDriveId.Values.First();
         //.000ファイル(DLDataが書かれたファイル)をダウンロードする
-        _onNetDriveFetFile.GetFile(dlDataDriveId, dlDataFileName, tempSlicedGameDLPath);
+        _onNetDriveGetFile.GetFile(dlDataDriveId, dlDataFileName, tempSlicedGameDLPath);
 
         //.000ファイルからインストールするゲームの情報を取得
         gameDLData.DeserializeDataByFilePath(Path.Combine(tempSlicedGameDLPath, dlDataFileName));

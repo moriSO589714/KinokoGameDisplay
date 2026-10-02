@@ -176,7 +176,7 @@ MonoBehaviour:
   TitleWordsRemit: 19
   DescriptionField: {fileID: 55513340342271861}
   DescriptionWordsRemit: 60
-  GameImage: {fileID: 546405342151332796}
+  GameImage: {fileID: 3987893226828105229}
   StartButton: {fileID: 9132181174207457532}
   GameDirName: {fileID: 2388867589193602413}
   GameDirNameWordsRemit: 31
@@ -184,6 +184,7 @@ MonoBehaviour:
   StartButtonSprite: {fileID: 21300000, guid: f71935af8e7ab6f47bf78c1a5db72f5f, type: 3}
   DownloadButtonSprite: {fileID: 21300000, guid: 5c4fd1d5156b25e4e8d77d922930a65c, type: 3}
   DownloadingButtonSprite: {fileID: 21300000, guid: ae3b0ed5d42a25949aa98840fae7b70a, type: 3}
+  _loadingAnimPref: {fileID: 540808825727845273, guid: 408a3e5ca21bbad4ab6b8108ad249c87, type: 3}
 --- !u!1 &5094532388827226648
 GameObject:
   m_ObjectHideFlags: 0
@@ -274,6 +275,9 @@ GameObject:
   - component: {fileID: 6902166999522342328}
   - component: {fileID: 634582897930167555}
   - component: {fileID: 546405342151332796}
+  - component: {fileID: 3987893226828105229}
+  - component: {fileID: 8504907317664030530}
+  - component: {fileID: 9015655163664079224}
   m_Layer: 5
   m_Name: GameImage
   m_TagString: Untagged
@@ -338,6 +342,92 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &3987893226828105229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7570397086169585316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 757cfaf69ce335c409776216a155bd37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!61 &8504907317664030530
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7570397086169585316}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: -0.68408203, y: -1.6922607}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 1920.4578, y: 1078.0208}
+  m_EdgeRadius: 0
+--- !u!114 &9015655163664079224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7570397086169585316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 4
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 3987893226828105229}
+          m_TargetAssemblyTypeName: UIActBase, Assembly-CSharp
+          m_MethodName: OnClickAct
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &8121253286742625490
 GameObject:
   m_ObjectHideFlags: 0

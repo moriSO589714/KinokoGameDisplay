@@ -12,7 +12,7 @@ public class GameBox : Box
     [SerializeField] int TitleWordsRemit;
     [SerializeField] Text DescriptionField;
     [SerializeField] int DescriptionWordsRemit;
-    [SerializeField] Image GameImage;
+    [SerializeField] UIActBase GameImage;
     [SerializeField] UIActBase StartButton;
     [SerializeField] Text GameDirName;
     [SerializeField] int GameDirNameWordsRemit;
@@ -21,6 +21,11 @@ public class GameBox : Box
     [SerializeField] Sprite StartButtonSprite;
     [SerializeField] Sprite DownloadButtonSprite;
     [SerializeField] Sprite DownloadingButtonSprite;
+
+    [SerializeField] GameObject _loadingAnimPref;
+    private GameObject _instantiatedAnimObj;
+    public Action EndImageLoading;
+
     public GameData _myGameData { get; private set; }
 
     private ForceReplaceWord _forceReplaceWord = new ForceReplaceWord();
@@ -46,6 +51,16 @@ public class GameBox : Box
         StartButton.ClickAct += () => clickStartButtonAct(this);
     }
 
+    public void SetClickImageAct(Action<GameBox> dlImageAct)
+    {
+        GameImage.ClickAct += () => dlImageAct(this);
+        GameImage.ClickAct += () 
+            => { GameObject instantiated = Instantiate(_loadingAnimPref);
+                instantiated.GetComponent<LoadingSquare>().ChangeParent(GameImage.gameObject);
+                _instantiatedAnimObj = instantiated;};
+        EndImageLoading += () => { Destroy(_instantiatedAnimObj); };
+    }
+
     private void SetTitle(string gameTitle)
     {
         if (gameTitle == null || gameTitle == "") return;
@@ -62,12 +77,13 @@ public class GameBox : Box
         string setDescription = StrTools.ReplaceOverWords(displayStr, DescriptionWordsRemit);
         DescriptionField.text = setDescription;
     }
-    private void SetImage(string gameId)
+    public void SetImage(string gameId)
     {
+        Image gameImageSource = GameImage.GetComponent<Image>();
         Sprite setSprite = NoImageSprite;
         if(gameId == "" || gameId == null)
         {
-            GameImage.sprite = setSprite;
+            gameImageSource.sprite = setSprite;
             return;
         }
 
@@ -77,7 +93,7 @@ public class GameBox : Box
             setSprite = imageSprite;
         }
 
-        GameImage.sprite = setSprite;
+        gameImageSource.sprite = setSprite;
     }
 
     public void ChangeButtonImage()

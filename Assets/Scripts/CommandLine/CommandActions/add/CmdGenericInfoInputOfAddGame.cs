@@ -8,6 +8,8 @@ using UnityEngine;
 public class CmdGenericInfoInputOfAddGame
 {
     private readonly string _decisionWord = "upload";
+    public readonly string _imageExtension = "png";
+
     private bool _allowDecision = false;
 
     private GameData _currentGameData = null;
@@ -26,6 +28,8 @@ public class CmdGenericInfoInputOfAddGame
         _sendGameDataAct = sendGameDataAct;
         Init();
     }
+
+    public CmdGenericInfoInputOfAddGame(){}
 
     private void Init()
     {
@@ -150,7 +154,7 @@ public class CmdGenericInfoInputOfAddGame
                 _sceneManager.OutPutManager.SendMessage("サムネイル画像のパスを送信してください", OutPutTextLogColorSets.SystemDefault);
                 try
                 {
-                    ExtensionFilter filter = new ExtensionFilter("Image Path", "png");
+                    ExtensionFilter filter = new ExtensionFilter("Image Path", _imageExtension);
                     string selectedPath = new OpenFilePanel().OpenFilePanelAndReturnPath(new ExtensionFilter[1] { filter });
                     if (selectedPath != null) _sceneManager.InputFieldManager.ChangeInputfieldVal(selectedPath);
                     _sceneManager.InputFieldManager.ChangeAction((string message) => ReceiveImagePath(message, returnStartInputData));
@@ -246,7 +250,7 @@ public class CmdGenericInfoInputOfAddGame
     {
         if (returnStartInputData.ReturnCheck(message)) return;
 
-        var systemReply = CmdRegister.RegisterPath(message,
+        var systemReply = CmdRegister.RegisterDirPath(message,
                 registerVal => { _userGamePath = registerVal; });
 
         if(systemReply.logColor == OutPutTextLogColorSets.SystemDefault)
@@ -274,7 +278,7 @@ public class CmdGenericInfoInputOfAddGame
     {
         if (returnStartInputData.ReturnCheck(message)) return;
 
-        var systemReply = CmdRegister.RegisterPath(message,
+        var systemReply = CmdRegister.RegisterFilePath(message,
                 registerVal => _userImagePath = registerVal);
 
         _sceneManager.OutPutManager.SendMessage(systemReply.replyMessage, systemReply.logColor);

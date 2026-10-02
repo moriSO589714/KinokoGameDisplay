@@ -120,7 +120,7 @@ public static class CmdRegister
         return (systemMessage, OutPutTextLogColorSets.SystemDefault);
     }
 
-    public static (string replyMessage, OutPutTextLogColorSets logColor) RegisterPath(string message, Action<string> registerAct)
+    public static (string replyMessage, OutPutTextLogColorSets logColor) RegisterDirPath(string message, Action<string> registerAct)
     {
         if (Directory.Exists(message))
         {
@@ -131,6 +131,21 @@ public static class CmdRegister
         else
         {
             string errorMessage = "送信されたパスは存在しません。";
+            return (errorMessage, OutPutTextLogColorSets.AccentDefault);
+        }
+    }
+
+    public static (string replyMessage, OutPutTextLogColorSets logColor) RegisterFilePath(string message, Action<string> registerAct)
+    {
+        if (File.Exists(message))
+        {
+            registerAct(message);
+            string systemMessage = "登録完了しました。項目選択に戻ります";
+            return (systemMessage, OutPutTextLogColorSets.SystemDefault);
+        }
+        else
+        {
+            string errorMessage = "送信されたパスは存在しません";
             return (errorMessage, OutPutTextLogColorSets.AccentDefault);
         }
     }

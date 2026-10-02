@@ -15353,6 +15353,7 @@ MonoBehaviour:
   _checkUpdataPanel: {fileID: 1433006261}
   _gameDlCue: {fileID: 384381314}
   _watchingGameDlCueForUI: {fileID: 1250451822}
+  _loadingAnimPref: {fileID: 0}
 --- !u!1 &2108106709
 GameObject:
   m_ObjectHideFlags: 0
