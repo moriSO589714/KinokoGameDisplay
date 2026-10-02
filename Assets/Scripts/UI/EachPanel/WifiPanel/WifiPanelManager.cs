@@ -1,6 +1,7 @@
 ﻿using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,6 +14,7 @@ public class WifiPanelManager : UIPanel
     [SerializeField] private Text _description;
 
     [SerializeField] private Vector2 _squarePos;
+    [SerializeField] private float _squareSize;
     private GameObject _gameBoxsManager = null;
     private GameObject _loadingSquare = null;
     private CancellationTokenSource _torkenSorce = new CancellationTokenSource();
@@ -82,7 +84,11 @@ public class WifiPanelManager : UIPanel
         _closeMark.gameObject.SetActive(false);
         _yesMark.gameObject.SetActive(false);
         _noMark.gameObject.SetActive(false);
+
         _loadingSquare = Instantiate(_loadingSquarePref, parent: gameObject.transform);
+        _loadingSquare.transform.localScale = _loadingSquare.transform.localScale * _squareSize;
+        RectTransform squareRect = _loadingSquare.GetComponent<RectTransform>();
+        squareRect.anchoredPosition = new Vector2(squareRect.anchoredPosition.x + _squarePos.x, squareRect.anchoredPosition.y + _squarePos.y);
     }
 
     private void SetErrorMode()

@@ -17699,7 +17699,8 @@ MonoBehaviour:
   _noMark: {fileID: 2228145400193948819}
   _loadingSquarePref: {fileID: 540808825727845273, guid: 408a3e5ca21bbad4ab6b8108ad249c87, type: 3}
   _description: {fileID: 6050140443488114854}
-  _squarePos: {x: 0, y: 0}
+  _squarePos: {x: 0, y: -105}
+  _squareSize: 0.35
 --- !u!224 &5017398291425828102
 RectTransform:
   m_ObjectHideFlags: 0
