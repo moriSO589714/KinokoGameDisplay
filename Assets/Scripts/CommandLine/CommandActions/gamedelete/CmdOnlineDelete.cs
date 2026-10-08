@@ -46,7 +46,7 @@ public class CmdOnlineDelete : CmdDelete
     public override void FirstCall()
     {
         base.FirstCall();
-        _cmdSceneManager.OutPutManager.SendMessage("オンラインゲーム削除モードに変更します", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("オンラインゲーム削除モードに変更します", OutPutTextLogColorSets.SystemDefault);
         //モードから出る時にトークンをキャンセルするようにしておく
         _cmdSceneManager.InputFieldManager._endModeAction += () => { _forDeleteCts?.Cancel(); };
         //スプシのロード中でコマンドの受付を行わないようにしておく
@@ -62,7 +62,7 @@ public class CmdOnlineDelete : CmdDelete
         GameDataManager gameDataManager = new GameDataManager();
 
         string connectLogStr = "インターネットに接続して、ゲーム情報を取得しています";
-        string messageId = _cmdSceneManager.OutPutManager.SendMessage(connectLogStr, OutPutTextLogColorSets.SystemDefault);
+        string messageId = _cmdSceneManager.OutPutManager.SendLogMessage(connectLogStr, OutPutTextLogColorSets.SystemDefault);
         CancellationTokenSource ctsForLogAnim = new CancellationTokenSource();
         new CmdWaitingAnimInLog().LoopWaitingLog(connectLogStr, OutPutTextLogColorSets.SystemDefault, messageId, ctsForLogAnim.Token);
 
@@ -73,7 +73,7 @@ public class CmdOnlineDelete : CmdDelete
         catch(System.Exception e)
         {
             ctsForLogAnim.Cancel();
-            _cmdSceneManager.OutPutManager.SendMessage("ゲーム情報の取得に失敗しました", OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("ゲーム情報の取得に失敗しました", OutPutTextLogColorSets.AccentDefault);
             ReturnCmdReceiveMode();
             return;
         }
@@ -93,7 +93,7 @@ public class CmdOnlineDelete : CmdDelete
             return;
         }
 
-        _cmdSceneManager.OutPutManager.SendMessage("接続成功。初期処理を実行中", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("接続成功。初期処理を実行中", OutPutTextLogColorSets.SystemDefault);
         CmdDeleteEntrance();
     }
 
@@ -105,7 +105,7 @@ public class CmdOnlineDelete : CmdDelete
 
     protected override async UniTask DoDelete(GameData targetGameData)
     {
-        _cmdSceneManager.OutPutManager.SendMessage("ゲームの削除を開始します", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("ゲームの削除を開始します", OutPutTextLogColorSets.SystemDefault);
         _cmdSceneManager.InputFieldManager.ChangeAction(new CmdNothing().MessageGird);
         _forDeleteCts = new CancellationTokenSource();
         try
@@ -114,11 +114,11 @@ public class CmdOnlineDelete : CmdDelete
         }
         catch(System.Exception e)
         {
-            _cmdSceneManager.OutPutManager.SendMessage($"エラーが発生しました。エラー内容>>{e}", OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage($"エラーが発生しました。エラー内容>>{e}", OutPutTextLogColorSets.AccentDefault);
             CmdDeleteEntrance();
             return;
         }
-        _cmdSceneManager.OutPutManager.SendMessage("ゲームの削除が完了しました", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("ゲームの削除が完了しました", OutPutTextLogColorSets.SystemDefault);
         
         ReturnCmdReceiveMode();
     }

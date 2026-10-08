@@ -64,10 +64,10 @@ public class CmdFiltering
             string appendVal = $"\n・{category}：{_currentFilterCondition.ReturnValueForCategory(category)}";
             checkSentence += appendVal;
         }
-        _cmdSceneManager.OutPutManager.SendMessage(checkSentence, OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage(checkSentence, OutPutTextLogColorSets.SystemDefault);
 
         _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveFilteringCategory(message, cmdReturn), _filteringCategoryWec);
-        _cmdSceneManager.OutPutManager.SendMessage($"「{_decisionWord}」で決定できます。", OutPutTextLogColorSets.Blue);
+        _cmdSceneManager.OutPutManager.SendLogMessage($"「{_decisionWord}」で決定できます。", OutPutTextLogColorSets.Blue);
     }
 
     public void FixStatusList(List<GameStatus> newList)
@@ -82,32 +82,32 @@ public class CmdFiltering
         CmdReturn returnWaitSendCategory = new CmdReturn(WaitSendCategory);
         if(message == _currentFilterCondition._filteringCategory[0])
         {
-            _cmdSceneManager.OutPutManager.SendMessage("ステータスを送信してください", OutPutTextLogColorSets.SystemDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("ステータスを送信してください", OutPutTextLogColorSets.SystemDefault);
             _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveGameStatus(message, returnWaitSendCategory));
         }
         else if (message == _currentFilterCondition._filteringCategory[1])
         {
-            _cmdSceneManager.OutPutManager.SendMessage("タイトルを送信してください", OutPutTextLogColorSets.SystemDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("タイトルを送信してください", OutPutTextLogColorSets.SystemDefault);
             _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveTitle(message, returnWaitSendCategory), _titleWec);
         }
         else if(message == _currentFilterCondition._filteringCategory[2])
         {
-            _cmdSceneManager.OutPutManager.SendMessage("タグを送信してください", OutPutTextLogColorSets.SystemDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("タグを送信してください", OutPutTextLogColorSets.SystemDefault);
             _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveTag(message, returnWaitSendCategory), _tagsWec);
         }
         else if(message == _currentFilterCondition._filteringCategory[3])
         {
-            _cmdSceneManager.OutPutManager.SendMessage("開発者名を送信してください", OutPutTextLogColorSets.SystemDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("開発者名を送信してください", OutPutTextLogColorSets.SystemDefault);
             _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveDev(message, returnWaitSendCategory), _devsWec);
         }
         else if (message == _currentFilterCondition._filteringCategory[4])
         {
-            _cmdSceneManager.OutPutManager.SendMessage("ゲームIDを送信してください", OutPutTextLogColorSets.SystemDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("ゲームIDを送信してください", OutPutTextLogColorSets.SystemDefault);
             _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveId(message, cmdReturn), _idsWec);
         }
         else if(message == _currentFilterCondition._filteringCategory[5])
         {
-            _cmdSceneManager.OutPutManager.SendMessage("ソフト名を送信してください", OutPutTextLogColorSets.SystemDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("ソフト名を送信してください", OutPutTextLogColorSets.SystemDefault);
             _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveSoft(message, returnWaitSendCategory), _toolsWec);
         }
         else if (message == _decisionWord)
@@ -128,7 +128,7 @@ public class CmdFiltering
         }
         catch (Exception e)
         {
-            _cmdSceneManager.OutPutManager.SendMessage($"{message}はGameStatusに存在しません。送信し直してください", OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage($"{message}はGameStatusに存在しません。送信し直してください", OutPutTextLogColorSets.AccentDefault);
             return;
         }
         
@@ -139,7 +139,7 @@ public class CmdFiltering
         List<GameStatus> gameStatusList = ConvertStrStatusToEnum(toStrList);
         _currentFilterCondition.Statuses = gameStatusList;
 
-        _cmdSceneManager.OutPutManager.SendMessage(systemReply.replyMessage, systemReply.logColor);
+        _cmdSceneManager.OutPutManager.SendLogMessage(systemReply.replyMessage, systemReply.logColor);
     }
 
     private void ReceiveTitle(string message, CmdReturn cmdReturn)
@@ -150,7 +150,7 @@ public class CmdFiltering
         var systemReply = CmdRegister.RegisterArrayCategory(message, _currentFilterCondition.GameNames[0]
             , registerVal => { _currentFilterCondition.GameNames[0] = registerVal; });
 
-        _cmdSceneManager.OutPutManager.SendMessage(systemReply.replyMessage, systemReply.logColor);
+        _cmdSceneManager.OutPutManager.SendLogMessage(systemReply.replyMessage, systemReply.logColor);
     }
 
     private void ReceiveTag(string message, CmdReturn cmdReturn)
@@ -161,7 +161,7 @@ public class CmdFiltering
         var systemReply = CmdRegister.RegisterArrayCategory(message, _currentFilterCondition.GameTags[0]
             , registerVal => { _currentFilterCondition.GameTags[0] = registerVal; });
 
-        _cmdSceneManager.OutPutManager.SendMessage(systemReply.replyMessage, systemReply.logColor);
+        _cmdSceneManager.OutPutManager.SendLogMessage(systemReply.replyMessage, systemReply.logColor);
     }
 
     private void ReceiveDev(string message, CmdReturn cmdReturn)
@@ -172,7 +172,7 @@ public class CmdFiltering
         var systemReply = CmdRegister.RegisterArrayCategory(message, _currentFilterCondition.GameDevs[0]
             , registerVal => { _currentFilterCondition.GameDevs[0] = registerVal; });
 
-        _cmdSceneManager.OutPutManager.SendMessage(systemReply.replyMessage, systemReply.logColor);
+        _cmdSceneManager.OutPutManager.SendLogMessage(systemReply.replyMessage, systemReply.logColor);
     }
 
     private void ReceiveId(string message, CmdReturn cmdReturn)
@@ -182,7 +182,7 @@ public class CmdFiltering
         var systemReply = CmdRegister.RegisterSingleValInWList(message, _currentFilterCondition.GameIds,
             registerVal => { _currentFilterCondition.GameIds = registerVal; });
 
-        _cmdSceneManager.OutPutManager.SendMessage(systemReply.replyMessage, systemReply.logColor);
+        _cmdSceneManager.OutPutManager.SendLogMessage(systemReply.replyMessage, systemReply.logColor);
     }
 
     private void ReceiveSoft(string message, CmdReturn cmdReturn)
@@ -241,7 +241,7 @@ public class CmdFiltering
     {
         if (message == "or")
         {
-            _cmdSceneManager.OutPutManager.SendMessage("orの使用には対応していません", OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("orの使用には対応していません", OutPutTextLogColorSets.AccentDefault);
             return true;
         }
         return false;

@@ -27,7 +27,7 @@ public class CmdWaitingAnimInLog
                 currentTxt = originMessage;
             }
 
-            cmdSceneManager.OutPutManager.SendMessage(currentTxt, outPutTextLogColorSets, specifiedUUID:messageCode);
+            cmdSceneManager.OutPutManager.SendLogMessage(currentTxt, outPutTextLogColorSets, specifiedUUID:messageCode);
             await UniTask.WaitForSeconds(_waitSeconds, cancellationToken: token);
         }
     }

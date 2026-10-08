@@ -13,16 +13,16 @@ public class CmdAddGameByLocal : CmdAct
     public override void FirstCall()
     {
         base.FirstCall();
-        _cmdSceneManager.OutPutManager.SendMessage("ローカルアップロードモードに変更します", OutPutTextLogColorSets.SystemDefault);
-        CmdGenericInfoInputOfAddGame cmdGenericInfoInputOfAddGame = new CmdGenericInfoInputOfAddGame(ReceiveInputedGameData);
+        _cmdSceneManager.OutPutManager.SendLogMessage("ローカルアップロードモードに変更します", OutPutTextLogColorSets.SystemDefault);
+        CmdGameInfoInputerForAdd cmdGameInfoInputerForAdd = new CmdGameInfoInputerForAdd(ReceiveInputedGameData);
         CmdReturn returnCmdReceiveMode = new CmdReturn(ReturnCmdReceiveMode);
-        cmdGenericInfoInputOfAddGame.StartInputData(returnCmdReceiveMode);
+        cmdGameInfoInputerForAdd.StartInputData(returnCmdReceiveMode);
     }
 
     private void ReceiveInputedGameData(GameData addGameData, string localGamePath, string localImagePath)
     {
         _cmdSceneManager.InputFieldManager.ChangeAction(new CmdNothing().MessageGird);
-        _cmdSceneManager.OutPutManager.SendMessage("ゲームフォルダのコピー中です", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("ゲームフォルダのコピー中です", OutPutTextLogColorSets.SystemDefault);
         AddNewGameByLocal addNewGameByLocal = new AddNewGameByLocal();
         try
         {
@@ -30,11 +30,11 @@ public class CmdAddGameByLocal : CmdAct
         }
         catch (Exception e)
         {
-            _cmdSceneManager.OutPutManager.SendMessage(e.ToString(), OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage(e.ToString(), OutPutTextLogColorSets.AccentDefault);
             throw e;
         }
 
-        _cmdSceneManager.OutPutManager.SendMessage("アップロードが終了しました。コマンド受付モードに移行します", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("アップロードが終了しました。コマンド受付モードに移行します", OutPutTextLogColorSets.SystemDefault);
         ReturnCmdReceiveMode();
     }
 }

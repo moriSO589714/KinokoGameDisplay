@@ -12,7 +12,7 @@ public class CmdDelete : CmdAct
     {
         CmdReturn cmdReturn = new CmdReturn(ReturnCmdReceiveMode);
         _cmdSceneManager.InputFieldManager.ChangeAction((string message) => ReceiveGameId(message, cmdReturn), _gameIdLib);
-        _cmdSceneManager.OutPutManager.SendMessage("削除したいゲームのゲームIDを送信してください", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("削除したいゲームのゲームIDを送信してください", OutPutTextLogColorSets.SystemDefault);
     }
 
     protected virtual void ReceiveGameId(string message, CmdReturn cmdReturn)
@@ -26,14 +26,14 @@ public class CmdDelete : CmdAct
 
         if (matchGameData.Count < 1)
         {
-            _cmdSceneManager.OutPutManager.SendMessage("合致するIDを持つゲームが存在しません", OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("合致するIDを持つゲームが存在しません", OutPutTextLogColorSets.AccentDefault);
             CmdDeleteEntrance();
             return;
         }
 
         if (matchGameData.Count > 1)
         {
-            _cmdSceneManager.OutPutManager.SendMessage("合致するIDを持つゲームが複数存在します", OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("合致するIDを持つゲームが複数存在します", OutPutTextLogColorSets.AccentDefault);
             CmdDeleteEntrance();
             return;
         }
@@ -42,7 +42,7 @@ public class CmdDelete : CmdAct
 
         if (!CheckGameStatus(targetGameData.Status))
         {
-            _cmdSceneManager.OutPutManager.SendMessage($"対象のゲームはこのモードでは削除できません。対象ゲームのステータス{targetGameData.Status}>>>", OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage($"対象のゲームはこのモードでは削除できません。対象ゲームのステータス{targetGameData.Status}>>>", OutPutTextLogColorSets.AccentDefault);
             CmdDeleteEntrance();
             return;
         }
@@ -72,7 +72,7 @@ public class CmdDelete : CmdAct
 
         CmdReturn cmdReturn = new CmdReturn(() => CheckDelete(deleteTarget));
 
-        _cmdSceneManager.OutPutManager.SendMessage(checkLog, OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage(checkLog, OutPutTextLogColorSets.SystemDefault);
         _cmdSceneManager.InputFieldManager.ChangeAction((string val) => ReceiveTitle(val, deleteTarget, cmdReturn));
     }
 
@@ -87,7 +87,7 @@ public class CmdDelete : CmdAct
         }
         else
         {
-            _cmdSceneManager.OutPutManager.SendMessage("タイトルと一致していません", OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("タイトルと一致していません", OutPutTextLogColorSets.AccentDefault);
             CmdDeleteEntrance();
             return;
         }

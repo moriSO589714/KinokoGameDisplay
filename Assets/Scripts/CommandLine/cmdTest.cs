@@ -1,7 +1,5 @@
 ﻿using Google.Apis.Drive.v3;
 using Google.Apis.Sheets.v4;
-using SFB;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -16,6 +14,7 @@ public class cmdTest : MonoBehaviour
 
     void Start()
     {
+
         Debug.Log("end");
     }
 
@@ -33,6 +32,19 @@ public class cmdTest : MonoBehaviour
         {
             _cts.Cancel();
         }
+    }
+
+    private void UpdateSheet()
+    {
+        NetworksSingleton networksSingleton = NetworksSingleton.Instance;
+        AllDirs allDirs = AllDirs.GetInstance();
+        GameData forTestGameData = new GameData();
+        forTestGameData.GameID = "TestGameId???";
+        forTestGameData.GameDriveId = "TestDriveId???";
+        List<string> registerSheetFormat = ElementOrderManager.GameDataToSheetFormat(networksSingleton.ReturnElementOrder(true), forTestGameData);
+
+        OnNetUpdateGameInfoToSpSt onNetUpdateGameInfoToSpSt = new OnNetUpdateGameInfoToSpSt(networksSingleton.ReturnSheetsService(), allDirs.SpreadSheetID);
+        onNetUpdateGameInfoToSpSt.UpdateGameInfo(registerSheetFormat, 33);
     }
 
     private void DeleteGame()
@@ -124,7 +136,7 @@ public class cmdTest : MonoBehaviour
         string localImagePath = "E:/pictures/PICT0011.jpg";
         string tmpFolderPath = "E:/GameCreate/Projects/Unity/KinokoGameDisplay/KinokinoAsobitai";
         string gameId = "TESTGAMEID441";
-        string picDriveId = networkThumbnailManager.UploadThumbnail(ondu, parentDriveId, localImagePath, tmpFolderPath, gameId);
+        string picDriveId = networkThumbnailManager.UploadThumbnail(ondu, parentDriveId, localImagePath, gameId);
         Debug.Log("uploadDriveId>>>" + picDriveId);
     }
 

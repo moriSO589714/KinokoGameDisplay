@@ -17,7 +17,7 @@ public class CmdDownloadGame : CmdActForUseNetwork
     public override void FirstCall()
     {
         base.FirstCall();
-        _cmdSceneManager.OutPutManager.SendMessage("ダウンロードモードに変更します", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("ダウンロードモードに変更します", OutPutTextLogColorSets.SystemDefault);
 
         try
         {
@@ -27,7 +27,7 @@ public class CmdDownloadGame : CmdActForUseNetwork
         {
             if (_ctsForLoadSpreadSheet.IsCancellationRequested) return;
 
-            _cmdSceneManager.OutPutManager.SendMessage("ゲーム情報の取得に失敗しました。モードを終了します。", OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("ゲーム情報の取得に失敗しました。モードを終了します。", OutPutTextLogColorSets.AccentDefault);
             ReturnCmdReceiveMode();
             Debug.LogException(e);
             return;
@@ -55,7 +55,7 @@ public class CmdDownloadGame : CmdActForUseNetwork
 
     private void DoFiltering()
     {
-        _cmdSceneManager.OutPutManager.SendMessage("ダウンロードするゲームのフィルタリング情報を送信してください", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("ダウンロードするゲームのフィルタリング情報を送信してください", OutPutTextLogColorSets.SystemDefault);
         //ダウンロードが可能なゲームはステータスが全てNotDownloadなのでフィルタリング設定を修正
         _filtering.FixStatusList(new List<GameStatus>() { GameStatus.NotDownloaded});
         _filtering.WaitSendCategory();
@@ -65,7 +65,7 @@ public class CmdDownloadGame : CmdActForUseNetwork
     {
         _currentFilterCondition = sendedFilterCondition;
 
-        _cmdSceneManager.OutPutManager.SendMessage("当てはまるゲームを検索中", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("当てはまるゲームを検索中", OutPutTextLogColorSets.SystemDefault);
         //一致するGameDataクラスを取得してくる
         List<GameData> matchGameDatas = PickUpMatchGameData(sendedFilterCondition);
 
@@ -76,14 +76,14 @@ public class CmdDownloadGame : CmdActForUseNetwork
             {
                 checkMessage += $"\nタイトル名：{gameData.GameTitle}, id：{gameData.GameID}";
             }
-            _cmdSceneManager.OutPutManager.SendMessage(checkMessage, OutPutTextLogColorSets.SystemDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage(checkMessage, OutPutTextLogColorSets.SystemDefault);
 
-            _cmdSceneManager.OutPutManager.SendMessage($"ダウンロードを実行しますか？", OutPutTextLogColorSets.SystemDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage($"ダウンロードを実行しますか？", OutPutTextLogColorSets.SystemDefault);
             _cmdSceneManager.InputFieldManager.ChangeAction(CheckDownload);
         }
         else
         {
-            _cmdSceneManager.OutPutManager.SendMessage("当てはまるゲームが存在しません。フィルタリング設定を修正してください", OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("当てはまるゲームが存在しません。フィルタリング設定を修正してください", OutPutTextLogColorSets.AccentDefault);
             DoFiltering();
         }
     }
@@ -95,7 +95,7 @@ public class CmdDownloadGame : CmdActForUseNetwork
             DoFiltering();
             return;
         }
-        _cmdSceneManager.OutPutManager.SendMessage("ゲームのダウンロードを開始します。", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("ゲームのダウンロードを開始します。", OutPutTextLogColorSets.SystemDefault);
         //コマンドを受け付けないようにしておく
         _cmdSceneManager.InputFieldManager.ChangeAction(new CmdNothing().MessageGird);
         DoDownload();
@@ -139,12 +139,12 @@ public class CmdDownloadGame : CmdActForUseNetwork
 
         CmdDownloadProgressLog cmdDlProgressLog = new CmdDownloadProgressLog();
         string logText = cmdDlProgressLog.UpdateTitle(currentDlGameTitle, lastPercentage);
-        string logId = _cmdSceneManager.OutPutManager.SendMessage(logText, OutPutTextLogColorSets.SystemDefault);
+        string logId = _cmdSceneManager.OutPutManager.SendLogMessage(logText, OutPutTextLogColorSets.SystemDefault);
 
         _watchingGameDlCue.UpdateProgressTaskActForTaskAct = 
-            (GameDlTask task) =>  _cmdSceneManager.OutPutManager.SendMessage(cmdDlProgressLog.UpdateTitle(task.TaskInstance.GameData.GameTitle), OutPutTextLogColorSets.SystemDefault, specifiedUUID: logId);
+            (GameDlTask task) =>  _cmdSceneManager.OutPutManager.SendLogMessage(cmdDlProgressLog.UpdateTitle(task.TaskInstance.GameData.GameTitle), OutPutTextLogColorSets.SystemDefault, specifiedUUID: logId);
         _watchingGameDlCue.UpdateProgressInPercentageAct =
-            (float progress) => _cmdSceneManager.OutPutManager.SendMessage(cmdDlProgressLog.UpdatePercentage(progress.ToString()), OutPutTextLogColorSets.SystemDefault, specifiedUUID: logId);            
+            (float progress) => _cmdSceneManager.OutPutManager.SendLogMessage(cmdDlProgressLog.UpdatePercentage(progress.ToString()), OutPutTextLogColorSets.SystemDefault, specifiedUUID: logId);            
     }
 
     /// <summary>
@@ -152,7 +152,7 @@ public class CmdDownloadGame : CmdActForUseNetwork
     /// </summary>
     private void EndDownload(WatchingGameDlCueForUI watchingGameDlCueForUI)
     {
-        _cmdSceneManager.OutPutManager.SendMessage("全てのダウンロードが終了しました。", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("全てのダウンロードが終了しました。", OutPutTextLogColorSets.SystemDefault);
 
         //エラーが発生したタスクが無いかの確認
         List<GameDlError> errorTasks = watchingGameDlCueForUI.CheckErrorTasks();
@@ -173,13 +173,13 @@ public class CmdDownloadGame : CmdActForUseNetwork
         {
             errorLog += $"\n・ゲームタイトル：{gameDlError.Task.TaskInstance.GameData.GameTitle},ID：{gameDlError.Task.TaskInstance.GameData.GameID},エラー分類：{gameDlError.DlException.GameDlErrorType.ToString()}";
         }
-        _cmdSceneManager.OutPutManager.SendMessage(errorLog, OutPutTextLogColorSets.AccentDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage(errorLog, OutPutTextLogColorSets.AccentDefault);
         CmdReturn endThisMode = new CmdReturn(ReturnCmdReceiveMode);
         //エラーが発生したゲームタイトルのwecを作成
         WordEmtCell errorTitleWEC = CreateLibFromGameDatas.CreateGameIdLib(errorTasks.Select(errorTask => errorTask.Task.TaskInstance.GameData).ToList());
         _cmdSceneManager.InputFieldManager.ChangeAction
             ((string message) => RecoveryError(message, errorTasks, endThisMode), errorTitleWEC);
-        _cmdSceneManager.OutPutManager.SendMessage($"エラーが発生したゲームのIDを送信することで回復処理を実行できます。\n「{endThisMode.ReturnWord}」を送信することでコマンド受信モードに戻ります。", OutPutTextLogColorSets.AccentDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage($"エラーが発生したゲームのIDを送信することで回復処理を実行できます。\n「{endThisMode.ReturnWord}」を送信することでコマンド受信モードに戻ります。", OutPutTextLogColorSets.AccentDefault);
         return;
     }
 
@@ -192,7 +192,7 @@ public class CmdDownloadGame : CmdActForUseNetwork
         int targetErrorIndex = errorTasks.FindIndex(errorTask => errorTask.Task.TaskInstance.GameData.GameID == message);
         if(targetErrorIndex == -1)
         {
-            _cmdSceneManager.OutPutManager.SendMessage("送信されたIDはエラーが発生したゲームリストに含まれていません。送信し直してください", OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("送信されたIDはエラーが発生したゲームリストに含まれていません。送信し直してください", OutPutTextLogColorSets.AccentDefault);
             return;
         }
         GameDlError targetErrorTask = errorTasks[targetErrorIndex];
@@ -206,7 +206,7 @@ public class CmdDownloadGame : CmdActForUseNetwork
                 DoRecovery(targetErrorTask.Task.TaskName);
                 break;
             default:
-                _cmdSceneManager.OutPutManager.SendMessage($"このモードで回復不可能なエラーです。管理者にお問い合わせ下さい\nエラー詳細：{targetErrorTask.DlException.Message}", OutPutTextLogColorSets.AccentDefault);                
+                _cmdSceneManager.OutPutManager.SendLogMessage($"このモードで回復不可能なエラーです。管理者にお問い合わせ下さい\nエラー詳細：{targetErrorTask.DlException.Message}", OutPutTextLogColorSets.AccentDefault);                
                 ReturnCmdReceiveMode();
                 return;
         }
@@ -216,7 +216,7 @@ public class CmdDownloadGame : CmdActForUseNetwork
     {
         //リカバリ中はメッセージ送信を受け付けない
         _cmdSceneManager.InputFieldManager.ChangeAction(new CmdNothing().MessageGird);
-        _cmdSceneManager.OutPutManager.SendMessage("回復処理を実行します", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("回復処理を実行します", OutPutTextLogColorSets.SystemDefault);
         List<GameDlError> errorTasks = _watchingGameDlCue.CheckErrorTasks();
 
         //タスク名からerrorListのインデックスを取得

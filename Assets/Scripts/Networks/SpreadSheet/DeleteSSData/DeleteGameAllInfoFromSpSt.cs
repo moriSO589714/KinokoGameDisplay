@@ -42,26 +42,8 @@ public class DeleteGameAllInfoFromSpSt
             throw new System.Exception("想定されているGameIDを表す変数がGameDataクラスに存在しません。");
         }
 
-        //GameIDが入っているインデックス値を取得
-        int gameIdIndex = elementOrder.IndexOf(_gameIDVariableNameOnGameData);
-        //スプレッドシートから取得したリストから当てはまる行のインデックスを取得する
-        int targetGameIndexInList = -1;
-        for(int i = 0; i <= sheetDatas.Count - 1; i++)
-        {
-            if (sheetDatas[i][gameIdIndex] == targetGameId)
-            {
-                targetGameIndexInList = i;
-                break;
-            }
-        }
-        //スプレッドシートに指定のGameIdのゲームが存在しなかった場合
-        if(targetGameIndexInList == -1)
-        {
-            Debug.Log("シートに削除対象のゲームデータが見つかりません");
-            return;
-        }
-        //スプレッドシートに存在するデータテーブル以外の部分(項目名など)を値に加味する。index値は0始まりなので、データテーブルの範囲が始まるセルの座標をそのまま足しても問題がない
-        int targetSheetRow = targetGameIndexInList + (int)_allDirs.SpreadSheetStartCellPos.y;
+        //対象のGameIdのスプレッドシート上の行数を取得する
+        int targetSheetRow = SpStTools.SearchSheetForRowFromGameId(_allDirs, elementOrder, _gameIDVariableNameOnGameData, sheetDatas, targetGameId);
 
         OnNetDeleteRow onNetDeleteRow = null;
         if (CheckInEnvironment.isOnNet)

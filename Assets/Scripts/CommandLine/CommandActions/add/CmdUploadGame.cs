@@ -18,7 +18,7 @@ public class CmdUploadGame : CmdActForUseNetwork
     public override void FirstCall()
     {
         base.FirstCall();
-        _cmdSceneManager.OutPutManager.SendMessage("アップロードモードに変更します", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("アップロードモードに変更します", OutPutTextLogColorSets.SystemDefault);
         _cmdSceneManager.InputFieldManager._endModeAction += () => { _ctsForUpload?.Cancel(); };
 
         //スプシのロード中にコマンドの受付を行わないようにしておく
@@ -31,7 +31,7 @@ public class CmdUploadGame : CmdActForUseNetwork
         catch (Exception e)
         {
             if (_ctsForLoadSpreadSheet.IsCancellationRequested) return;
-            _cmdSceneManager.OutPutManager.SendMessage("ゲーム情報の取得に失敗しました。モードを終了します。", OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("ゲーム情報の取得に失敗しました。モードを終了します。", OutPutTextLogColorSets.AccentDefault);
             ReturnCmdReceiveMode();
             Debug.LogException(e);
             return;
@@ -47,9 +47,9 @@ public class CmdUploadGame : CmdActForUseNetwork
 
     private void OtherPrepare()
     {
-        CmdGenericInfoInputOfAddGame cmdGenericInfoInputOfAddGame = new CmdGenericInfoInputOfAddGame(ReceiveInputedGameData);
+        CmdGameInfoInputerForAdd cmdGameInfoInputerForAdd = new CmdGameInfoInputerForAdd(ReceiveInputedGameData);
         CmdReturn cmdReturn = new CmdReturn(ReturnCmdReceiveMode);
-        cmdGenericInfoInputOfAddGame.StartInputData(cmdReturn);
+        cmdGameInfoInputerForAdd.StartInputData(cmdReturn);
     }   
 
     protected override void Init()
@@ -87,15 +87,15 @@ public class CmdUploadGame : CmdActForUseNetwork
     {
         //アップロード開始のメソッド(MessageGirdに入力先を変えておく)
         _cmdSceneManager.InputFieldManager.ChangeAction(new CmdNothing().MessageGird);
-        _cmdSceneManager.OutPutManager.SendMessage("アップロードを開始します", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("アップロードを開始します", OutPutTextLogColorSets.SystemDefault);
         UploadGame(uploadGameData, localGamePath, localImagePath);
     }
 
     private async UniTask UploadGame(GameData uploadGameInfo, string localGamePath, string localImagePath)
     {
-        string logId = _cmdSceneManager.OutPutManager.SendMessage("ゲーム情報を最適化中", OutPutTextLogColorSets.SystemDefault);
+        string logId = _cmdSceneManager.OutPutManager.SendLogMessage("ゲーム情報を最適化中", OutPutTextLogColorSets.SystemDefault);
         GameData uploadGameData = GameDataForUpload.CreateGameDataForUpload(uploadGameInfo, localGamePath, localImagePath);
-        _cmdSceneManager.OutPutManager.SendMessage("ゲーム情報の最適化が完了", OutPutTextLogColorSets.SystemDefault, specifiedUUID:logId);
+        _cmdSceneManager.OutPutManager.SendLogMessage("ゲーム情報の最適化が完了", OutPutTextLogColorSets.SystemDefault, specifiedUUID:logId);
 
         _ctsForUpload = new CancellationTokenSource();
         GameUpProgress gameUpProgress = new GameUpProgress();
@@ -107,7 +107,7 @@ public class CmdUploadGame : CmdActForUseNetwork
         }
         catch (Exception e) 
         {
-            _cmdSceneManager.OutPutManager.SendMessage($"アップロード中にエラーが発生しました\nエラー内容>>{e}", OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage($"アップロード中にエラーが発生しました\nエラー内容>>{e}", OutPutTextLogColorSets.AccentDefault);
             Debug.Log(e);
         }
         ReturnCmdReceiveMode();
@@ -115,6 +115,6 @@ public class CmdUploadGame : CmdActForUseNetwork
 
     private void DuringUploadLogger(string message, string logId)
     {
-        _cmdSceneManager.OutPutManager.SendMessage(message, OutPutTextLogColorSets.SystemDefault, specifiedUUID:logId);
+        _cmdSceneManager.OutPutManager.SendLogMessage(message, OutPutTextLogColorSets.SystemDefault, specifiedUUID:logId);
     }
 }

@@ -92,6 +92,33 @@ public static class SpStTools
 
         return new List<List<string>>(filledList);
     }
+
+    /// <summary>
+    /// ゲームIDからスプレッドシートの何行目に登録されているのかを検索する
+    /// </summary>   
+    public static int SearchSheetForRowFromGameId(AllDirs allDirs, List<string> elementOrder, string gameIdVariableName, List<List<string>> sheetDatas, string targetGameId)
+    {
+        int gameIdIndexInSheet = elementOrder.IndexOf(gameIdVariableName);
+        //ローカルにキャッシュされているスプシのデータ(List<List<string>>形式)から当てはまる行のインデックス値を取得
+        int targetGameIndexInLocalList = -1;
+        for(int i = 0; i <= sheetDatas.Count - 1; i++)
+        {
+            if (sheetDatas[i][gameIdIndexInSheet] == targetGameId)
+            {
+                targetGameIndexInLocalList = i;
+                break;
+            }
+        }
+        //指定のGameIDのゲームが見つからなかった場合
+        if(targetGameIndexInLocalList == -1)
+        {
+            throw new Exception("スプレッドシートに対象となるGameIdを持つゲームが登録されていません。");
+        }
+
+        //実際のスプレッドシートの行に変換する(項目名の行などデータテーブルでは無い部分)
+        int resultSheetRow = targetGameIndexInLocalList + (int)allDirs.SpreadSheetStartCellPos.y;
+        return resultSheetRow;
+    }
 }
 
 public enum DirectionOnSpSt 

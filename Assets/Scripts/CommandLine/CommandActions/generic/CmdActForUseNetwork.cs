@@ -25,7 +25,7 @@ public class CmdActForUseNetwork : CmdAct
         GameDataManager gameDataManager = new GameDataManager();
 
         string connectInternetLog = "インターネットに接続して、現在登録されているゲーム情報を取得しています";
-        string messageId = _cmdSceneManager.OutPutManager.SendMessage(connectInternetLog, OutPutTextLogColorSets.SystemDefault);
+        string messageId = _cmdSceneManager.OutPutManager.SendLogMessage(connectInternetLog, OutPutTextLogColorSets.SystemDefault);
         
         CancellationTokenSource ctsForLogAnim = new CancellationTokenSource();
         new CmdWaitingAnimInLog().LoopWaitingLog(connectInternetLog, OutPutTextLogColorSets.SystemDefault, messageId, ctsForLogAnim.Token);
@@ -51,6 +51,6 @@ public class CmdActForUseNetwork : CmdAct
             return;
         }
 
-        _cmdSceneManager.OutPutManager.SendMessage("接続成功。初期処理を実行中", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("接続成功。初期処理を実行中", OutPutTextLogColorSets.SystemDefault);
     }
 }

@@ -7,7 +7,7 @@ public class CmdShowTxt : MonoBehaviour
     public void SayHelloWorld()
     {
         if (_cmdSceneManager == null) _cmdSceneManager = CmdSceneManager.Instance;
-        _cmdSceneManager.OutPutManager.SendMessage("HelloWorld", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("HelloWorld", OutPutTextLogColorSets.SystemDefault);
     }
 
     /// <summary>
@@ -17,7 +17,7 @@ public class CmdShowTxt : MonoBehaviour
     {
         if (_cmdSceneManager == null) _cmdSceneManager = CmdSceneManager.Instance;
         //inputFieldのメッセージ送信先を切り替える
-        _cmdSceneManager.InputFieldManager.ChangeAction( str => _cmdSceneManager.OutPutManager.SendMessage(str, OutPutTextLogColorSets.SystemDefault));
+        _cmdSceneManager.InputFieldManager.ChangeAction( str => _cmdSceneManager.OutPutManager.SendLogMessage(str, OutPutTextLogColorSets.SystemDefault));
 
         //終了時のアクションを登録する
         _cmdSceneManager.InputFieldManager._whenEndCurrentAction += () => { Debug.Log("オウム返しを終了します"); };

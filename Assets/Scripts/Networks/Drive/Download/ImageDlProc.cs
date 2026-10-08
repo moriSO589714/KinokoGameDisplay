@@ -36,7 +36,7 @@ public class ImageDlProc
 
         string gameId = _targetGameData.GameID;
         //画像パスの作成
-        string imageExtension = "." + new CmdGenericInfoInputOfAddGame()._imageExtension;
+        string imageExtension = "." + new CmdGameInfoInputer()._imageExtension;
         string imageFileName = gameId + imageExtension;
         string imagePath = Path.Combine(_allDirs.ImageFolderPath, imageFileName);
 

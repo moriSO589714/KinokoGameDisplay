@@ -32,7 +32,7 @@ public class CmdDownloadThumbnaill : CmdActForUseNetwork
     public override void FirstCall()
     {
         base.FirstCall();
-        _cmdSceneManager.OutPutManager.SendMessage("サムネイルダウンロードモードに変更します", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("サムネイルダウンロードモードに変更します", OutPutTextLogColorSets.SystemDefault);
         _ctsForDownloadImages = new CancellationTokenSource();
 
         try
@@ -43,7 +43,7 @@ public class CmdDownloadThumbnaill : CmdActForUseNetwork
         {
             if (_ctsForLoadSpreadSheet.IsCancellationRequested) return;
 
-            _cmdSceneManager.OutPutManager.SendMessage("ゲーム情報の取得に失敗しました。モードを終了します", OutPutTextLogColorSets.AccentDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("ゲーム情報の取得に失敗しました。モードを終了します", OutPutTextLogColorSets.AccentDefault);
             ReturnCmdReceiveMode();
             Debug.LogError(e);
             return;
@@ -61,7 +61,7 @@ public class CmdDownloadThumbnaill : CmdActForUseNetwork
 
     private void DoFiltering()
     {
-        _cmdSceneManager.OutPutManager.SendMessage("サムネイルのダウンロードを行うゲームのフィルタリング情報を送信してください", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("サムネイルのダウンロードを行うゲームのフィルタリング情報を送信してください", OutPutTextLogColorSets.SystemDefault);
         //ローカル追加のゲームはサムネイルのダウンロードが行えないため、フィルタリング設定を修正
         _filtering.FixStatusList(new List<GameStatus>() { GameStatus.NotDownloaded, GameStatus.Downloaded, GameStatus.Downloading, GameStatus.UpdateAvailable });
         _filtering.WaitSendCategory();
@@ -70,7 +70,7 @@ public class CmdDownloadThumbnaill : CmdActForUseNetwork
     private void ReceiveCmdFiltering(FilterCondition sendedFilterCondition)
     {
         _currentFilterCondition = sendedFilterCondition;
-        _cmdSceneManager.OutPutManager.SendMessage("当てはまるゲームを検索中", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("当てはまるゲームを検索中", OutPutTextLogColorSets.SystemDefault);
         //一致するGameDataクラスの取得
         List<GameData> matchGameDatas = PickUpMatchGameData(_currentFilterCondition);
 
@@ -81,14 +81,14 @@ public class CmdDownloadThumbnaill : CmdActForUseNetwork
             {
                 checkMessage += $"\nタイトル名：{gameData.GameTitle}, id：{gameData.GameID}";
             }
-            _cmdSceneManager.OutPutManager.SendMessage(checkMessage, OutPutTextLogColorSets.SystemDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage(checkMessage, OutPutTextLogColorSets.SystemDefault);
 
-            _cmdSceneManager.OutPutManager.SendMessage("サムネイルのダウンロードを実行しますか？", OutPutTextLogColorSets.SystemDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("サムネイルのダウンロードを実行しますか？", OutPutTextLogColorSets.SystemDefault);
             _cmdSceneManager.InputFieldManager.ChangeAction(CheckThumbnailDownload);
         }
         else
         {
-            _cmdSceneManager.OutPutManager.SendMessage("当てはまるゲームが存在しません。フィルタリング情報を修正してください", OutPutTextLogColorSets.SystemDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("当てはまるゲームが存在しません。フィルタリング情報を修正してください", OutPutTextLogColorSets.SystemDefault);
             DoFiltering();
         }
     }
@@ -109,7 +109,7 @@ public class CmdDownloadThumbnaill : CmdActForUseNetwork
             DoFiltering();
             return;
         }
-        _cmdSceneManager.OutPutManager.SendMessage("サムネイルのダウンロードを開始します", OutPutTextLogColorSets.SystemDefault);
+        _cmdSceneManager.OutPutManager.SendLogMessage("サムネイルのダウンロードを開始します", OutPutTextLogColorSets.SystemDefault);
         //コマンドを受け付けないようにする
         _cmdSceneManager.InputFieldManager.ChangeAction(new CmdNothing().MessageGird);
         DoThumbnailDownload();
@@ -120,7 +120,7 @@ public class CmdDownloadThumbnaill : CmdActForUseNetwork
         int counter = 0;
         string baseLog = "サムネイルのダウンロード中\n【進捗】";
         int totalDataCounts = _candidateGameDatas.Count;
-        string logId = _cmdSceneManager.OutPutManager.SendMessage(baseLog + $"{counter}/{totalDataCounts}", OutPutTextLogColorSets.SystemDefault);
+        string logId = _cmdSceneManager.OutPutManager.SendLogMessage(baseLog + $"{counter}/{totalDataCounts}", OutPutTextLogColorSets.SystemDefault);
         List<string> isErrorList = new List<string>();
 
         foreach(GameData targetGameData in _candidateGameDatas)
@@ -145,12 +145,12 @@ public class CmdDownloadThumbnaill : CmdActForUseNetwork
             }
 
             counter++;
-            _cmdSceneManager.OutPutManager.SendMessage(baseLog + $"{counter}/{totalDataCounts}", OutPutTextLogColorSets.SystemDefault, specifiedUUID: logId);
+            _cmdSceneManager.OutPutManager.SendLogMessage(baseLog + $"{counter}/{totalDataCounts}", OutPutTextLogColorSets.SystemDefault, specifiedUUID: logId);
         }
 
         if (!_ctsForDownloadImages.IsCancellationRequested)
         {
-            _cmdSceneManager.OutPutManager.SendMessage("指定された全てのゲームのサムネイルをダウンロードしました", OutPutTextLogColorSets.SystemDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("指定された全てのゲームのサムネイルをダウンロードしました", OutPutTextLogColorSets.SystemDefault);
 
             if(isErrorList.Count > 0)
             {
@@ -159,10 +159,10 @@ public class CmdDownloadThumbnaill : CmdActForUseNetwork
                 {
                     errorLogTxt = errorLogTxt + "\n" + "・" + errorLog;
                 }
-                _cmdSceneManager.OutPutManager.SendMessage(errorLogTxt, OutPutTextLogColorSets.AccentDefault);
+                _cmdSceneManager.OutPutManager.SendLogMessage(errorLogTxt, OutPutTextLogColorSets.AccentDefault);
             }
 
-            _cmdSceneManager.OutPutManager.SendMessage("サムネイルダウンロードモードを終了します", OutPutTextLogColorSets.SystemDefault);
+            _cmdSceneManager.OutPutManager.SendLogMessage("サムネイルダウンロードモードを終了します", OutPutTextLogColorSets.SystemDefault);
             ReturnCmdReceiveMode();
         }
     }

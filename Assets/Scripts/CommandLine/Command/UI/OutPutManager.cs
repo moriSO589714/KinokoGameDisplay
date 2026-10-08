@@ -39,7 +39,7 @@ public class OutputManager : ObjectStuckPool<OutputTextBox>
         return Output(message, textColor, isUserMessage, specifiedUUID);
     }
 
-    public string SendMessage(string message, OutPutTextLogColorSets outPutTextLogColorSets, bool isUserMessage = false, string specifiedUUID = null)
+    public string SendLogMessage(string message, OutPutTextLogColorSets outPutTextLogColorSets, bool isUserMessage = false, string specifiedUUID = null)
     {
         Color textColor = GetTextColor(outPutTextLogColorSets);
         return Output(message, textColor, isUserMessage, specifiedUUID);

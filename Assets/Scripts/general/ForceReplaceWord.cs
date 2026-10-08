@@ -67,10 +67,16 @@ public class ForceReplaceWord
     /// </summary>
     public string CombineArrayToSheetStr(string[] strArray)
     {
-        //joinでは先頭に区切り文字が追加されないため代入しておく
-        string result = ArrayWordForSheet;
-        //区切り文字を指定して結合
-        result += string.Join(ArrayWordForSheet, strArray);
+        string result = "";
+
+        if(strArray != null && strArray.Count() != 0)
+        {
+            //joinでは先頭に区切り文字が追加されないため代入しておく 
+            result = ArrayWordForSheet;
+            //区切り文字を指定して結合
+            result += string.Join(ArrayWordForSheet, strArray);
+        }
+
         return result;
     }
 

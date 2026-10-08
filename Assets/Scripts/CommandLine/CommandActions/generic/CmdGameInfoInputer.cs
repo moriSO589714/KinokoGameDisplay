@@ -1,37 +1,38 @@
-﻿using SFB;
+﻿using Google.Apis.Sheets.v4.Data;
+using SFB;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
 
-public class CmdGenericInfoInputOfAddGame
+public class CmdGameInfoInputer
 {
-    private readonly string _decisionWord = "upload";
+    protected readonly string _decisionWord;
     public readonly string _imageExtension = "png";
 
-    private bool _allowDecision = false;
+    protected bool _allowDecision = false;
 
-    private GameData _currentGameData = null;
-    private string _userGamePath = "";
-    private string _userImagePath = "";
-    private Action<GameData, string, string> _sendGameDataAct = null;
-    private CmdSceneManager _sceneManager = null;
+    protected GameData _currentGameData = null;
+    protected string _userGamePath = "";
+    protected string _userImagePath = "";
+   protected Action<GameData, string, string> _sendGameDataAct = null; //ゲームデータ入力後に完成したデータを送信するメソッド, <GameData, フォルダのパス, サムネのパス>
+    protected CmdSceneManager _sceneManager = null;
 
     WordEmtCell _categoryWec;
     WordEmtCell _tagsLib;
     WordEmtCell _devsLib;
     WordEmtCell _toolsLib;
 
-    public CmdGenericInfoInputOfAddGame(Action<GameData, string, string> sendGameDataAct)
+    public CmdGameInfoInputer(Action<GameData, string, string> sendGameDataAct)
     {
         _sendGameDataAct = sendGameDataAct;
         Init();
     }
 
-    public CmdGenericInfoInputOfAddGame(){}
+    public CmdGameInfoInputer(){}
 
-    private void Init()
+    protected virtual void Init()
     {
         _currentGameData = new GameData();
         _currentGameData.GameDevelopper = new string[0];
@@ -59,16 +60,16 @@ public class CmdGenericInfoInputOfAddGame
         });
     }
 
-    private void End()
+    protected virtual void End()
     {
         _sendGameDataAct = null;
         _allowDecision = false;
     }
 
-    public void StartInputData(CmdReturn returnCmdReceive)
+    public virtual void StartInputData(CmdReturn returnCmdReceive)
     {
         _sceneManager.InputFieldManager.ChangeAction((string message) => SwitchInputContent(message, returnCmdReceive), _categoryWec);
-        _sceneManager.OutPutManager.SendMessage
+        _sceneManager.OutPutManager.SendLogMessage
             ($"設定する項目名を送信してください。({returnCmdReceive.ReturnWord}で1つ前に戻れます)" +
             $"\n・{CmdAddGameCategory.title}:{_currentGameData?.GameTitle}" +
             $"\n・{CmdAddGameCategory.description}:{_currentGameData?.GameDescription}" +
@@ -79,24 +80,16 @@ public class CmdGenericInfoInputOfAddGame
             $"\n・{CmdAddGameCategory.softwaretype}:{_currentGameData?.GameSoftwareType}" +
             $"\n・{CmdAddGameCategory.tags}:{MergeArray(_currentGameData?.GameTags)}", OutPutTextLogColorSets.SystemDefault
             );
-
-        //アップロードに必要なデータが最低限セットされているかを確認する
-        if (GameDataForUpload.QualityCheck(_currentGameData, _userGamePath))
-        {
-            _allowDecision = true;
-            _sceneManager.OutPutManager.SendMessage
-                ($"※※アップロードが行えます。アップロードを実行する場合は「{_decisionWord}」を送信してください※※", OutPutTextLogColorSets.Blue);
-        }
     }
 
-    private void SwitchInputContent(string message, CmdReturn returnReceiveCmd)
+    protected virtual void SwitchInputContent(string message, CmdReturn returnReceiveCmd)
     {
         if (returnReceiveCmd.ReturnCheck(message))
         {
             return;
         }
 
-        if (message == _decisionWord && _allowDecision)
+        if (CheckDecision(message))
         {
             _sendGameDataAct.Invoke(_currentGameData, _userGamePath, _userImagePath);
             End();
@@ -105,7 +98,7 @@ public class CmdGenericInfoInputOfAddGame
 
         if (!Enum.TryParse<CmdAddGameCategory>(message, out var content))
         {
-            _sceneManager.OutPutManager.SendMessage("送信された項目は存在しません", OutPutTextLogColorSets.AccentDefault);
+            _sceneManager.OutPutManager.SendLogMessage("送信された項目は存在しません", OutPutTextLogColorSets.AccentDefault);
             return;
         }
 
@@ -114,15 +107,16 @@ public class CmdGenericInfoInputOfAddGame
         switch (content) 
         {
             case CmdAddGameCategory.title:
-                _sceneManager.OutPutManager.SendMessage("タイトル名を送信してください", OutPutTextLogColorSets.SystemDefault);
+                _sceneManager.OutPutManager.SendLogMessage("タイトル名を送信してください", OutPutTextLogColorSets.SystemDefault);
                 _sceneManager.InputFieldManager.ChangeAction((string message) => ReceiveTitle(message, returnStartInputData));
                 break;
             case CmdAddGameCategory.description:
-                _sceneManager.OutPutManager.SendMessage("ゲームの説明を送信してください", OutPutTextLogColorSets.SystemDefault);
+                ForceReplaceWord forceReplaceWord = new ForceReplaceWord();
+                _sceneManager.OutPutManager.SendLogMessage($"ゲームの説明を送信してください。「{forceReplaceWord.ReplacedNewLine}」で改行が行なえます", OutPutTextLogColorSets.SystemDefault);
                 _sceneManager.InputFieldManager.ChangeAction((string message) => ReceiveDescription(message, returnStartInputData));
                 break;
             case CmdAddGameCategory.folderpath:
-                _sceneManager.OutPutManager.SendMessage("ゲームが入っているフォルダのパスを送信してください", OutPutTextLogColorSets.SystemDefault);
+                _sceneManager.OutPutManager.SendLogMessage("ゲームが入っているフォルダのパスを送信してください", OutPutTextLogColorSets.SystemDefault);
                 try
                 {
                     string selectedPath = new OpenFilePanel().OpenFolderPanelAndReturnPath();
@@ -131,12 +125,12 @@ public class CmdGenericInfoInputOfAddGame
                 }
                 catch(System.Exception e)
                 {
-                    _sceneManager.OutPutManager.SendMessage("エラーが発生しました。項目名から再送信してください", OutPutTextLogColorSets.AccentDefault);
+                    _sceneManager.OutPutManager.SendLogMessage("エラーが発生しました。項目名から再送信してください", OutPutTextLogColorSets.AccentDefault);
                     Debug.LogException(e);
                 }
                 break;
             case CmdAddGameCategory.exepath:
-                _sceneManager.OutPutManager.SendMessage("ゲームが入っているフォルダのパスを送信してください", OutPutTextLogColorSets.SystemDefault);
+                _sceneManager.OutPutManager.SendLogMessage("ゲームが入っているフォルダのパスを送信してください", OutPutTextLogColorSets.SystemDefault);
                 try
                 {
                     ExtensionFilter filter = new ExtensionFilter("All File", "*");
@@ -146,12 +140,12 @@ public class CmdGenericInfoInputOfAddGame
                 }
                 catch(System.Exception e)
                 {
-                    _sceneManager.OutPutManager.SendMessage("エラーが発生しました。項目名から再送信してください", OutPutTextLogColorSets.AccentDefault);
+                    _sceneManager.OutPutManager.SendLogMessage("エラーが発生しました。項目名から再送信してください", OutPutTextLogColorSets.AccentDefault);
                     Debug.LogError(e);
                 }
                 break;
             case CmdAddGameCategory.imagepath:
-                _sceneManager.OutPutManager.SendMessage("サムネイル画像のパスを送信してください", OutPutTextLogColorSets.SystemDefault);
+                _sceneManager.OutPutManager.SendLogMessage("サムネイル画像のパスを送信してください", OutPutTextLogColorSets.SystemDefault);
                 try
                 {
                     ExtensionFilter filter = new ExtensionFilter("Image Path", _imageExtension);
@@ -161,20 +155,20 @@ public class CmdGenericInfoInputOfAddGame
                 }
                 catch(System.Exception e)
                 {
-                    _sceneManager.OutPutManager.SendMessage("エラーが発生しました。項目名から再送信してください", OutPutTextLogColorSets.AccentDefault);
+                    _sceneManager.OutPutManager.SendLogMessage("エラーが発生しました。項目名から再送信してください", OutPutTextLogColorSets.AccentDefault);
                     Debug.LogError(e);
                 }
                 break;
             case CmdAddGameCategory.deveroppers:
-                _sceneManager.OutPutManager.SendMessage("ゲームの開発者名を送信してください", OutPutTextLogColorSets.SystemDefault);
+                _sceneManager.OutPutManager.SendLogMessage("ゲームの開発者名を送信してください", OutPutTextLogColorSets.SystemDefault);
                 _sceneManager.InputFieldManager.ChangeAction((string message) => ReceiveAddDeveroppers(message, returnStartInputData), _devsLib);
                 break;
             case CmdAddGameCategory.softwaretype:
-                _sceneManager.OutPutManager.SendMessage("使用したツール・ソフトウェアを送信してください", OutPutTextLogColorSets.SystemDefault);
+                _sceneManager.OutPutManager.SendLogMessage("使用したツール・ソフトウェアを送信してください", OutPutTextLogColorSets.SystemDefault);
                 _sceneManager.InputFieldManager.ChangeAction((string message) => ReceiveTool(message, returnStartInputData), _toolsLib);
                 break;
             case CmdAddGameCategory.tags:
-                _sceneManager.OutPutManager.SendMessage("追加するタグを送信してください", OutPutTextLogColorSets.SystemDefault);
+                _sceneManager.OutPutManager.SendLogMessage("追加するタグを送信してください", OutPutTextLogColorSets.SystemDefault);
                 _sceneManager.InputFieldManager.ChangeAction((string message) => ReceiveAddTags(message, returnStartInputData), _tagsLib);
                 break;
 
@@ -201,7 +195,7 @@ public class CmdGenericInfoInputOfAddGame
         var systemReply = CmdRegister.RegisterSingleCategory(message,
             registerVal => { _currentGameData.GameTitle = registerVal; });
 
-        _sceneManager.OutPutManager.SendMessage(systemReply.replyMessage, systemReply.logColor);
+        _sceneManager.OutPutManager.SendLogMessage(systemReply.replyMessage, systemReply.logColor);
         returnStartInputData.ForceDoingAction();
     }
 
@@ -212,7 +206,7 @@ public class CmdGenericInfoInputOfAddGame
         var systemReply = CmdRegister.RegisterSingleCategory(message,
                 registerVal => { _currentGameData.GameDescription = registerVal; });
 
-        _sceneManager.OutPutManager.SendMessage(systemReply.replyMessage, systemReply.logColor);
+        _sceneManager.OutPutManager.SendLogMessage(systemReply.replyMessage, systemReply.logColor);
         returnStartInputData.ForceDoingAction();
     }
 
@@ -223,7 +217,7 @@ public class CmdGenericInfoInputOfAddGame
         var systemReply = CmdRegister.RegisterSingleCategory(message,
                 registerVal => { _currentGameData.GameSoftwareType = registerVal; });
 
-        _sceneManager.OutPutManager.SendMessage(systemReply.replyMessage, systemReply.logColor);
+        _sceneManager.OutPutManager.SendLogMessage(systemReply.replyMessage, systemReply.logColor);
     }
 
     private void ReceiveAddDeveroppers(string message, CmdReturn returnStartInputData)
@@ -233,7 +227,7 @@ public class CmdGenericInfoInputOfAddGame
         var systemReply = CmdRegister.RegisterArrayCategory(message, _currentGameData.GameDevelopper.ToList(),
                 registerVal => { _currentGameData.GameDevelopper = registerVal.ToArray(); });
 
-        _sceneManager.OutPutManager.SendMessage(systemReply.replyMessage, systemReply.logColor);
+        _sceneManager.OutPutManager.SendLogMessage(systemReply.replyMessage, systemReply.logColor);
     }
 
     private void ReceiveAddTags(string message, CmdReturn returnStartInputData)
@@ -243,7 +237,7 @@ public class CmdGenericInfoInputOfAddGame
         var systemReply = CmdRegister.RegisterArrayCategory(message, _currentGameData.GameTags.ToList(),
                 registerVal => { _currentGameData.GameTags = registerVal.ToArray(); });
 
-        _sceneManager.OutPutManager.SendMessage(systemReply.replyMessage, systemReply.logColor);
+        _sceneManager.OutPutManager.SendLogMessage(systemReply.replyMessage, systemReply.logColor);
     }
 
     private void ReceiveGameFolderPath(string message, CmdReturn returnStartInputData)
@@ -259,7 +253,7 @@ public class CmdGenericInfoInputOfAddGame
             _currentGameData.GameExeName = "";
         }
 
-        _sceneManager.OutPutManager.SendMessage(systemReply.replyMessage, systemReply.logColor);
+        _sceneManager.OutPutManager.SendLogMessage(systemReply.replyMessage, systemReply.logColor);
         returnStartInputData.ForceDoingAction();
     }
 
@@ -270,7 +264,7 @@ public class CmdGenericInfoInputOfAddGame
         var systemReply = CmdRegister.RegisterExePath(message, _userGamePath,
                 registerVal => _currentGameData.GameExeName = registerVal);
 
-        _sceneManager.OutPutManager.SendMessage(systemReply.replyMessage, systemReply.logColor);
+        _sceneManager.OutPutManager.SendLogMessage(systemReply.replyMessage, systemReply.logColor);
         returnStartInputData.ForceDoingAction();
     }
 
@@ -281,11 +275,17 @@ public class CmdGenericInfoInputOfAddGame
         var systemReply = CmdRegister.RegisterFilePath(message,
                 registerVal => _userImagePath = registerVal);
 
-        _sceneManager.OutPutManager.SendMessage(systemReply.replyMessage, systemReply.logColor);
+        _sceneManager.OutPutManager.SendLogMessage(systemReply.replyMessage, systemReply.logColor);
         returnStartInputData.ForceDoingAction();
     }
     //=====================================================================================================================================
+
+    protected virtual bool CheckDecision(string message)
+    {
+        return false;
+    }
 }
+
 
 public enum CmdAddGameCategory
 {

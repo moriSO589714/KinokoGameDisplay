@@ -31,6 +31,25 @@ public class GameData
     public string[] GameTags; //ゲームに付与されているタグ
     [MustItem]
     public GameStatus Status;//ゲームの状態(ダウンロードされているかなど)
+
+    public GameData() { }
+
+    //コピーコンストラクタ
+    public GameData(GameData copyed)
+    {
+        GameTitle = copyed.GameTitle;
+        GameDirName = copyed.GameDirName;
+        GameExeName = copyed.GameExeName;
+        GameID = copyed.GameID;
+        GameVersion = copyed.GameVersion;
+        GameDescription = copyed.GameDescription;
+        GameDevelopper = copyed.GameDevelopper;
+        GameSoftwareType = copyed.GameSoftwareType;
+        GameDriveId = copyed.GameDriveId;
+        GameImageId = copyed.GameImageId;
+        GameTags = copyed.GameTags;
+        Status = copyed.Status;
+    }
 }
 
 /// <summary>

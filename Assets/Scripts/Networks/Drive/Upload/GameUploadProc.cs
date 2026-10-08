@@ -43,39 +43,82 @@ public class GameUploadProc
 
         try
         {
-            await UniTask.RunOnThreadPool(() => UploadGame(forceUpload, gameData, gameUpProgress), cancellationToken: ct);
+            await UniTask.RunOnThreadPool(() => UploadAll(forceUpload, gameData, gameUpProgress), cancellationToken: ct);
         }
         catch (System.Exception e)
         {
             //エラーで終了した場合はアップロード途中の部分の削除を行う
             if(_driveId != "")
             {
-                //tmpフォルダの削除
-                string tempDirPath = _allDirs.TmpUpPath;
-                string tempGamePath = CreateDirPath.TempGamePathForUpload(tempDirPath, _gameOriginalId);
-                DirectoryActs.CompleteDirDelete(tempGamePath);
 
                 //アップロード済みのデータやスプシデータの削除
-                DeleteProc deleteProc = new DeleteProc(_onNetDelete, _onNetGetParentId, _onNetDriveGetName);
-                await deleteProc.UniDeleteDriveGame(_driveId, _gameOriginalId, new CancellationTokenSource().Token);
+                try
+                {
+                    //tmpフォルダの削除
+                    string tempDirPath = _allDirs.TmpUpPath;
+                    string tempGamePath = CreateDirPath.TempGamePathForUpload(tempDirPath, _gameOriginalId);
+                    
+                    DirectoryActs.CompleteDirDelete(tempGamePath);
+                    DeleteProc deleteProc = new DeleteProc(_onNetDelete, _onNetGetParentId, _onNetDriveGetName);
+                    await deleteProc.UniDeleteDriveGame(_driveId, _gameOriginalId, new CancellationTokenSource().Token);
+                }
+                catch(System.Exception e2)
+                {
+                    Debug.LogException(e2);
+                }
             }
 
             throw e;
         }
     }
 
+    private void UploadAll(bool forceUpload, GameData gameData, GameUpProgress gameUpProgress)
+    {
+        string localGameDir = gameData.GameDriveId;
+        string localImageDir = gameData.GameImageId;
+
+        string createGameId = CreateGameId(gameUpProgress);
+        string idDriveFolderId = CreateIdDriveFolder(createGameId);
+        string driveId = UploadGame(forceUpload, gameData, createGameId, idDriveFolderId, gameUpProgress);
+        string imageDriveId = UploadImage(idDriveFolderId, createGameId, gameData, gameUpProgress);
+        WriteSheetForUpload(localGameDir, createGameId, driveId, imageDriveId, gameData, gameUpProgress);
+
+        gameUpProgress?.ChangeState("アップロード処理が完了しました");
+    }
+
     /// <summary>
-    /// ゲームをアップロードする
-    /// GameDataクラスのGameDriveIdとGameImageIdにはそれぞれのローカルパスを入れる
+    /// GameIdを作成する
     /// </summary>
-    /// <exception cref="System.Exception"></exception>
-    private void UploadGame(bool forceUpload, GameData gameData, GameUpProgress gameUpProgress)
+    /// <param name="progress"></param>
+    /// <returns></returns>
+    private string CreateGameId(GameUpProgress progress)
     {
         //ゲームを判別するための固有IDの生成
         string gameId = UUIDGenerator.GenerateUUID();
         _gameOriginalId = gameId;
         Debug.Log("UploadGameId>>>" + gameId);
-        gameUpProgress?.ChangeState($"ゲームIDの作成完了。ID>>>{gameId}");
+        progress?.ChangeState($"ゲームIDの作成完了。ID>>>{gameId}");
+
+        return gameId;
+    }
+
+    /// <summary>
+    /// GameIDが名前になっているドライブフォルダを作成して、そのDriveIdを返す
+    /// </summary>
+    private string CreateIdDriveFolder(string gameId)
+    {
+        string idDriveFolder = _onNetCreateFolder.CreateFolder(_allDirs.GameSavedDriveID, gameId);
+        return idDriveFolder;
+    }
+
+    /// <summary>
+    /// ゲームをアップロードする
+    /// GameDataクラスのGameDriveIdとGameImageIdにはそれぞれのローカルパスを入れる
+    /// </summary>
+    /// <returns>アップロードしたゲームフォルダのDriveID</returns>
+    /// <exception cref="System.Exception"></exception>
+    public string UploadGame(bool forceUpload, GameData gameData,string gameId ,string idDriveFolderId, GameUpProgress gameUpProgress)
+    {
         string localGameDir = gameData.GameDriveId;
         string localImagePath = gameData.GameImageId;
 
@@ -112,10 +155,8 @@ public class GameUploadProc
         string[] uploadFilesPaths = Directory.GetFiles(tempSlicedGamePath);
 
         gameUpProgress?.ChangeState("インターネット上にアップロード用フォルダを作成");
-        //GoogleDrive上のフォルダを作成する
-        string gameSavedDriveId = _allDirs.GameSavedDriveID; //ゲーム保存ドライブフォルダの最も上層フォルダ
-        string gameIdFolderDriveId = _onNetCreateFolder.CreateFolder(gameSavedDriveId, gameId);
-        string uploadTargetFolderDriveId = _onNetCreateFolder.CreateFolder(gameIdFolderDriveId, gameFolderName);
+        //GoogleDrive上のフォルダを作成する     
+        string uploadTargetFolderDriveId = _onNetCreateFolder.CreateFolder(idDriveFolderId, gameFolderName);
 
         _driveId = uploadTargetFolderDriveId;
 
@@ -123,7 +164,15 @@ public class GameUploadProc
         //順番にアップロードを行う
         foreach (string uploadFilePath in uploadFilesPaths)
         {
-            _onNetDriveUploadFile.UploadFile(uploadTargetFolderDriveId, uploadFilePath);
+            try
+            {
+                _onNetDriveUploadFile.UploadFile(uploadTargetFolderDriveId, uploadFilePath);
+            }
+            catch (System.Exception ex) 
+            {
+                UnityEngine.Debug.LogException(ex);
+                throw ex;
+            }
 
             //トークンがキャンセルされていれば例外を投げて処理を中断
             _ct.ThrowIfCancellationRequested();
@@ -131,29 +180,47 @@ public class GameUploadProc
             gameUpProgress?.ChangeState($"{counter++}/{uploadFilesPaths.Count()}をアップロード済み");
         }
 
+        //一時データの削除
+        gameUpProgress?.ChangeState("ローカルの一時ファイル削除を実行中");
+        DirectoryActs.CompleteDirDelete(tempGamePath);
+
+        return uploadTargetFolderDriveId;
+    }
+
+    /// <summary>
+    /// サムネイル画像のアップロード
+    /// </summary>
+    public string UploadImage(string idFolderDriveId, string gameId, GameData gameData, GameUpProgress progress)
+    {
         //サムネ画像のアップロード
-        gameUpProgress?.ChangeState("サムネイル画像のアップロードを開始");
+        progress?.ChangeState("サムネイル画像のアップロードを開始");
+        string localImagePath = gameData.GameImageId;
+
         string imageDriveId = "";
-        if(localImagePath != null && localImagePath != "")
+        if (localImagePath != null && localImagePath != "")
         {
             NetworkThumbnailManager networkThumbnailManager = new NetworkThumbnailManager();
 
             //トークンがキャンセルされていれば例外を投げて処理を中断
             _ct.ThrowIfCancellationRequested();
 
-            imageDriveId = networkThumbnailManager.UploadThumbnail(_onNetDriveUploadFile, gameIdFolderDriveId, localImagePath, tempGamePath, gameId);
+            imageDriveId = networkThumbnailManager.UploadThumbnail(_onNetDriveUploadFile, idFolderDriveId, localImagePath, gameId);
         }
 
-        //一時データの削除
-        gameUpProgress?.ChangeState("ローカルの一時ファイル削除を実行中");
-        DirectoryActs.CompleteDirDelete(tempGamePath);
+        return imageDriveId;
+    }
 
-        gameUpProgress?.ChangeState("スプレッドシートへゲーム情報を追加中");
+    /// <summary>
+    /// データのスプレッドシートへの書き込み
+    /// </summary>
+    private void WriteSheetForUpload(string localGameDir, string gameId, string driveId, string imageDriveId, GameData gameData, GameUpProgress progress)
+    {
+        progress?.ChangeState("スプレッドシートへゲーム情報を追加中");
         //スプレッドシートへの保存
         gameData.GameDirName = Path.GetFileName(localGameDir);
         gameData.GameID = gameId;
         gameData.GameVersion = NetworkGameVersionManager.CreateGameVersion();
-        gameData.GameDriveId = uploadTargetFolderDriveId;
+        gameData.GameDriveId = driveId;
         gameData.GameImageId = imageDriveId;
         NetworksSingleton networksSingleton = NetworksSingleton.Instance;
         List<string> sheetElementOrder = networksSingleton.ReturnElementOrder(false);
@@ -165,6 +232,5 @@ public class GameUploadProc
 
         //スプレッドシートの新規行に追加
         _onNetAppEndGameInfo.AppEndGameInfo(registerSheetFormat);
-        gameUpProgress?.ChangeState("アップロード処理が完了しました");
     }
 }
