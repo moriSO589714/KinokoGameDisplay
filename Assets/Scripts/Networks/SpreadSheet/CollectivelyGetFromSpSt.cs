@@ -10,12 +10,12 @@ public class CollectivelyGetFromSpSt
     /// <summary>
     /// すべてのゲーム情報をスプレッドシートから取得する
     /// </summary>
-    public List<GameData> AllGameDataFromSpSt()
+    public List<GameData> AllGameDataFromSpSt(bool isForce)
     {
         NetworksSingleton networksSingleton = NetworksSingleton.Instance;
         List<string> elementOrder = networksSingleton.ReturnElementOrder(false);
 
-        List<List<string>> allGameInfoList = networksSingleton.ReturnGameInfoAllData(true);
+        List<List<string>> allGameInfoList = networksSingleton.ReturnGameInfoAllData(isForce);
         List<GameData> returnList = new List<GameData>();
         //1行ずつGameDataクラスにする
         foreach(List<string> strList in allGameInfoList)

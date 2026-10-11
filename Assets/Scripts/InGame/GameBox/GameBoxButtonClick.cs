@@ -25,21 +25,22 @@ public class GameBoxButtonClick
     {
         GameData targetGameData = targetGameBox._myGameData;
         //ゲームの状態ごとに処理を分ける
-        if(targetGameData.Status == GameStatus.Downloaded || targetGameData.Status == GameStatus.ByLocal)
+        if (targetGameData.Status == GameStatus.Downloaded || targetGameData.Status == GameStatus.ByLocal)
         {
             //ゲームを実行
             new PlayingGame().OnPlayGame(targetGameData);
         }
-        else if(targetGameData.Status == GameStatus.NotDownloaded)
+        else if (targetGameData.Status == GameStatus.NotDownloaded)
         {
             //ダウンロードを確認するパネルを有効化。残りの処理はそっちに任せる
             _checkDownloadPanel.gameObject.SetActive(true);
             _checkDownloadPanel.GetComponent<CheckDownloadPanel>().SetGameData(targetGameData, _gameDlCue, targetGameBox);
         }
-        else if(targetGameData.Status == GameStatus.UpdateAvailable)
+        else if (targetGameData.Status == GameStatus.UpdateAvailable)
         {
             //アップデートするか確認するパネルを有効化。残りの処理はそっちに任せる
             _checkUpdatePanel.gameObject.SetActive(true);
+            _checkUpdatePanel.GetComponent<CheckUpdatePanel>().SetGameData(targetGameData, _gameDlCue, targetGameBox, () => { new PlayingGame().OnPlayGame(targetGameData); });
         }
     }
 }

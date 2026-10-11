@@ -1,13 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Ookii.Dialogs;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class CmdDownloadThumbnaill : CmdActForUseNetwork
 {
+    protected override string _thisMode => "サムネイルダウンロード";
+
     private FilterCondition _currentFilterCondition = new FilterCondition();
     private CmdFiltering _filtering;
     private List<GameData> _candidateGameDatas;
@@ -31,8 +30,7 @@ public class CmdDownloadThumbnaill : CmdActForUseNetwork
 
     public override void FirstCall()
     {
-        base.FirstCall();
-        _cmdSceneManager.OutPutManager.SendLogMessage("サムネイルダウンロードモードに変更します", OutPutTextLogColorSets.SystemDefault);
+        base.FirstCall();        
         _ctsForDownloadImages = new CancellationTokenSource();
 
         try

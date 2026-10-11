@@ -31,13 +31,13 @@ public class GameDataManager
     /// インターネット上(スプレッドシート)からGameData群をロード(シングルトンに追加)する
     /// </summary>
     /// <param name="filterObjects">絞りこみを行う場合、条件を代入したGameDataクラス,nullの場合絞りこみを行わない</param>
-    public void LoadGameDataFromSpSt()
+    public void LoadGameDataFromSpSt(bool isForce)
     {
         List<GameData> gameDatas = new List<GameData>();
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
         CollectivelyGetFromSpSt collectivelyGetFromSpSt = new CollectivelyGetFromSpSt();
 
-        List<GameData> gotGameDatas = collectivelyGetFromSpSt.AllGameDataFromSpSt();
+        List<GameData> gotGameDatas = collectivelyGetFromSpSt.AllGameDataFromSpSt(isForce);
         gameDatasSingleton.AddGameDataList(gotGameDatas);
     }
 }

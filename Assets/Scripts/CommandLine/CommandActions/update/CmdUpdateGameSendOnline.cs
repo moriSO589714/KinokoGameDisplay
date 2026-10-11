@@ -9,7 +9,7 @@ using UnityEngine;
 /// <summary>
 /// オンライン上(スプシ)のゲームデータを変更する
 /// </summary>
-public class CmdUpdateGameOnline : CmdActForUseNetwork
+public class CmdUpdateGameSendOnline : CmdActForUseNetwork
 {
     private WordEmtCell _idLib;
     private List<GameData> _allGameDatas;
@@ -84,8 +84,8 @@ public class CmdUpdateGameOnline : CmdActForUseNetwork
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
         _allGameDatas = gameDatasSingleton.AllGameDatas;
         _idLib = CreateLibFromGameDatas.CreateGameIdLib(_allGameDatas);
-        _cmdSceneManager.OutPutManager.SendLogMessage("アップデートするゲームのIDを送信してください", OutPutTextLogColorSets.SystemDefault);
         _cmdSceneManager.InputFieldManager.ChangeAction(SelectGame, _idLib);
+        _cmdSceneManager.OutPutManager.SendLogMessage("アップデートするゲームのIDを送信してください", OutPutTextLogColorSets.SystemDefault);
     }
 
     private void SelectGame(string message)
@@ -107,6 +107,13 @@ public class CmdUpdateGameOnline : CmdActForUseNetwork
         else if(matchGameDatas.Count == 1)
         {
             matchGameData = matchGameDatas[0];
+        }
+
+        //ゲームがオンラインで追加されたかを確認する
+        if(matchGameData.Status == GameStatus.ByLocal)
+        {
+            _cmdSceneManager.OutPutManager.SendMessage("送信されたゲームはオンラインで追加されているため、このモードからはアップデートできません。IDを送信し直してください", OutPutTextLogColorSets.AccentDefault);
+            return;
         }
 
         StartDataInput(new GameData(matchGameData), matchGameData);

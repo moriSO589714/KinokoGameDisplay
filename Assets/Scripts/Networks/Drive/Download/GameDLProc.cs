@@ -3,25 +3,27 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
 
 public class GameDlProc
-{
-    public GameData GameData { get; private set; }
+{   
+    public GameData GameData { get; protected set; }
     //ダウンロードプロセスが終了した際にtrueとなる
     public bool EndTaskFlag { get; private set; } = false;
 
-    private OnNetDriveMetaData _onNetDriveMetaData = null;
-    private OnNetDriveGetFile _onNetDriveGetFile = null;
-    private bool _doingTaskFlag = false;
-    private GameDlProgress _gameDlProgress = null;
+    protected OnNetDriveMetaData _onNetDriveMetaData = null;
+    protected OnNetDriveGetFile _onNetDriveGetFile = null;
+    protected bool _doingTaskFlag = false;
+    protected GameDlProgress _gameDlProgress = null;
+    protected AllDirs _allDirs;
 
-    private CancellationToken _ct = new CancellationToken();
+    protected CancellationToken _ct = new CancellationToken();
 
     /// <summary>
     /// 対象のゲームの現在の状態を表す列挙型
     /// </summary>
-    private enum LastGameDLState 
+    protected enum LastGameDLState 
     {
         Completely,//完全にダウンロード済
         ExistSplit,//スライス状態で存在する
@@ -36,7 +38,7 @@ public class GameDlProc
         GameData = gameData;
     }
 
-    public async UniTask DLGameInUniTask(CancellationToken ct, GameDlProgress gameDlProgress = null)
+    public virtual async UniTask DLGameInUniTask(CancellationToken ct, GameDlProgress gameDlProgress = null)
     {
         _doingTaskFlag = true;
         if (gameDlProgress != null)
@@ -50,7 +52,7 @@ public class GameDlProc
     /// <summary>
     /// 実行中のダウンロードタスクを停止する
     /// </summary>
-    public void ForceEndThisProc()
+    public virtual void ForceEndThisProc()
     {
         if (_doingTaskFlag)
         {
@@ -61,14 +63,14 @@ public class GameDlProc
     /// <summary>
     /// 固有IDからゲームデータをローカルに保存する
     /// </summary>
-    private void DLGame()
+    protected virtual void DLGame()
     {
         string gameId = GameData.GameID;
         string driveId = GameData.GameDriveId;
-        AllDirs allDirs = AllDirs.GetInstance();
+        _allDirs = AllDirs.GetInstance();
 
         //使用するパスの定義
-        string tempDirPath = allDirs.TmpDLPath;
+        string tempDirPath = _allDirs.TmpDLPath;
         string tempGameDLPath = CreateDirPath.TempGamePathForDl(tempDirPath: tempDirPath, gameId: gameId);
         string tempSlicedGameDLPath = CreateDirPath.TempSlicedGamePathForDl(tempDirPath: tempDirPath, gameId: gameId);
 
@@ -149,15 +151,10 @@ public class GameDlProc
 
         string gameFileName = newDLData.FileName;
         //完成したゲームデータが置かれるパス
-        string newGamePath = CreateDirPath.GameDataPath(saveGamesDirName: allDirs.GameFilePath, gameId: gameId, gameDirName: gameFileName);
-        
-        //保存したファイル群をマージする(FileCombineに不足ファイルが合った際に呼ぶ処理を登録できる)
-        new FileCombine().MergeSplitedFile(tempGameDLPath, newGamePath);
+        string newGamePath = CreateDirPath.GameDataPath(saveGamesDirName: _allDirs.GameFilePath, gameId: gameId, gameDirName: gameFileName);
 
-        GameData.Status = GameStatus.Downloaded;
-        string thisGameJsonPath = CreateDirPath.GameJsonPath(savedJsonsPath: allDirs.JsonsDirPath, gameId: gameId);
-        //ダウンロード済みデータとしてjsonに保存
-        JSONTools.SerializeJson(GameData, thisGameJsonPath);
+        //tempフォルダから実際のフォルダにゲームを移動させる
+        MoveActualFolder(tempGameDLPath, newGamePath, gameId);
 
         //サムネイル画像(あれば)のダウンロード
         ImageDlProc imageDlProc = new ImageDlProc(_onNetDriveGetFile, GameData);
@@ -176,7 +173,7 @@ public class GameDlProc
         EndTaskFlag = true;
     }
 
-    private LastGameDLState CheckLastStatus(string gameID, string tempSliceGamePath)
+    protected virtual LastGameDLState CheckLastStatus(string gameID, string tempSliceGamePath)
     {
         AllDirs allDirs = AllDirs.GetInstance();
         //既にダウンロード済み
@@ -197,12 +194,10 @@ public class GameDlProc
         {
             return LastGameDLState.ExistSplit;
         }
-
-
     }
 
     //既に前回ダウンロード途中の跡がある際に、前回から現在まででアップデートが行われたかを確認し、行われていたならディレクトリを削除する
-    private bool CheckUpdated(DLData oldData, DLData newData)
+    protected virtual bool CheckUpdated(DLData oldData, DLData newData)
     {
         //ファイル容量もしくは、GameIDが異なる
         if(!isSameDataSize(oldData, newData))
@@ -212,7 +207,7 @@ public class GameDlProc
         return false;
     }
 
-    private bool isSameDataSize(DLData oldData, DLData newData)
+    protected virtual bool isSameDataSize(DLData oldData, DLData newData)
     {
         if(oldData.GameSize != newData.GameSize || oldData.FileName != newData.FileName)
         {
@@ -222,7 +217,7 @@ public class GameDlProc
 
     }
 
-    private Dictionary<string,string> CreateLackDic(MistakeFiles mistakeFiles, Dictionary<string, string> metaDic)
+    protected virtual Dictionary<string,string> CreateLackDic(MistakeFiles mistakeFiles, Dictionary<string, string> metaDic)
     {
         string fileName = mistakeFiles.FileName;
         //不足しているファイルをlong型のリストからstring型のファイル名に変更する
@@ -245,7 +240,7 @@ public class GameDlProc
     /// <summary>
     /// DLData(.000)のファイルをドライブから取得するための処理
     /// </summary>
-    private DLData GetDLDataFromDrive(Dictionary<string, string> metaDic, string tempSlicedGameDLPath)
+    protected virtual DLData GetDLDataFromDrive(Dictionary<string, string> metaDic, string tempSlicedGameDLPath)
     {
         DLData gameDLData = new DLData();
 
@@ -264,5 +259,16 @@ public class GameDlProc
         gameDLData.DeserializeDataByFilePath(Path.Combine(tempSlicedGameDLPath, dlDataFileName));
 
         return gameDLData;
+    }
+
+    protected virtual void MoveActualFolder(string tempGameDLPath, string newGamePath, string gameId)
+    {
+        //保存したファイル群をマージする(FileCombineに不足ファイルが合った際に呼ぶ処理を登録できる)
+        new FileCombine().MergeSplitedFile(tempGameDLPath, newGamePath);
+
+        GameData.Status = GameStatus.Downloaded;
+        string thisGameJsonPath = CreateDirPath.GameJsonPath(savedJsonsPath: _allDirs.JsonsDirPath, gameId: gameId);
+        //ダウンロード済みデータとしてjsonに保存
+        JSONTools.SerializeJson(GameData, thisGameJsonPath);
     }
 }

@@ -17,9 +17,12 @@ public class CmdGameInfoInputerForUpdate : CmdGameInfoInputer
     public override void StartInputData(CmdReturn returnCmdReceive)
     {
         base.StartInputData(returnCmdReceive);
-        _allowDecision = true;
 
-        _sceneManager.OutPutManager.SendLogMessage($"※決定してアップデートをする場合は「{_decisionWord}」を送信してください", OutPutTextLogColorSets.Blue);
+        if (GameDataForUpdate.QualityCheck(_currentGameData, _userGamePath))
+        {
+            _allowDecision = true;
+            _sceneManager.OutPutManager.SendLogMessage($"※決定してアップデートをする場合は「{_decisionWord}」を送信してください", OutPutTextLogColorSets.Blue);
+        }
     }
 
     protected override bool CheckDecision(string message)

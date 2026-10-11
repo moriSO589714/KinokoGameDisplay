@@ -32,7 +32,7 @@ public class CmdActForUseNetwork : CmdAct
 
         try
         {
-            await UniTask.RunOnThreadPool(gameDataManager.LoadGameDataFromSpSt);
+            await UniTask.RunOnThreadPool(() => gameDataManager.LoadGameDataFromSpSt(true));
         }
         catch (Exception e)
         {

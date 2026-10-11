@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class CmdOfflineDelete : CmdDelete
 {
+    protected override string _thisMode => "オフラインゲーム削除";
     protected override void Init()
     {
         
@@ -12,8 +13,7 @@ public class CmdOfflineDelete : CmdDelete
 
     public override void FirstCall()
     {
-        base.FirstCall();
-        _cmdSceneManager.OutPutManager.SendLogMessage("オフラインゲーム削除モードに変更します", OutPutTextLogColorSets.SystemDefault);
+        base.FirstCall();        
 
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
         List<GameData> gameDatas = gameDatasSingleton.AllGameDatas;

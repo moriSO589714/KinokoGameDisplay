@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class CmdAddGameByLocal : CmdAct
 {
+    protected override string _thisMode => "ローカルアップロード";
+
     protected override void Init()
     {
         base.Init();
@@ -12,8 +14,7 @@ public class CmdAddGameByLocal : CmdAct
 
     public override void FirstCall()
     {
-        base.FirstCall();
-        _cmdSceneManager.OutPutManager.SendLogMessage("ローカルアップロードモードに変更します", OutPutTextLogColorSets.SystemDefault);
+        base.FirstCall();        
         CmdGameInfoInputerForAdd cmdGameInfoInputerForAdd = new CmdGameInfoInputerForAdd(ReceiveInputedGameData);
         CmdReturn returnCmdReceiveMode = new CmdReturn(ReturnCmdReceiveMode);
         cmdGameInfoInputerForAdd.StartInputData(returnCmdReceiveMode);

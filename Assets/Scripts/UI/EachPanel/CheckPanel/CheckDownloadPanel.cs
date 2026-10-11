@@ -26,7 +26,7 @@ public class CheckDownloadPanel : UIPanel
         _gameBox = gameBox;
     }
 
-    public void AddGameDlTask()
+    private void AddGameDlTask()
     {
         //ダウンロード用のタスクを作成してキューに追加
         GameDlTask dlTask = new DownloadGame().CreateGameDlTaskAndAddCue(_dlGameData, _gameDlCue);

@@ -22,9 +22,14 @@ public class DownloadGame
             onNetDriveMetaData = new OnNetDriveMetaDatafromTest();
         }
 
-        GameDlProc gameDLProc = new GameDlProc(onNetDriveMetaData, onNetDriveGetFile, gameData);
+        GameDlProc gameDLProc = CreateGameDlProc(onNetDriveGetFile, onNetDriveMetaData, gameData);
         GameDlTask returnTask = new GameDlTask(gameDLProc);
         _cue.AddGameDlTask(returnTask);
         return returnTask;
+    }
+
+    protected virtual GameDlProc CreateGameDlProc(OnNetDriveGetFile onNetDriveGetFile, OnNetDriveMetaData onNetDriveMetaData, GameData gameData)
+    {
+        return new GameDlProc(onNetDriveMetaData, onNetDriveGetFile, gameData);
     }
 }

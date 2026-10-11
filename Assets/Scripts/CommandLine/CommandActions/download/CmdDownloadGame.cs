@@ -7,17 +7,18 @@ using UnityEngine;
 
 public class CmdDownloadGame : CmdActForUseNetwork
 {
-    private FilterCondition _currentFilterCondition = new FilterCondition();
-    private CmdFiltering _filtering;
-    private List<GameData> _candidateGameDatas = new List<GameData>();
+    protected override string _thisMode => "ダウンロード";
 
-    [SerializeField] private GameDlCue _gameDlCue;
-    [SerializeField] private WatchingGameDlCueForUI _watchingGameDlCue;    
+    protected FilterCondition _currentFilterCondition = new FilterCondition();
+    protected CmdFiltering _filtering;
+    protected List<GameData> _candidateGameDatas = new List<GameData>();   
+
+    [SerializeField] protected GameDlCue _gameDlCue;
+    [SerializeField] protected WatchingGameDlCueForUI _watchingGameDlCue;    
 
     public override void FirstCall()
     {
-        base.FirstCall();
-        _cmdSceneManager.OutPutManager.SendLogMessage("ダウンロードモードに変更します", OutPutTextLogColorSets.SystemDefault);
+        base.FirstCall();        
 
         try
         {
@@ -53,7 +54,7 @@ public class CmdDownloadGame : CmdActForUseNetwork
         DoFiltering();
     }
 
-    private void DoFiltering()
+    protected virtual void DoFiltering()
     {
         _cmdSceneManager.OutPutManager.SendLogMessage("ダウンロードするゲームのフィルタリング情報を送信してください", OutPutTextLogColorSets.SystemDefault);
         //ダウンロードが可能なゲームはステータスが全てNotDownloadなのでフィルタリング設定を修正
@@ -104,7 +105,7 @@ public class CmdDownloadGame : CmdActForUseNetwork
     private List<GameData> PickUpMatchGameData(FilterCondition filterCondition)
     {
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
-        List<GameData> matchGameDatas = GameBoxFilter.FilteringGameDatas(_currentFilterCondition, gameDatasSingleton.AllGameDatas);
+        List<GameData> matchGameDatas = GameBoxFilter.FilteringGameDatas(filterCondition, gameDatasSingleton.AllGameDatas);
         //現在のダウンロード候補としてフィールドに保存しておく
         _candidateGameDatas = new List<GameData>(matchGameDatas);
 
@@ -114,7 +115,7 @@ public class CmdDownloadGame : CmdActForUseNetwork
     /// <summary>
     /// 実際にダウンロードを実行
     /// </summary>
-    private void DoDownload()
+    protected virtual void DoDownload()
     {
         DownloadGame downloadGame = new DownloadGame();
         List<GameDlTask> gameDlTasks = new List<GameDlTask>();
@@ -132,7 +133,7 @@ public class CmdDownloadGame : CmdActForUseNetwork
     /// <summary>
     /// ダウンロード中にコマンドラインに進捗ログを流すメソッド
     /// </summary>
-    private void LoggerDuaringDownload()
+    protected void LoggerDuaringDownload()
     {
         string currentDlGameTitle = _gameDlCue.GameDlTasksList[0].TaskInstance.GameData.GameTitle;
         string lastPercentage = _watchingGameDlCue.ReturnLastPercentage();
@@ -150,7 +151,7 @@ public class CmdDownloadGame : CmdActForUseNetwork
     /// <summary>
     /// 予定されたダウンロードが全て終了した際に呼ばれる
     /// </summary>
-    private void EndDownload(WatchingGameDlCueForUI watchingGameDlCueForUI)
+    protected virtual void EndDownload(WatchingGameDlCueForUI watchingGameDlCueForUI)
     {
         _cmdSceneManager.OutPutManager.SendLogMessage("全てのダウンロードが終了しました。", OutPutTextLogColorSets.SystemDefault);
 
@@ -166,7 +167,7 @@ public class CmdDownloadGame : CmdActForUseNetwork
         ReturnCmdReceiveMode();
     }
 
-    private void HappenError(List<GameDlError> errorTasks)
+    protected void HappenError(List<GameDlError> errorTasks)
     {
         string errorLog = "エラー終了したゲームが存在します!!\n【エラーリスト】";
         foreach (GameDlError gameDlError in errorTasks)

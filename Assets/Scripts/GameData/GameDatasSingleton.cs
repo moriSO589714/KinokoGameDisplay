@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
 /// <summary>
 /// 保存されているゲームのデータを管理するシングルトンクラス
@@ -54,27 +50,7 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
             //シングルトンに既に同じゲームIDのゲーム情報が登録されている場合
             if(singletonGameData.GameID == gameData.GameID)
             {
-                //追加されるゲームのバージョンが新しい場合
-                if(long.Parse(singletonGameData.GameVersion) < long.Parse(gameData.GameVersion) && singletonGameData.Status == GameStatus.Downloaded)
-                {
-                    singletonGameData.Status = GameStatus.UpdateAvailable;
-                }
-
-                //それ以外に異なるデータが存在する場合
-                FieldInfo[] gameDataFields = typeof(GameData).GetFields();
-                foreach(FieldInfo field in gameDataFields)
-                {
-                    //ゲームのバージョンは処理を走らせない
-                    if (field.Name == "GameVersion") continue;
-                    if (field.Name == "Status") continue;
-                    var singletonDataValue = field.GetValue(singletonGameData);
-                    var newGameDataValue = field.GetValue(gameData);
-                    if(singletonDataValue != newGameDataValue)
-                    {
-                        //シングルトン側のデータを最新のものに書き換える
-                        field.SetValue(singletonGameData, newGameDataValue);
-                    }
-                }
+                CheckGameDataUpdate.CheckUpdate(oldGameData: singletonGameData, newGameData: gameData);
                 return false;
             }
         }
@@ -84,4 +60,3 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
         return true;
     }
 }
-

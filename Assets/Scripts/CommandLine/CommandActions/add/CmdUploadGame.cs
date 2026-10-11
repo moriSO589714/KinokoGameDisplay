@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class CmdUploadGame : CmdActForUseNetwork
 {
+    protected new string _thisMode = "アップロード";
+
     OnNetDriveUploadFile _onNetDriveUploadFile;
     OnNetCreateFolder _onNetCreateFolder;
     OnNetAppEndGameInfo _onNetAppEndGameInfo;
@@ -17,8 +19,7 @@ public class CmdUploadGame : CmdActForUseNetwork
 
     public override void FirstCall()
     {
-        base.FirstCall();
-        _cmdSceneManager.OutPutManager.SendLogMessage("アップロードモードに変更します", OutPutTextLogColorSets.SystemDefault);
+        base.FirstCall();        
         _cmdSceneManager.InputFieldManager._endModeAction += () => { _ctsForUpload?.Cancel(); };
 
         //スプシのロード中にコマンドの受付を行わないようにしておく
@@ -82,7 +83,13 @@ public class CmdUploadGame : CmdActForUseNetwork
         _ctsForUpload?.Cancel();
         _ctsForUpload = null;
     }
-    
+
+    protected override void ReturnCmdReceiveMode()
+    {
+        _ctsForUpload?.Cancel();
+        base.ReturnCmdReceiveMode();
+    }
+
     private void ReceiveInputedGameData(GameData uploadGameData, string localGamePath, string localImagePath)
     {
         //アップロード開始のメソッド(MessageGirdに入力先を変えておく)

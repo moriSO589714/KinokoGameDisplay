@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CmdAct : MonoBehaviour
 {
     protected CmdSceneManager _cmdSceneManager = null;
+    protected virtual string _thisMode => "";
 
     /// <summary>
     /// コマンドラインでコマンドを送信した際に初めに呼ばれるようにするメソッド
@@ -14,6 +13,7 @@ public class CmdAct : MonoBehaviour
         if (_cmdSceneManager == null) _cmdSceneManager = CmdSceneManager.Instance;
         _cmdSceneManager.InputFieldManager._endModeAction += End;
         Init();
+        _cmdSceneManager.OutPutManager.SendLogMessage($"{_thisMode}モードに変更します", OutPutTextLogColorSets.SystemDefault);
     }
 
     /// <summary>

@@ -1,5 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 
 public class SetGameBoxs
 {
@@ -34,7 +35,7 @@ public class SetGameBoxs
 
     public async UniTask SetAllGameBoxfromNet()
     {
-        await UniTask.RunOnThreadPool(_gameDataManager.LoadGameDataFromSpSt);
+        await UniTask.RunOnThreadPool(() => _gameDataManager.LoadGameDataFromSpSt(true));
         List<GameData> allGameDatas = _gameDatasSingleton.AllGameDatas;
         FilterCondition currentConditions = _gameDatasSingleton.CurrentFilterCondition;
 

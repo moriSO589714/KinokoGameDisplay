@@ -8,6 +8,8 @@ using UnityEngine;
 
 public class CmdOnlineDelete : CmdDelete
 {
+    protected override string _thisMode => "オンラインゲーム削除";
+
     private OnNetGetParentId _onNetGetParentId;
     private OnNetDriveGetName _onNetDriveGetName;
     private OnNetDelete _onNetDelete;
@@ -45,8 +47,7 @@ public class CmdOnlineDelete : CmdDelete
 
     public override void FirstCall()
     {
-        base.FirstCall();
-        _cmdSceneManager.OutPutManager.SendLogMessage("オンラインゲーム削除モードに変更します", OutPutTextLogColorSets.SystemDefault);
+        base.FirstCall();        
         //モードから出る時にトークンをキャンセルするようにしておく
         _cmdSceneManager.InputFieldManager._endModeAction += () => { _forDeleteCts?.Cancel(); };
         //スプシのロード中でコマンドの受付を行わないようにしておく
@@ -68,7 +69,7 @@ public class CmdOnlineDelete : CmdDelete
 
         try
         {
-            await UniTask.RunOnThreadPool(gameDataManager.LoadGameDataFromSpSt);
+            await UniTask.RunOnThreadPool(() => gameDataManager.LoadGameDataFromSpSt(true));
         }
         catch(System.Exception e)
         {

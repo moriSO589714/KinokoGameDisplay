@@ -5,7 +5,8 @@ using System.Linq;
 using UnityEngine;
 
 public class CmdDelete : CmdAct
-{
+{    
+
     protected WordEmtCell _gameIdLib;
 
     protected virtual void CmdDeleteEntrance()
