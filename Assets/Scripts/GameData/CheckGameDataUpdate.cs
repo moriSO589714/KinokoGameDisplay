@@ -40,8 +40,10 @@ public static class CheckGameDataUpdate
         if (isExistUpdate && (oldGameData.Status == GameStatus.Downloaded || oldGameData.Status == GameStatus.UpdateAvailable))
         {
             AllDirs allDirs = AllDirs.GetInstance();
+            GameData forWriteGameData = new GameData(oldGameData);
+            forWriteGameData.Status = GameStatus.Downloaded;
             //jsonファイルを新しいものに更新する
-            GameJsonUpdate.UpdateJson(oldGameData, allDirs);
+            GameJsonUpdate.UpdateJson(forWriteGameData, allDirs);
         }
     }
 }

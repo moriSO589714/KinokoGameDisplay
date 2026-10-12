@@ -26,6 +26,8 @@ public class GameUpdateReceiveProc : GameDlProc
         new GameDeleteManager().UninstallGame(GameData);
 
         base.MoveActualFolder(tempGameDLPath, newGamePath, gameId);
+
+        GameDatasSingleton.Instance.ReplaceGameData(GameData);
     }
 
     /// <summary>

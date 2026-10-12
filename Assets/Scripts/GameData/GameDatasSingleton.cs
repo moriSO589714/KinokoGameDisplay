@@ -31,6 +31,24 @@ public class GameDatasSingleton : BasedSingleton<GameDatasSingleton>
         AllGameDatas.Remove(gameData);
     }
 
+    /// <summary>
+    /// AllDataに存在するGameDataインスタンスを保持したまま、データを入れ替える
+    /// (アップデートした際に利用)
+    /// </summary>
+    public void ReplaceGameData(GameData newGameData)
+    {
+        GameData oldGameData = null;
+        foreach(GameData gameData in AllGameDatas)
+        {
+            if(gameData.GameID == newGameData.GameID)
+            {
+                oldGameData = gameData;
+            }
+        }
+
+        GameDataReplacer.ComparisonAndReplace(oldGameData, newGameData);
+    }
+
     //リストのリセット
     public void ResetGameDataList()
     {

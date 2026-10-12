@@ -16,6 +16,7 @@ public class GameBox : Box
     [SerializeField] UIActBase StartButton;
     [SerializeField] Text GameDirName;
     [SerializeField] int GameDirNameWordsRemit;
+    [SerializeField] GameObject ExistNewVersionMrk;
 
     [SerializeField] Sprite NoImageSprite;
     [SerializeField] Sprite StartButtonSprite;
@@ -43,6 +44,7 @@ public class GameBox : Box
         SetDescription(originGameData.GameDescription);
         SetImage(originGameData.GameID);
         SetGameDirName(originGameData.GameDirName);
+        ActivateExistNewVersionMrk(originGameData.Status);
         ChangeButtonImage();
     }
 
@@ -117,6 +119,7 @@ public class GameBox : Box
                 buttonImage.sprite = DownloadingButtonSprite;
                 break;
         }
+        ActivateExistNewVersionMrk(_myGameData.Status);
     }
 
     private void SetGameDirName(string gameDirName)
@@ -126,6 +129,18 @@ public class GameBox : Box
         string displayStr = _forceReplaceWord.ReturnReplacedWord(gameDirName);
         string setGameDirName = StrTools.ReplaceOverWords(displayStr, GameDirNameWordsRemit);
         GameDirName.text = setGameDirName;
+    }
+
+    private void ActivateExistNewVersionMrk(GameStatus gameStatus)
+    {
+        if(gameStatus == GameStatus.UpdateAvailable)
+        {
+            ExistNewVersionMrk.SetActive(true);
+        }
+        else
+        {
+            ExistNewVersionMrk.SetActive(false);
+        }
     }
 
     /// <summary>

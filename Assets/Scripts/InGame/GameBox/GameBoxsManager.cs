@@ -24,7 +24,7 @@ public class GameBoxsManager : BoxManager
     protected override void Awake()
     {
         base.Awake();
-        _gameBoxButtonClick = new GameBoxButtonClick(_checkDlPanel, _checkUpdataPanel, _gameDlCue);
+        _gameBoxButtonClick = new GameBoxButtonClick(_checkDlPanel, _checkUpdataPanel, _gameDlCue, _watchingGameDlCueForUI);
         _gameBoxImageClick = new GameBoxImageClick();
     }
 

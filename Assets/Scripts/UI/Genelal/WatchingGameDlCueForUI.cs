@@ -16,6 +16,7 @@ public class WatchingGameDlCueForUI : MonoBehaviour
     public Action UpdateProgressTaskAct = null;
     public Action<GameDlTask> UpdateProgressTaskActForTaskAct = null;
     public Action EndProgressTaskAct;
+    public Action<string> EndProgressTaskSendTaskName = null;
 
     public Action<float> UpdateProgressInPercentageAct = null;
     public Action ChangeTaskEmptyAct = null;
@@ -91,6 +92,7 @@ public class WatchingGameDlCueForUI : MonoBehaviour
     private void CallProgressTaskEnd()
     {
         EndProgressTaskAct?.Invoke();
+        EndProgressTaskSendTaskName?.Invoke(_lastProgressTaskName);
     }
 
     /// <summary>

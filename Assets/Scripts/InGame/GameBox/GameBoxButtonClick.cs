@@ -10,14 +10,16 @@ public class GameBoxButtonClick
     private UIPanel _checkDownloadPanel;
     private UIPanel _checkUpdatePanel;
     private GameDlCue _gameDlCue;
+    private WatchingGameDlCueForUI _wathingGameDlCue;
 
-    public GameBoxButtonClick(UIPanel checkDlPanel, UIPanel checkUpdatePanel, GameDlCue gameDlCue)
+    public GameBoxButtonClick(UIPanel checkDlPanel, UIPanel checkUpdatePanel, GameDlCue gameDlCue, WatchingGameDlCueForUI watchingGameDlCueForUI)
     {
         _checkDownloadPanel = checkDlPanel;
         _checkUpdatePanel = checkUpdatePanel;
         _gameDlCue = gameDlCue;
+        _wathingGameDlCue = watchingGameDlCueForUI;
     }
-
+    
     /// <summary>
     /// ボタンが押された際の処理
     /// </summary>
@@ -34,13 +36,13 @@ public class GameBoxButtonClick
         {
             //ダウンロードを確認するパネルを有効化。残りの処理はそっちに任せる
             _checkDownloadPanel.gameObject.SetActive(true);
-            _checkDownloadPanel.GetComponent<CheckDownloadPanel>().SetGameData(targetGameData, _gameDlCue, targetGameBox);
+            _checkDownloadPanel.GetComponent<CheckDownloadPanel>().SetGameData(targetGameData, _gameDlCue, _wathingGameDlCue, targetGameBox);
         }
         else if (targetGameData.Status == GameStatus.UpdateAvailable)
         {
             //アップデートするか確認するパネルを有効化。残りの処理はそっちに任せる
             _checkUpdatePanel.gameObject.SetActive(true);
-            _checkUpdatePanel.GetComponent<CheckUpdatePanel>().SetGameData(targetGameData, _gameDlCue, targetGameBox, () => { new PlayingGame().OnPlayGame(targetGameData); });
+            _checkUpdatePanel.GetComponent<CheckUpdatePanel>().SetGameData(targetGameData, _gameDlCue, _wathingGameDlCue, targetGameBox, () => { new PlayingGame().OnPlayGame(targetGameData); });
         }
     }
 }
