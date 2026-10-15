@@ -5,6 +5,11 @@
     /// </summary>
     public static string ReplaceOverWords(string targetStr, int wordLimits)
     {
+        if(wordLimits == -1)
+        {
+            return targetStr;
+        }
+
         string returnStr = targetStr;
         //制限された文字数以上であった場合以下の処理を実行する。
         if (targetStr.Length > wordLimits)

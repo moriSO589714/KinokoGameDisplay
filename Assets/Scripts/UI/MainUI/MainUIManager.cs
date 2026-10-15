@@ -21,6 +21,7 @@ public class MainUIManager : MonoBehaviour
     [SerializeField] private UIPanel _filterPanel;
     [SerializeField] private UIPanel _optionPanel;
     [SerializeField] private UIPanel _sortPanel;
+    [SerializeField] private UIPanel _libraryPanel;
     private void Awake()
     {
         InitMainUI();
@@ -82,6 +83,17 @@ public class MainUIManager : MonoBehaviour
 
         //フィルタリングマークのアクティブ化確認をメイン画面に戻る度に行う
         commonStateManager.AddOutLoadingFunc(CheckFiltering);
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log("GetSpace");
+            _libraryPanel.gameObject.SetActive(true);
+            GameLibraryPanelManager gameLibraryPanelManager = _libraryPanel as GameLibraryPanelManager;
+            gameLibraryPanelManager.SetData();
+        }
     }
 
     private void CreatePanel(GameObject panel)

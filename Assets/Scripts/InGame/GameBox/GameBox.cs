@@ -40,10 +40,11 @@ public class GameBox : Box
         //型のキャスト
         GameData originGameData = originData as GameData;
         _myGameData = originGameData;
-        SetTitle(originGameData.GameTitle);
-        SetDescription(originGameData.GameDescription);
-        SetImage(originGameData.GameID);
-        SetGameDirName(originGameData.GameDirName);
+
+        GameDataSetterForUI.SetPlainStrData(originGameData.GameTitle, TitleWordsRemit, Title);
+        GameDataSetterForUI.SetPlainStrData(originGameData.GameDescription, DescriptionWordsRemit, DescriptionField);
+        GameDataSetterForUI.SetPlainStrData(originGameData.GameDirName, GameDirNameWordsRemit, GameDirName);
+        SetImage(originGameData.GameID);       
         ActivateExistNewVersionMrk(originGameData.Status);
         ChangeButtonImage();
     }
@@ -63,22 +64,6 @@ public class GameBox : Box
         EndImageLoading += () => { Destroy(_instantiatedAnimObj); };
     }
 
-    private void SetTitle(string gameTitle)
-    {
-        if (gameTitle == null || gameTitle == "") return;
-        //置き換え文字を戻す
-        string displayStr = _forceReplaceWord.ReturnReplacedWord(gameTitle);
-        string setStr = StrTools.ReplaceOverWords(displayStr, TitleWordsRemit);
-        Title.text = setStr;
-    }
-    private void SetDescription(string description)
-    {
-        if (description == "" || description == null) return;
-        //置き換え文字を戻す
-        string displayStr = _forceReplaceWord.ReturnReplacedWord(description);
-        string setDescription = StrTools.ReplaceOverWords(displayStr, DescriptionWordsRemit);
-        DescriptionField.text = setDescription;
-    }
     public void SetImage(string gameId)
     {
         Image gameImageSource = GameImage.GetComponent<Image>();
@@ -120,15 +105,6 @@ public class GameBox : Box
                 break;
         }
         ActivateExistNewVersionMrk(_myGameData.Status);
-    }
-
-    private void SetGameDirName(string gameDirName)
-    {
-        if (gameDirName == null || gameDirName == "") return;
-        //置き換え文字を戻す
-        string displayStr = _forceReplaceWord.ReturnReplacedWord(gameDirName);
-        string setGameDirName = StrTools.ReplaceOverWords(displayStr, GameDirNameWordsRemit);
-        GameDirName.text = setGameDirName;
     }
 
     private void ActivateExistNewVersionMrk(GameStatus gameStatus)

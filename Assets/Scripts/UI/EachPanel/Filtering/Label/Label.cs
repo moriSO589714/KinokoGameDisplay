@@ -22,7 +22,10 @@ public class Label : MonoBehaviour
     {
         MyRect = this.GetComponent<RectTransform>();
         _labelTxt = _labelTxtObj.GetComponent<Text>();
-        _deleteLabelButton.ClickAct += DeleteThis;
+        if(_deleteLabelButton != null)
+        {
+            _deleteLabelButton.ClickAct += DeleteThis;
+        }
     }
 
     private void DeleteThis()
