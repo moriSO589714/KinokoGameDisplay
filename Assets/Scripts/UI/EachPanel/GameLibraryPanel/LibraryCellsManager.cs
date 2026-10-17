@@ -5,7 +5,7 @@ using UnityEngine;
 public class LibraryCellsManager : BoxManager
 {
     [SerializeField] GameObject _libraryCellPref;
-    [SerializeField] GameLibraryMainPanelManager _mainPanelManager;
+    [SerializeField] GameLibraryMainPanelManager _mainPanelManager;   
     [SerializeField] RayPassHitPanel _hitPanel;
 
     private LibraryCell _currentSelectedCell;
@@ -27,11 +27,13 @@ public class LibraryCellsManager : BoxManager
     /// 既存に生成しているボックスを消して新たに生成する
     /// </summary>
     public void GenerateBoxs(List<GameData> gameDataList, int firstActivateIndex)
-    {       
+    {
+        RectTransform thisRect = this.GetComponent<RectTransform>();
         foreach (GameData gameData in gameDataList)
         {
             GameObject instancedBox = InstanceBox(gameData, _lastBoxYPos, _libraryCellPref);
-            instancedBox.GetComponent<LibraryCell>()._activateAct = OnActiveCell;
+            LibraryCell instancedCell = instancedBox.GetComponent<LibraryCell>();
+            instancedCell._activateAct = OnActiveCell;
             _lastBoxYPos = instancedBox.GetComponent<RectTransform>().anchoredPosition.y;
         }
 

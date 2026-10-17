@@ -13,15 +13,11 @@ public class GameBox : Box
     [SerializeField] Text DescriptionField;
     [SerializeField] int DescriptionWordsRemit;
     [SerializeField] UIActBase GameImage;
-    [SerializeField] UIActBase StartButton;
+    [SerializeField] GameStartButton StartButton;
     [SerializeField] Text GameDirName;
     [SerializeField] int GameDirNameWordsRemit;
-    [SerializeField] GameObject ExistNewVersionMrk;
 
     [SerializeField] Sprite NoImageSprite;
-    [SerializeField] Sprite StartButtonSprite;
-    [SerializeField] Sprite DownloadButtonSprite;
-    [SerializeField] Sprite DownloadingButtonSprite;
 
     [SerializeField] GameObject _loadingAnimPref;
     private GameObject _instantiatedAnimObj;
@@ -44,14 +40,13 @@ public class GameBox : Box
         GameDataSetterForUI.SetPlainStrData(originGameData.GameTitle, TitleWordsRemit, Title);
         GameDataSetterForUI.SetPlainStrData(originGameData.GameDescription, DescriptionWordsRemit, DescriptionField);
         GameDataSetterForUI.SetPlainStrData(originGameData.GameDirName, GameDirNameWordsRemit, GameDirName);
-        SetImage(originGameData.GameID);       
-        ActivateExistNewVersionMrk(originGameData.Status);
-        ChangeButtonImage();
+        SetImage(originGameData.GameID);
+        SetStartButton();
     }
 
-    public void SetClickButtonAct(Action<GameBox> clickStartButtonAct)
+    public void SetClickButtonAct(Action<GameData ,GameStartButton> clickStartButtonAct)
     {
-        StartButton.ClickAct += () => clickStartButtonAct(this);
+        StartButton.ClickAct += () => clickStartButtonAct(_myGameData, StartButton);
     }
 
     public void SetClickImageAct(Action<GameBox> dlImageAct)
@@ -62,6 +57,12 @@ public class GameBox : Box
                 instantiated.GetComponent<LoadingSquare>().ChangeParent(GameImage.gameObject);
                 _instantiatedAnimObj = instantiated;};
         EndImageLoading += () => { Destroy(_instantiatedAnimObj); };
+    }
+
+    private void SetStartButton()
+    {
+        StartButton.NewSetGameData(_myGameData);
+        StartButton.ChangeButtonImage();
     }
 
     public void SetImage(string gameId)
@@ -81,42 +82,6 @@ public class GameBox : Box
         }
 
         gameImageSource.sprite = setSprite;
-    }
-
-    public void ChangeButtonImage()
-    {
-        Image buttonImage = StartButton.gameObject.GetComponent<Image>();
-        switch (_myGameData.Status) 
-        {
-            case GameStatus.ByLocal:
-                buttonImage.sprite = StartButtonSprite;
-                break;
-            case GameStatus.Downloaded:
-                buttonImage.sprite = StartButtonSprite;
-                break;
-            case GameStatus.UpdateAvailable:
-                buttonImage.sprite = StartButtonSprite;
-                break;
-            case GameStatus.NotDownloaded:
-                buttonImage.sprite = DownloadButtonSprite;
-                break;
-            case GameStatus.Downloading:
-                buttonImage.sprite = DownloadingButtonSprite;
-                break;
-        }
-        ActivateExistNewVersionMrk(_myGameData.Status);
-    }
-
-    private void ActivateExistNewVersionMrk(GameStatus gameStatus)
-    {
-        if(gameStatus == GameStatus.UpdateAvailable)
-        {
-            ExistNewVersionMrk.SetActive(true);
-        }
-        else
-        {
-            ExistNewVersionMrk.SetActive(false);
-        }
     }
 
     /// <summary>

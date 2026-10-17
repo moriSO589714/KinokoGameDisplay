@@ -1,18 +1,17 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// ゲームボックスのスタートボタンが押されたときの挙動
 /// GameBoxManagerにインスタンスが存在する
 /// </summary>
-public class GameBoxButtonClick
+public class GameStartButtonClickSwitcher
 {
     private UIPanel _checkDownloadPanel;
     private UIPanel _checkUpdatePanel;
     private GameDlCue _gameDlCue;
     private WatchingGameDlCueForUI _wathingGameDlCue;
 
-    public GameBoxButtonClick(UIPanel checkDlPanel, UIPanel checkUpdatePanel, GameDlCue gameDlCue, WatchingGameDlCueForUI watchingGameDlCueForUI)
+    public GameStartButtonClickSwitcher(UIPanel checkDlPanel, UIPanel checkUpdatePanel, GameDlCue gameDlCue, WatchingGameDlCueForUI watchingGameDlCueForUI)
     {
         _checkDownloadPanel = checkDlPanel;
         _checkUpdatePanel = checkUpdatePanel;
@@ -23,9 +22,8 @@ public class GameBoxButtonClick
     /// <summary>
     /// ボタンが押された際の処理
     /// </summary>
-    public void OnClickAction(GameBox targetGameBox)
+    public void OnClickAction(GameData targetGameData, GameStartButton targetGameStartButton)
     {
-        GameData targetGameData = targetGameBox._myGameData;
         //ゲームの状態ごとに処理を分ける
         if (targetGameData.Status == GameStatus.Downloaded || targetGameData.Status == GameStatus.ByLocal)
         {
@@ -36,13 +34,13 @@ public class GameBoxButtonClick
         {
             //ダウンロードを確認するパネルを有効化。残りの処理はそっちに任せる
             _checkDownloadPanel.gameObject.SetActive(true);
-            _checkDownloadPanel.GetComponent<CheckDownloadPanel>().SetGameData(targetGameData, _gameDlCue, _wathingGameDlCue, targetGameBox);
+            _checkDownloadPanel.GetComponent<CheckDownloadPanel>().SetGameData(targetGameData, _gameDlCue, _wathingGameDlCue, targetGameStartButton);
         }
         else if (targetGameData.Status == GameStatus.UpdateAvailable)
         {
             //アップデートするか確認するパネルを有効化。残りの処理はそっちに任せる
             _checkUpdatePanel.gameObject.SetActive(true);
-            _checkUpdatePanel.GetComponent<CheckUpdatePanel>().SetGameData(targetGameData, _gameDlCue, _wathingGameDlCue, targetGameBox, () => { new PlayingGame().OnPlayGame(targetGameData); });
+            _checkUpdatePanel.GetComponent<CheckUpdatePanel>().SetGameData(targetGameData, _gameDlCue, _wathingGameDlCue, targetGameStartButton, () => { new PlayingGame().OnPlayGame(targetGameData); });
         }
     }
 }

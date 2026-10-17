@@ -10,14 +10,24 @@ public class GameLibraryMainPanelManager : MonoBehaviour
     [SerializeField] private Text _descriptionText;
     [SerializeField] private Image _thumbnailImage;
     [SerializeField] private DetailInfoManager _detailInfoManager;
-
+    [SerializeField] private UIPanel _checkDlPanel;
+    [SerializeField] private UIPanel _checkUpdatePanel;
+    [SerializeField] private GameDlCue _gameDlCue;
+    [SerializeField] private WatchingGameDlCueForUI _watchingGameDlCueForUI;
+    [SerializeField] private GameStartButton _startButton;
 
     [SerializeField] private GameLibrarySizeFitter _gameLibrarySizeFitter;
 
     private int _assignNolimit = -1;
 
+    private GameStartButtonClickSwitcher _gameStartButtonClickChanger;
     private GameData _currentGameData;
     private Vector2 _currentFloorPos;
+
+    private void Awake()
+    {
+        _gameStartButtonClickChanger = new GameStartButtonClickSwitcher(_checkDlPanel, _checkUpdatePanel, _gameDlCue, _watchingGameDlCueForUI);
+    }
 
     public void SetData(GameData newGameData)
     {
@@ -28,6 +38,9 @@ public class GameLibraryMainPanelManager : MonoBehaviour
         GameDataSetterForUI.SetPlainStrData(_currentGameData.GameDescription, _assignNolimit, _descriptionText);
         GameDataSetterForUI.SetPlainStrData("#" + string.Join(",#", _currentGameData.GameTags), _assignNolimit, _tagsText);
         _detailInfoManager.SetData(_currentGameData);
+        _startButton.ClickAct = () => _gameStartButtonClickChanger.OnClickAction(newGameData, _startButton);
+        _startButton.NewSetGameData(newGameData);
+        _startButton.ChangeButtonImage();
 
         //UIの変更を即時実行
         Canvas.ForceUpdateCanvases();

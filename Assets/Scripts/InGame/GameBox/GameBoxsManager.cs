@@ -15,7 +15,7 @@ public class GameBoxsManager : BoxManager
 
     [SerializeField] WatchingGameDlCueForUI _watchingGameDlCueForUI;
 
-    private GameBoxButtonClick _gameBoxButtonClick;
+    private GameStartButtonClickSwitcher _gameBoxButtonClickSwitcher;
     private GameBoxImageClick _gameBoxImageClick;
     [SerializeField] private GameObject _loadingAnimPref;
 
@@ -24,7 +24,7 @@ public class GameBoxsManager : BoxManager
     protected override void Awake()
     {
         base.Awake();
-        _gameBoxButtonClick = new GameBoxButtonClick(_checkDlPanel, _checkUpdataPanel, _gameDlCue, _watchingGameDlCueForUI);
+        _gameBoxButtonClickSwitcher = new GameStartButtonClickSwitcher(_checkDlPanel, _checkUpdataPanel, _gameDlCue, _watchingGameDlCueForUI);
         _gameBoxImageClick = new GameBoxImageClick();
     }
 
@@ -41,7 +41,7 @@ public class GameBoxsManager : BoxManager
             GameObject instancedBox = InstanceBox(gameData, _lastBoxYPos, _gameBoxPref);
             _lastBoxYPos = instancedBox.GetComponent<RectTransform>().anchoredPosition.y;
             GameBox instancedGameBox = instancedBox.GetComponent<GameBox>();
-            instancedGameBox.SetClickButtonAct(_gameBoxButtonClick.OnClickAction);
+            instancedGameBox.SetClickButtonAct(_gameBoxButtonClickSwitcher.OnClickAction);
 
             instancedGameBox.SetClickImageAct((gameBox) => _gameBoxImageClick.OnClickAction(gameBox, _ctsForImageDownload.Token));
         }

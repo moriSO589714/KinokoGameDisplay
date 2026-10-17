@@ -8,7 +8,7 @@ public class CheckDownloadPanel : UIPanel
     private GameData _dlGameData = null;
     private GameDlCue _gameDlCue = null;
     private WatchingGameDlCueForUI _wathingGameDlCue = null;
-    private GameBox _gameBox = null;
+    private GameStartButton _currentGameStartButton;
 
     public override void InitPanel()
     {
@@ -20,23 +20,23 @@ public class CheckDownloadPanel : UIPanel
     }
 
     //ダウンロードを実行するゲームのGameDataクラスをセットする
-    public void SetGameData(GameData gameData, GameDlCue gameDlCue, WatchingGameDlCueForUI watchingGameDlCueForUI, GameBox gameBox)
+    public void SetGameData(GameData gameData, GameDlCue gameDlCue, WatchingGameDlCueForUI watchingGameDlCueForUI, GameStartButton gameStartButton)
     {
         _dlGameData = gameData;
         _gameDlCue = gameDlCue;
         _wathingGameDlCue = watchingGameDlCueForUI;
-        _gameBox = gameBox;
+        _currentGameStartButton = gameStartButton;
     }
 
     private void AddGameDlTask()
     {
         //ダウンロード用のタスクを作成してキューに追加
         GameDlTask dlTask = new DownloadGame().CreateGameDlTaskAndAddCue(_dlGameData, _gameDlCue);
-        GameBox localGameBox = _gameBox;
+        GameStartButton localGameStartButton = _currentGameStartButton;
         //ダウンロード終了時にボタンのスプライトを更新するようにしておく
-        _wathingGameDlCue.EndProgressTaskSendTaskName += (string endTaskName) => ChangeSpriteWhenEndDownload(dlTask.TaskName, endTaskName, localGameBox);
+        _wathingGameDlCue.EndProgressTaskSendTaskName += (string endTaskName) => ChangeSpriteWhenEndDownload(dlTask, endTaskName, localGameStartButton);
         //ダウンロード中であることが分かるようにゲームボックスのスプライトを差し替える
-        _gameBox.ChangeButtonImage();
+        _currentGameStartButton.ChangeButtonImage();
         OnCloseProc();
     }
 
@@ -46,12 +46,16 @@ public class CheckDownloadPanel : UIPanel
         this.gameObject.SetActive(false);
     }
 
-    private void ChangeSpriteWhenEndDownload(string taskName, string endTaskName, GameBox targetGameBox)
+    private void ChangeSpriteWhenEndDownload(GameDlTask targetTask, string endTaskName, GameStartButton targetGameStartButton)
     {
         //終了したタスクが引数のIDを持つゲームのタスクか
-        if(taskName == endTaskName)
+        if(targetTask.TaskName == endTaskName)
         {
-            targetGameBox.ChangeButtonImage();
+            //タスクと事前に渡されているスタートボタンのゲームが一致しているか？(ゲームライブラリパネルなどはインスタンスは同じで扱うゲームが変わる)
+            if (targetTask.TaskInstance.GameData.GameID == targetGameStartButton.MyGameData.GameID)
+            {
+                targetGameStartButton.ChangeButtonImage();
+            }
         }
     }
 }

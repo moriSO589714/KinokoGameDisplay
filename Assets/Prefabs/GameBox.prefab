@@ -253,14 +253,10 @@ MonoBehaviour:
   DescriptionField: {fileID: 55513340342271861}
   DescriptionWordsRemit: 60
   GameImage: {fileID: 3987893226828105229}
-  StartButton: {fileID: 9132181174207457532}
+  StartButton: {fileID: 3274110942545510202}
   GameDirName: {fileID: 2388867589193602413}
   GameDirNameWordsRemit: 31
-  ExistNewVersionMrk: {fileID: 2615274908130500239}
   NoImageSprite: {fileID: 21300000, guid: 8fcc58fa72d686c4f9f54611b7a688a7, type: 3}
-  StartButtonSprite: {fileID: 21300000, guid: f71935af8e7ab6f47bf78c1a5db72f5f, type: 3}
-  DownloadButtonSprite: {fileID: 21300000, guid: 5c4fd1d5156b25e4e8d77d922930a65c, type: 3}
-  DownloadingButtonSprite: {fileID: 21300000, guid: ae3b0ed5d42a25949aa98840fae7b70a, type: 3}
   _loadingAnimPref: {fileID: 540808825727845273, guid: 408a3e5ca21bbad4ab6b8108ad249c87, type: 3}
 --- !u!1 &5094532388827226648
 GameObject:
@@ -595,9 +591,9 @@ GameObject:
   - component: {fileID: 1669369357069297791}
   - component: {fileID: 3800914666127811285}
   - component: {fileID: 8152069624821836842}
-  - component: {fileID: 9132181174207457532}
   - component: {fileID: 4249872445578148888}
   - component: {fileID: 7806871267420249640}
+  - component: {fileID: 3274110942545510202}
   m_Layer: 5
   m_Name: OnPlayButton
   m_TagString: Untagged
@@ -662,21 +658,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &9132181174207457532
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8761012007330098764}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 37a699171b31b2e41a7a258a5f85a069, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _zoomScale: 1.06
-  _zoomInSpeed: 0.1
-  _zoomOutSpeed: 0.1
 --- !u!61 &4249872445578148888
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -739,7 +720,7 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 9132181174207457532}
+        - m_Target: {fileID: 3274110942545510202}
           m_TargetAssemblyTypeName: UIActBase, Assembly-CSharp
           m_MethodName: OnClickAct
           m_Mode: 1
@@ -755,7 +736,7 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 9132181174207457532}
+        - m_Target: {fileID: 3274110942545510202}
           m_TargetAssemblyTypeName: ZoomUIAct, Assembly-CSharp
           m_MethodName: OnPointerEnter
           m_Mode: 1
@@ -771,7 +752,7 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 9132181174207457532}
+        - m_Target: {fileID: 3274110942545510202}
           m_TargetAssemblyTypeName: ZoomUIAct, Assembly-CSharp
           m_MethodName: OnPointerExit
           m_Mode: 1
@@ -783,3 +764,22 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+--- !u!114 &3274110942545510202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8761012007330098764}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfca5d6f107ccd14a953d8ea88fa772c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _zoomScale: 1.06
+  _zoomInSpeed: 0.1
+  _zoomOutSpeed: 0.1
+  _startButtonSprite: {fileID: 21300000, guid: f71935af8e7ab6f47bf78c1a5db72f5f, type: 3}
+  _downloadButtonSprite: {fileID: 21300000, guid: 5c4fd1d5156b25e4e8d77d922930a65c, type: 3}
+  _downloadingButtonSprite: {fileID: 21300000, guid: ae3b0ed5d42a25949aa98840fae7b70a, type: 3}
+  _existNewVersionMrk: {fileID: 2615274908130500239}

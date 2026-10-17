@@ -10,7 +10,7 @@ public class ZoomUIAct : UIActBase
     [SerializeField] private float _zoomOutSpeed;
 
     private ZoomInOut _zoomInOut;
-    private void Awake()
+    protected virtual void Awake()
     {
         _zoomInOut = new ZoomInOut(gameObject, _zoomScale, _zoomInSpeed, _zoomOutSpeed);
     }
