@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,6 +21,8 @@ public class GameBox : Box
 
     [SerializeField] GameObject _loadingAnimPref;
     private GameObject _instantiatedAnimObj;
+    private GameImageDownloaderForUI _gameImageDownloaderForUI;
+
     public Action EndImageLoading;
 
     public GameData _myGameData { get; private set; }
@@ -42,15 +45,19 @@ public class GameBox : Box
         SetStartButton();
     }
 
-
-    public void SetClickImageAct(Action<GameBox> dlImageAct)
+    //Displayの中で一番のクソコード。もっと分かりやすい方法は無かったのか
+    public void SetImageDownloader(GameImageDownloaderForUI gameImageDownloaderForUI)
     {
-        GameImage.ClickAct += () => dlImageAct(this);
-        GameImage.ClickAct += () 
-            => { GameObject instantiated = Instantiate(_loadingAnimPref);
-                instantiated.GetComponent<LoadingSquare>().ChangeParent(GameImage.gameObject);
-                _instantiatedAnimObj = instantiated;};
-        EndImageLoading += () => { Destroy(_instantiatedAnimObj); };
+        _gameImageDownloaderForUI = gameImageDownloaderForUI;
+        GameImage.ClickAct += InstantiateLoadingAnimPref;
+        GameImage.ClickAct += () => gameImageDownloaderForUI.OnClickAction
+            (_myGameData, (string gameId) => SetImage(gameId), () => Destroy(_instantiatedAnimObj));
+    }
+
+    private void InstantiateLoadingAnimPref()
+    {
+        _instantiatedAnimObj = Instantiate(_loadingAnimPref);
+        _instantiatedAnimObj.GetComponent<LoadingSquare>().ChangeParent(GameImage.gameObject);
     }
 
     public void SetStartButtonAct(Action<GameData ,GameStartButton> clickStartButtonAct)
@@ -79,39 +86,12 @@ public class GameBox : Box
             return;
         }
 
-        Sprite imageSprite = LoadPicSpriteByPath(gameId);
+        Sprite imageSprite = GetThumbnailImageSprite.LoadPicSpriteByImageName(gameId);
         if (imageSprite != null)
         {
             setSprite = imageSprite;
         }
 
         gameImageSource.sprite = setSprite;
-    }
-
-    /// <summary>
-    /// ローカルパスから画像データをスプライトとして返す
-    /// </summary>
-    /// <param name="path"></param>
-    /// <returns>画像のスプライト、読み取れない場合nulを返す</returns>
-    private Sprite LoadPicSpriteByPath(string imageName)
-    {
-        AllDirs allDirs = AllDirs.GetInstance();
-        string imageExtention = allDirs.ImageExtention;
-        //gameIDから画像のパスにする
-        string imageFilePath = Path.Combine(allDirs.ImageFolderPath, imageName + imageExtention);
-        Sprite sprite = null;
-        if (File.Exists(imageFilePath))
-        {
-            //画像データをバイト配列として読み込む
-            byte[] imageFileBytes = File.ReadAllBytes(imageFilePath);
-            //空のテクスチャを作成する
-            Texture2D texture = new Texture2D(0, 0);
-            //テクスチャにファイルデータをロードする
-            texture.LoadImage(imageFileBytes);
-            //スプライトデータに変換する
-            sprite = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100f);
-        }
-
-        return sprite;
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,6 +21,8 @@ public class CmdInputFieldManager : MonoBehaviour
     //コマンド受信モードに切り替える際に実行するアクション。モードの終了処理など
     public Action _endModeAction;
 
+    [SerializeField] private UIActBase _cmdSendButton;
+
     //予測変換に利用する各インスタンス
     [SerializeField] private CandidateBoxManager _candidateBoxManager;
     [SerializeField] private MonitorPlayerInput _monitorPlayerInput;
@@ -39,7 +40,8 @@ public class CmdInputFieldManager : MonoBehaviour
         _nextSelectBox = () => _candidateBoxManager.MovePerSelectBox(true);
         _previousSelectBox = () => _candidateBoxManager.MovePerSelectBox(false);
 
-        _freeInputEnterController = new FreeInputEnterController(TryAction, ReflectCandidiateValue, _candidateBoxManager);     
+        _freeInputEnterController = new FreeInputEnterController(TryAction, ReflectCandidiateValue, _candidateBoxManager);
+        _cmdSendButton.ClickAct =  OnValueSubmit;
     }
 
     //2択の解答処理をアクションとして代入する用(引数がboolのメソッドをアクションとして登録するため)
@@ -66,7 +68,6 @@ public class CmdInputFieldManager : MonoBehaviour
         _isWordEstimateActive = true;
         _currentWordEstimater = new WordEstimater(newLibrary, " ");
     }
-
 
     public void ChangeInputfieldVal(string val)
     {

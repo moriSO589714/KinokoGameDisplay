@@ -1,8 +1,6 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameBoxsManager : BoxManager
@@ -17,8 +15,7 @@ public class GameBoxsManager : BoxManager
     [SerializeField] WatchingGameDlCueForUI _watchingGameDlCueForUI;
 
     private GameStartButtonClickSwitcher _gameBoxButtonClickSwitcher;
-    private GameBoxImageClick _gameBoxImageClick;
-    [SerializeField] private GameObject _loadingAnimPref;
+    [SerializeField] GameImageDownloaderForUI _gameImageDownLoaderForUI;
 
     private CancellationTokenSource _ctsForImageDownload = new CancellationTokenSource();
 
@@ -26,7 +23,7 @@ public class GameBoxsManager : BoxManager
     {
         base.Awake();
         _gameBoxButtonClickSwitcher = new GameStartButtonClickSwitcher(_checkDlPanel, _checkUpdataPanel, _gameDlCue, _watchingGameDlCueForUI);
-        _gameBoxImageClick = new GameBoxImageClick();
+        _gameImageDownLoaderForUI = new GameImageDownloaderForUI();
     }
 
     /// <summary>
@@ -43,8 +40,8 @@ public class GameBoxsManager : BoxManager
             _lastBoxYPos = instancedBox.GetComponent<RectTransform>().anchoredPosition.y;
             GameBox instancedGameBox = instancedBox.GetComponent<GameBox>();
             instancedGameBox.SetStartButtonAct(_gameBoxButtonClickSwitcher.OnClickAction);
-            instancedGameBox.SetClickImageAct((gameBox) => _gameBoxImageClick.OnClickAction(gameBox, _ctsForImageDownload.Token));
             instancedGameBox.SetToLibraryButtonAct(ActivateGameLibraryPanel);
+            instancedGameBox.SetImageDownloader(_gameImageDownLoaderForUI);
         }
     }
 

@@ -1,20 +1,21 @@
 ﻿using Cysharp.Threading.Tasks;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-public class GameBoxImageClick
+public class GameImageDownloaderForUI : MonoBehaviour
 {
     List<string> downloadingImagesList = new List<string>();
+    private CancellationTokenSource cts = new CancellationTokenSource();
 
-    public void OnClickAction(GameBox targetGameBox, CancellationToken ct)
+    public void OnClickAction(GameData targetGameData, Action<string> setImageAct, Action endImageDownloadAct)
     {
-        StartDownloadImage(targetGameBox, ct);
+        StartDownloadImage(targetGameData, setImageAct ,endImageDownloadAct);
     }
 
-    private async UniTask StartDownloadImage(GameBox targetGameBox, CancellationToken ct)
+    private async UniTask StartDownloadImage(GameData targetGameData, Action<string> setImageAct, Action endImageDownloadAct = null)
     {
-        GameData targetGameData = targetGameBox._myGameData;
         string driveId = targetGameData.GameImageId;
         if (downloadingImagesList.Contains(driveId))
         {
@@ -35,10 +36,22 @@ public class GameBoxImageClick
         }
         ImageDlProc imageDlProc = new ImageDlProc(onNetDriveGetFile, targetGameData);
 
-        await imageDlProc.DLImageInUniTask(ct);
-
-        targetGameBox.SetImage(targetGameData.GameID);
+        try
+        {
+            await imageDlProc.DLImageInUniTask(cts.Token);
+            setImageAct?.Invoke(targetGameData.GameID);
+        }
+        catch (Exception e) 
+        {
+            Debug.LogException(e);
+        }
+        
         downloadingImagesList.Remove(targetGameData.GameImageId);
-        targetGameBox.EndImageLoading?.Invoke();
+        endImageDownloadAct?.Invoke();
+    }
+
+    private void OnDestroy()
+    {
+        if (cts != null) cts.Cancel();
     }
 }

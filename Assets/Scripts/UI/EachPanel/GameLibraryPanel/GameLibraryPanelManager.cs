@@ -8,7 +8,7 @@ public class GameLibraryPanelManager : UIPanel
     [SerializeField] private MonitorPlayerInput _monitorPlayerInput;
     [SerializeField] private  LibraryCellsManager _libraryCellsManager;
     [SerializeField] private  GameLibraryMainPanelManager _mainPanelManager;
-    [SerializeField] private GameLibraryMoveMainPanel _moveMainPanel;
+    [SerializeField] private GameLibraryMoveMainPanel _moveMainPanel;   
     [SerializeField] private UIActBase _closeMrk;
 
 

@@ -10,7 +10,9 @@ public class GameLibrarySubPanelManager : UIPanel
     [SerializeField] private UIActBase _closeMrk;
     [SerializeField] private UIActBase _openGameFolder;
     [SerializeField] private UIActBase _openGameExeFolder;
-    [SerializeField] private UIActBase _uninstallGame;
+    [SerializeField] private UIActBase _uninstallGameButton;
+
+    [SerializeField] private UninstallPanelManager _uninstallPanelManager;
 
     private GameData _myGameData;
 
@@ -23,7 +25,11 @@ public class GameLibrarySubPanelManager : UIPanel
         _openGameFolder.ClickAct = () => FileOpenByExplorer.OpenFolder(CreateDirPath.GameDataPath(allDirs.GameFilePath, _myGameData.GameID, _myGameData.GameDirName));
         _openGameExeFolder.ClickAct = () => FileOpenByExplorer.OpenFile(Path.Combine(allDirs.GameFilePath, _myGameData.GameID, _myGameData.GameDirName, _myGameData.GameExeName));
 
+        _uninstallGameButton.ClickAct = () => 
+        {
+            OnCloseProc();
+            _uninstallPanelManager.gameObject.SetActive(true);
+            _uninstallPanelManager.SetData(_myGameData);
+        };
     }
-
-
 }
