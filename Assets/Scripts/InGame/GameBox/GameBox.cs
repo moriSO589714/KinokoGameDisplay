@@ -14,8 +14,6 @@ public class GameBox : Box
     [SerializeField] int DescriptionWordsRemit;
     [SerializeField] UIActBase GameImage;
     [SerializeField] GameStartButton StartButton;
-    [SerializeField] Text GameDirName;
-    [SerializeField] int GameDirNameWordsRemit;
 
     [SerializeField] Sprite NoImageSprite;
 
@@ -38,8 +36,7 @@ public class GameBox : Box
         _myGameData = originGameData;
 
         GameDataSetterForUI.SetPlainStrData(originGameData.GameTitle, TitleWordsRemit, Title);
-        GameDataSetterForUI.SetPlainStrData(originGameData.GameDescription, DescriptionWordsRemit, DescriptionField);
-        GameDataSetterForUI.SetPlainStrData(originGameData.GameDirName, GameDirNameWordsRemit, GameDirName);
+        GameDataSetterForUI.SetPlainStrData(originGameData.GameDescription, DescriptionWordsRemit, DescriptionField);        
         SetImage(originGameData.GameID);
         SetStartButton();
     }
