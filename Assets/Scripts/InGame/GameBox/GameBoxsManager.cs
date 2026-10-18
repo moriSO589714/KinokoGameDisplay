@@ -11,6 +11,7 @@ public class GameBoxsManager : BoxManager
 
     [SerializeField] UIPanel _checkDlPanel;
     [SerializeField] UIPanel _checkUpdataPanel;
+    [SerializeField] GameLibraryPanelManager _gameLibraryPanelManager;
     [SerializeField] GameDlCue _gameDlCue;
 
     [SerializeField] WatchingGameDlCueForUI _watchingGameDlCueForUI;
@@ -41,9 +42,9 @@ public class GameBoxsManager : BoxManager
             GameObject instancedBox = InstanceBox(gameData, _lastBoxYPos, _gameBoxPref);
             _lastBoxYPos = instancedBox.GetComponent<RectTransform>().anchoredPosition.y;
             GameBox instancedGameBox = instancedBox.GetComponent<GameBox>();
-            instancedGameBox.SetClickButtonAct(_gameBoxButtonClickSwitcher.OnClickAction);
-
+            instancedGameBox.SetStartButtonAct(_gameBoxButtonClickSwitcher.OnClickAction);
             instancedGameBox.SetClickImageAct((gameBox) => _gameBoxImageClick.OnClickAction(gameBox, _ctsForImageDownload.Token));
+            instancedGameBox.SetToLibraryButtonAct(ActivateGameLibraryPanel);
         }
     }
 
@@ -51,5 +52,11 @@ public class GameBoxsManager : BoxManager
     {
         base.ClearField();
         _ctsForImageDownload.Cancel();
+    }
+
+    private void ActivateGameLibraryPanel(GameData clickedGameData)
+    {
+        _gameLibraryPanelManager.gameObject.SetActive(true);
+        _gameLibraryPanelManager.SetData(clickedGameData);
     }
 }

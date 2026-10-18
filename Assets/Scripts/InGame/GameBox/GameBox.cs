@@ -13,6 +13,7 @@ public class GameBox : Box
     [SerializeField] Text DescriptionField;
     [SerializeField] int DescriptionWordsRemit;
     [SerializeField] UIActBase GameImage;
+    [SerializeField] UIActBase ToLibraryButton;
     [SerializeField] GameStartButton StartButton;
 
     [SerializeField] Sprite NoImageSprite;
@@ -41,10 +42,6 @@ public class GameBox : Box
         SetStartButton();
     }
 
-    public void SetClickButtonAct(Action<GameData ,GameStartButton> clickStartButtonAct)
-    {
-        StartButton.ClickAct += () => clickStartButtonAct(_myGameData, StartButton);
-    }
 
     public void SetClickImageAct(Action<GameBox> dlImageAct)
     {
@@ -54,6 +51,16 @@ public class GameBox : Box
                 instantiated.GetComponent<LoadingSquare>().ChangeParent(GameImage.gameObject);
                 _instantiatedAnimObj = instantiated;};
         EndImageLoading += () => { Destroy(_instantiatedAnimObj); };
+    }
+
+    public void SetStartButtonAct(Action<GameData ,GameStartButton> clickStartButtonAct)
+    {
+        StartButton.ClickAct = () => clickStartButtonAct(_myGameData, StartButton);
+    }
+
+    public void SetToLibraryButtonAct(Action<GameData> clickToLibraryButtonAct)
+    {
+        ToLibraryButton.ClickAct = () => clickToLibraryButtonAct(_myGameData); 
     }
 
     private void SetStartButton()

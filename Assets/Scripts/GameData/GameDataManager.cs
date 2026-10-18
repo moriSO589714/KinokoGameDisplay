@@ -12,7 +12,8 @@ public class GameDataManager
     /// </summary>
     public void LoadGameDataFromJsons()
     {
-        new GameDatasSingleton().ResetGameDataList();
+        GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
+        gameDatasSingleton.ResetGameDataList();
         //jsonファイルが入っているディレクトリのパスを取得してくる
         AllDirs allDirs = AllDirs.GetInstance();
         string jsonsDirPath = allDirs.JsonsDirPath;
@@ -22,8 +23,6 @@ public class GameDataManager
         }
         //ゲームデータクラスのリスト化
         List<GameData> gameDatas = new JSONandGameDataChanger().JSONDirPathToGameData(jsonsDirPath);
-
-        GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
         gameDatasSingleton.AddGameDataList(gameDatas);
     }
 

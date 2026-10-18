@@ -80,18 +80,12 @@ public class MainUIManager : MonoBehaviour
         //================================================================================        
 
         //フィルタリングマークのアクティブ化確認をメイン画面に戻る度に行う
-        commonStateManager.AddOutPanelFunc(CheckFiltering);
+        commonStateManager.AddOutPanelFunc(CheckFiltering);       
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Debug.Log("GetSpace");
-            _libraryPanel.gameObject.SetActive(true);
-            GameLibraryPanelManager gameLibraryPanelManager = _libraryPanel as GameLibraryPanelManager;
-            gameLibraryPanelManager.SetData();
-        }
+
     }
 
     private void CreatePanel(GameObject panel)

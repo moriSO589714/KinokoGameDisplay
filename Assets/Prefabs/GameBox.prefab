@@ -374,6 +374,7 @@ MonoBehaviour:
   DescriptionField: {fileID: 55513340342271861}
   DescriptionWordsRemit: 55
   GameImage: {fileID: 3987893226828105229}
+  ToLibraryButton: {fileID: 924176155921094518}
   StartButton: {fileID: 3274110942545510202}
   NoImageSprite: {fileID: 21300000, guid: 8fcc58fa72d686c4f9f54611b7a688a7, type: 3}
   _loadingAnimPref: {fileID: 540808825727845273, guid: 408a3e5ca21bbad4ab6b8108ad249c87, type: 3}

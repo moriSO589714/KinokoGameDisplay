@@ -15,6 +15,8 @@ public class GameLibraryMainPanelManager : MonoBehaviour
     [SerializeField] private GameDlCue _gameDlCue;
     [SerializeField] private WatchingGameDlCueForUI _watchingGameDlCueForUI;
     [SerializeField] private GameStartButton _startButton;
+    [SerializeField] private GameLibrarySubPanelManager _gameLibrarySubPanel;
+    [SerializeField] private UIActBase _subPanelButton;
 
     [SerializeField] private GameLibrarySizeFitter _gameLibrarySizeFitter;
 
@@ -41,6 +43,12 @@ public class GameLibraryMainPanelManager : MonoBehaviour
         _startButton.ClickAct = () => _gameStartButtonClickChanger.OnClickAction(newGameData, _startButton);
         _startButton.NewSetGameData(newGameData);
         _startButton.ChangeButtonImage();
+
+        _subPanelButton.ClickAct = () =>
+        {
+            _gameLibrarySubPanel.gameObject.SetActive(true);
+            _gameLibrarySubPanel.SetData(_currentGameData);
+        };
 
         //UIの変更を即時実行
         Canvas.ForceUpdateCanvases();

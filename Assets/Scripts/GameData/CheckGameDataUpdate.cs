@@ -11,9 +11,11 @@ public static class CheckGameDataUpdate
     public static void CheckUpdate(GameData oldGameData, GameData newGameData)
     {
         bool isExistUpdate = false;
+        long oldGameVersion = long.TryParse(oldGameData.GameVersion, out long result) ? result : 0;
+        long newGameVersion = long.TryParse(oldGameData.GameVersion, out long result2) ? result2 : 0;
 
         //新しいほうのゲームのバージョンが新しくなっていた場合
-        if(long.Parse(oldGameData.GameVersion) < long.Parse(newGameData.GameVersion) && oldGameData.Status == GameStatus.Downloaded)
+        if(oldGameData.Status == GameStatus.Downloaded && oldGameVersion  < newGameVersion)
         {
             oldGameData.Status = GameStatus.UpdateAvailable;
         }

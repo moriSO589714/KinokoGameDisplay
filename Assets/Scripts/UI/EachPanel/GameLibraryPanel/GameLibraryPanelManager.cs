@@ -22,11 +22,17 @@ public class GameLibraryPanelManager : UIPanel
 
         _closeMrk.ClickAct = OnCloseProc;
     }
-    public void SetData(int _firstSelectIndex = 0)
+
+    public void SetData(GameData firstSelectGameData = null)
     {
         GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
         List<GameData> currentAllGameDatas = gameDatasSingleton.AllGameDatas;
-        _libraryCellsManager.GenerateBoxs(currentAllGameDatas, _firstSelectIndex);
+        int firstSelectIndex = currentAllGameDatas.IndexOf(firstSelectGameData);
+        if(firstSelectIndex == -1 || currentAllGameDatas[firstSelectIndex] == null)
+        {
+            firstSelectIndex = 0;
+        } 
+        _libraryCellsManager.GenerateBoxs(currentAllGameDatas, firstSelectIndex);
     }
 
     protected override void OnCloseProc()

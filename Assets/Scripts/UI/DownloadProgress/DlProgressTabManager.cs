@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class DlProgressTabManager : UIPanel
 {
-    [SerializeField] private SlideSideUIAct _thisUIAct;
+    [SerializeField] private DownloadProgressTabUIAct _thisUIAct;
     [SerializeField] private WatchingGameDlCueForUI _watchCue;
     [SerializeField] private DlProgressPanelManager _progressPanelManager;
 
