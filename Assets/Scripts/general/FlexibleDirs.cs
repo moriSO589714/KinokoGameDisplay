@@ -1,20 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// 自由に変更可能なディレクトリーのパスを代入するためのクラス
 /// </summary>
 public class FlexibleDirs
 {
-    //基底ディレクトリ(すべてのデータがこのディレクト下に保存される)
-    public string BaseDirectory;
     //ゲームが保存されるディレクトリ
-    public string GameFilePath;
+    public string GameFilePath = "dd\\GFP";
     //jsonFileが保存されるディレクトリ
-    public string JsonsDirPath;
+    public string JsonsDirPath = "dd\\JP";
     //イメージ写真が保存されるディレクトリ
-    public string ImageFolderPath;
+    public string ImageFolderPath = "dd\\IFP";
     //ゲームデータが保存されているドライブのID(最も上層)
     public string GameSavedDriveID;
     //スプレッドシートのID
