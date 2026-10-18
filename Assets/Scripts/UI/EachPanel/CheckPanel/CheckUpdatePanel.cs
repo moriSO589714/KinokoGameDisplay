@@ -43,12 +43,6 @@ public class CheckUpdatePanel : UIPanel
         OnCloseProc();
     }
 
-    protected override void OnCloseProc()
-    {
-        stateManager.SetCurrentLoad(LoadStates.NoLoading);
-        this.gameObject.SetActive(false);
-    }
-
     //スタートボタンのスプライト更新用、WathingGameDlCueForUIのEndProgressTaskSendTaskNameに突っ込む
     private void UpdateStartSpriteWhenEndUpdateTask(GameDlTask targetTask, string endTaskName, GameStartButton gameStartButton)
     {

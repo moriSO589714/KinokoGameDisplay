@@ -20,14 +20,14 @@ public class UIPanel : MonoBehaviour
     public virtual void InitPanel()
     {
         //ステートの変更
-        stateManager.SetCurrentLoad(LoadStates.MiniLoading);
+        stateManager.SetExistPanelState(PanelStates.LargePanel, this);
     }
 
     //パネルを閉じる際に行う処理
     protected virtual void OnCloseProc()
     {
         //ロードステートを変更する
-        stateManager.SetCurrentLoad(LoadStates.NoLoading);
+        stateManager.SetExistPanelState(PanelStates.NoPanel, this);
 
         //オブジェクトを消す
         this.gameObject.SetActive(false);

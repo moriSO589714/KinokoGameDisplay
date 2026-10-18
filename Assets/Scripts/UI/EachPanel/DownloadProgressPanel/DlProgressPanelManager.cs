@@ -41,7 +41,7 @@ public class DlProgressPanelManager : UIPanel
 
             //メイン画面に戻った際に割り当てを解除する
             CommonStateManager commonStateManager = CommonStateManager.Instance;
-            commonStateManager.AddOutLoadingFunc(() => { _monitorPlayerInput.OnMouseScroll -= act; });
+            commonStateManager.AddOutPanelFunc(() => { _monitorPlayerInput.OnMouseScroll -= act; });
         }
     }
 

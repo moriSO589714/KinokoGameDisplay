@@ -10,31 +10,27 @@ public enum SceneStates
     Main,
     Command,
 }
-public enum LoadStates 
+public enum PanelStates 
 {
-    NoLoading,　//ロードを行っていない
-    MainLoading, //パネルを用い全画面を伴うロード
-    MiniLoading, //画面の一部分のみを伴うロード
-    BackLoading,
+    NoPanel,　//パネルを表示していない
+    LargePanel, //パネルを表示している
 }
-
 
 public class CommonStateManager : BasedSingletonInMono<CommonStateManager>
 {
     //現在の状態
     [HideInInspector] public SceneStates _currentState { get; private set; }
-    [HideInInspector] public LoadStates _currentLoadState { get; private set; }
+    [HideInInspector] public PanelStates _currentPanelState { get; private set; }
 
     //ステート切り替え時に実行するメソッド(通常終了処理が記述される)
     private List<Func<CancellationToken, UniTask>> _onChangeFuncs = new();
 
-    //ロードに入る際に実行するメソッド
-    private List<Func<CancellationToken, UniTask>> _onMainLoadingFuncs = new();
-    private List<Func<CancellationToken, UniTask>> _onMiniLoadingFuncs = new();
-    private List<Func<CancellationToken, UniTask>> _onBackLoadingFuncs = new();
+    //パネルを表示させる際に実行するメソッド
+    private List<Func<CancellationToken, UniTask>> _inPanelFunc = new();
+    private List<UIPanel> _currentDisplayPanel = new List<UIPanel>();
 
     //ロードから出る時に実行するメソッド
-    private List<Func<CancellationToken, UniTask>> _outLoadFuncs = new();
+    private List<Func<CancellationToken, UniTask>> _outPanelFunc = new();
 
     protected override void Awake()
     {
@@ -68,24 +64,28 @@ public class CommonStateManager : BasedSingletonInMono<CommonStateManager>
         _currentState = state;
     }
 
-    public async UniTask SetCurrentLoad(LoadStates state)
+    public async UniTask SetExistPanelState(PanelStates state, UIPanel panel)
     {
         CancellationTokenSource cts = new CancellationTokenSource();
         switch (state) 
         {
-            case LoadStates.MainLoading:
-                await UniTask.WhenAll(_onMainLoadingFuncs.Select(f => f(cts.Token)));
+            case PanelStates.LargePanel:
+                //現在表示しているパネルとしてリストに追加しておく
+                _currentDisplayPanel.Add(panel);
+                await UniTask.WhenAll(_inPanelFunc.Select(f => f(cts.Token)));
+                _currentPanelState = state;
                 break;
-            case LoadStates.MiniLoading:
-                await UniTask.WhenAll(_onMiniLoadingFuncs.Select(f => f(cts.Token)));
-                break;
-            case LoadStates.NoLoading:
-                await UniTask.WhenAll(_outLoadFuncs.Select(f => f(cts.Token)));
+            case PanelStates.NoPanel:
+                _currentDisplayPanel.Remove(panel);
+                if(_currentDisplayPanel.Count == 0)
+                {
+                    await UniTask.WhenAll(_outPanelFunc.Select(f => f(cts.Token)));
+                    _currentPanelState = state;
+                }
                 break;
         }
 
         cts.Cancel();
-        _currentLoadState = state;
     }
 
     public void AddOnChangeFunc(Func<CancellationToken, UniTask> func)
@@ -93,56 +93,28 @@ public class CommonStateManager : BasedSingletonInMono<CommonStateManager>
         _onChangeFuncs.Add(func);
     }
 
-    public void AddOnMainLoadingFunc(Func<CancellationToken, UniTask> func)
+    public void AddInPanelFunc(Func<CancellationToken, UniTask> func)
     {
-        _onMainLoadingFuncs.Add(func);
+        _inPanelFunc.Add(func);
     }
 
-    public void AddOnMainLoadingFunc(Action act)
+    public void AddInPanelFunc(Action act)
     {
-        _onMainLoadingFuncs.Add(x =>
+        _inPanelFunc.Add(x =>
         {
             act?.Invoke();
             return UniTask.CompletedTask;
         });
     }
 
-    public void AddOnMiniLoadingFunc(Func<CancellationToken, UniTask> func)
+    public void AddOutPanelFunc(Func<CancellationToken, UniTask> func)
     {
-        _onMiniLoadingFuncs.Add(func);
+        _outPanelFunc.Add(func);
     }
 
-    public void AddOnMiniLoadingFunc(Action act)
+    public void AddOutPanelFunc(Action act)
     {
-        _onMiniLoadingFuncs.Add(x =>
-        {
-            act?.Invoke();
-            return UniTask.CompletedTask;
-        });
-    }
-
-    public void AddOnBackLoadingFunc(Func<CancellationToken, UniTask> func)
-    {
-        _onBackLoadingFuncs.Add(func);
-    }
-
-    public void AddOnBackLoadingFunc(Action act)
-    {
-        _onBackLoadingFuncs.Add(x =>
-        {
-            act?.Invoke();
-            return UniTask.CompletedTask;
-        });
-    }
-
-    public void AddOutLoadingFunc(Func<CancellationToken, UniTask> func)
-    {
-        _outLoadFuncs.Add(func);
-    }
-
-    public void AddOutLoadingFunc(Action act)
-    {
-        _outLoadFuncs.Add(x =>
+        _outPanelFunc.Add(x =>
         {
             act?.Invoke();
             return UniTask.CompletedTask;

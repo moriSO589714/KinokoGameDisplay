@@ -57,10 +57,9 @@ public class MainUIManager : MonoBehaviour
             Action<float> act = _gameBoxManager.OnScroll;
             _monitorPlayerInput.OnMouseScroll += act;
             //画面変更及び、ローディング時に外す
-            commonStateManager.AddOnMainLoadingFunc(() => { _monitorPlayerInput.OnMouseScroll -= act; });
-            commonStateManager.AddOnMiniLoadingFunc(() => { _monitorPlayerInput.OnMouseScroll -= act; });
+            commonStateManager.AddInPanelFunc(() => { _monitorPlayerInput.OnMouseScroll -= act; });            
             //メイン画面に戻った際は再び割り当てる
-            commonStateManager.AddOutLoadingFunc(() => { _monitorPlayerInput.OnMouseScroll += act; });
+            commonStateManager.AddOutPanelFunc(() => { _monitorPlayerInput.OnMouseScroll += act; });
         }
         //================================================================================
 
@@ -70,10 +69,9 @@ public class MainUIManager : MonoBehaviour
             Action act = () => CreatePanel(_optionPanel.gameObject);
             _monitorPlayerInput.EscapeAct += act;
             //画面変更及びローディング時に外す
-            commonStateManager.AddOnMainLoadingFunc(() => { _monitorPlayerInput.EscapeAct -= act; });
-            commonStateManager.AddOnMiniLoadingFunc(() => { _monitorPlayerInput.EscapeAct -= act; });
+            commonStateManager.AddInPanelFunc(() => { _monitorPlayerInput.EscapeAct -= act; });
             //メイン画面に戻った際は再び割り当てる
-            commonStateManager.AddOutLoadingFunc(() => { _monitorPlayerInput.EscapeAct += act; });
+            commonStateManager.AddOutPanelFunc(() => { _monitorPlayerInput.EscapeAct += act; });
         }
         //================================================================================
 
@@ -82,7 +80,7 @@ public class MainUIManager : MonoBehaviour
         //================================================================================        
 
         //フィルタリングマークのアクティブ化確認をメイン画面に戻る度に行う
-        commonStateManager.AddOutLoadingFunc(CheckFiltering);
+        commonStateManager.AddOutPanelFunc(CheckFiltering);
     }
 
     private void Update()

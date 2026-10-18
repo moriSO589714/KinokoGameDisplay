@@ -22,6 +22,10 @@ public class DlProgressTabManager : UIPanel
     {
     }
 
+    protected override void OnCloseProc()
+    {
+    }
+
     public void UpdateTask(GameDlTask newTask)
     {
         _dlProgressTaskBox.SetNewTask(newTask);

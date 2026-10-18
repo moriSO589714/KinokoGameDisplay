@@ -40,12 +40,6 @@ public class CheckDownloadPanel : UIPanel
         OnCloseProc();
     }
 
-    protected override void OnCloseProc()
-    {
-        stateManager.SetCurrentLoad(LoadStates.NoLoading);
-        this.gameObject.SetActive(false);
-    }
-
     private void ChangeSpriteWhenEndDownload(GameDlTask targetTask, string endTaskName, GameStartButton targetGameStartButton)
     {
         //終了したタスクが引数のIDを持つゲームのタスクか

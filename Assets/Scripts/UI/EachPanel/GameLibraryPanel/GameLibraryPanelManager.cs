@@ -9,15 +9,18 @@ public class GameLibraryPanelManager : UIPanel
     [SerializeField] private  LibraryCellsManager _libraryCellsManager;
     [SerializeField] private  GameLibraryMainPanelManager _mainPanelManager;
     [SerializeField] private GameLibraryMoveMainPanel _moveMainPanel;
+    [SerializeField] private UIActBase _closeMrk;
 
 
     public override void InitPanel()
     {
-        base.InitPanel();
-
         //マウススクロールの割り当て
         _monitorPlayerInput.OnMouseScroll += _libraryCellsManager.OnScroll;
         _monitorPlayerInput.OnMouseScroll += _moveMainPanel.OnScroll;
+        base.InitPanel();
+
+
+        _closeMrk.ClickAct = OnCloseProc;
     }
     public void SetData(int _firstSelectIndex = 0)
     {

@@ -28,6 +28,8 @@ public class LibraryCellsManager : BoxManager
     /// </summary>
     public void GenerateBoxs(List<GameData> gameDataList, int firstActivateIndex)
     {
+        ClearField();
+
         RectTransform thisRect = this.GetComponent<RectTransform>();
         foreach (GameData gameData in gameDataList)
         {
