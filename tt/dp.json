@@ -1,0 +1,15 @@
+{
+  "GameFilePath": "dd\\GFP",
+  "JsonsDirPath": "dd\\JP",
+  "ImageFolderPath": "dd\\IFP",
+  "GameSavedDriveID": "1YJFw7p6r-Lw7MSNwKB2qhLqL3pd-UvdN",
+  "SpreadSheetID": "1DtfvY_Oh2zaiMmohuE5LPHaOsUheNxb3t-U0wQA-U-c",
+  "SpreadSheetStartCellPos": {
+    "x": 2,
+    "y": 3
+  },
+  "SpStElementStartCellPos": {
+    "x": 2,
+    "y": 2
+  }
+}

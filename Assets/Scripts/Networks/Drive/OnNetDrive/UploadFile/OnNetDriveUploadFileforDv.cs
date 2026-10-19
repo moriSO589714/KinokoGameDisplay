@@ -47,7 +47,7 @@ public class OnNetDriveUploadFileforDv : OnNetDriveUploadFile
         if(progress.Status != Google.Apis.Upload.UploadStatus.Completed)
         {
             //アップロードが正常に終了しなかった場合
-            throw new System.Exception("アップロードに失敗>>>" + progress.Status);
+            throw new System.Exception("アップロードに失敗>>>" + progress.Exception.ToString());
         }
         //正常終了した場合はGoogleDriveIDを返して終了
         return request.ResponseBody.Id;

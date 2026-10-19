@@ -55,16 +55,10 @@ public class LoadFlexibleDir
     /// </summary>
     private void CheckDirsExist(AllDirs allDirs)
     {
-        CheckAndCreate(allDirs.GameFilePath);
-        CheckAndCreate(allDirs.JsonsDirPath);
-        CheckAndCreate(allDirs.ImageFolderPath);
-    }
-
-    private void CheckAndCreate(string dirPath)
-    {
-        if (!Directory.Exists(dirPath))
-        {
-            Directory.CreateDirectory(dirPath);
-        }
+        DirectoryActs.CreateAndCheckDir(allDirs.GameFilePath);
+        DirectoryActs.CreateAndCheckDir(allDirs.JsonsDirPath);
+        DirectoryActs.CreateAndCheckDir(allDirs.ImageFolderPath);
+        DirectoryActs.CreateAndCheckDir(allDirs.TmpDLPath);
+        DirectoryActs.CreateAndCheckDir(allDirs.TmpUpPath);
     }
 }

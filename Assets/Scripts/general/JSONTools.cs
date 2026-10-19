@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using UnityEngine;
 
@@ -49,6 +48,11 @@ public static class JSONTools
     public static void SerializeJson<T>(T serializedClass, string savePath)
     {
         string json = JsonUtility.ToJson(serializedClass);
+        string dirName = Path.GetDirectoryName(savePath);
+        if (!System.IO.Directory.Exists(dirName))
+        {
+            System.IO.Directory.CreateDirectory(dirName);
+        }
         //文字列形式で保存されたjsonをファイルとして出力する
         File.WriteAllText(savePath, json);
     }

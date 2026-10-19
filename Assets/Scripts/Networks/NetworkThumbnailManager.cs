@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using UnityEngine;
+﻿using System.IO;
 
 public class NetworkThumbnailManager
 {
@@ -17,7 +14,8 @@ public class NetworkThumbnailManager
 
         //一時保存フォルダに画像のコピーを作成
         string fixFileName = gameId + Path.GetExtension(localImagePath);
-        string tmpSavedPath = Path.Combine(allDirs.TmpDLPath, fixFileName); //コピー保存先のパス
+        DirectoryActs.CreateAndCheckDir(allDirs.TmpUpPath);
+        string tmpSavedPath = Path.Combine(allDirs.TmpUpPath, fixFileName); //コピー保存先のパス
         File.Copy(localImagePath, tmpSavedPath, overwrite: true);
 
         //コピーをドライブにアップロード
