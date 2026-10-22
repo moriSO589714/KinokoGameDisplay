@@ -1,9 +1,7 @@
 ﻿using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 public class OnNetUpdateGameInfoToSpSt : OnNetUpdateGameInfo
 {
@@ -36,6 +34,13 @@ public class OnNetUpdateGameInfoToSpSt : OnNetUpdateGameInfo
 
         request.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
 
-        request.Execute();
+        try
+        {
+            request.Execute();
+        }
+        catch (Google.GoogleApiException ex)
+        {
+            throw new System.Exception("スプレッドシートの値の更新に失敗しました", ex);
+        }
     }
 }

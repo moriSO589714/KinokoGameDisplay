@@ -17,10 +17,14 @@ public class CmdLoader : MonoBehaviour
     {
         GameDataManager gameDataManager = new GameDataManager();
         new LoadFlexibleDir().SetFlexibleDirByJson();
+        Debug.Log("flexibleデータの取得に成功しました(cmd)");
         gameDataManager.LoadGameDataFromJsons();
+        Debug.Log("ゲームデータの取得に成功しました(cmd)");
         _cmdLib = _commandManager.GetCmdLib();
+        Debug.Log("コマンドライブラリの取得に成功しました(cmd)");
         SetCommandReceiver();
         _cmdSceneManager.InputFieldManager._setCommandReceiver = SetCommandReceiver;
+        Debug.Log("コマンドシーンのロードに成功しました(cmd)");
     }
 
     private void SetCommandReceiver()

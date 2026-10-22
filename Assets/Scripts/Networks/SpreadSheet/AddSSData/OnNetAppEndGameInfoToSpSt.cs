@@ -2,7 +2,6 @@
 using Google.Apis.Sheets.v4.Data;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting.FullSerializer;
 
 public class OnNetAppEndGameInfoToSpSt : OnNetAppEndGameInfo
 {
@@ -34,7 +33,14 @@ public class OnNetAppEndGameInfoToSpSt : OnNetAppEndGameInfo
         //stringで入力された数値をシート上で数値として扱うために、ValueInputOptionを指定する
         request.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
 
-        //リクエストの実行
-        request.Execute();
+        try
+        {
+            //リクエストの実行
+            request.Execute();
+        }
+        catch (Google.GoogleApiException ex)
+        {
+            throw new System.Exception("スプレッドシートの値追加に失敗しました", ex);
+        }
     }
 }

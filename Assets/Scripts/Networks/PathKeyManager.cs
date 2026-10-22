@@ -32,7 +32,7 @@ public class PathKeyManager
     public void ActivateKeyCode(string cipherTxt)
     {
         AllDirs allDirs = AllDirs.GetInstance();
-        string savePath = allDirs.JsonPathKey;
+        string savePath = allDirs.ActivationCodePath;
 
         //コードが正しいかどうかの確認(最低限)
         if(cipherTxt == "")

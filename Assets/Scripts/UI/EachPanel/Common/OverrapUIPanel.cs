@@ -16,7 +16,7 @@ public class OverrapUIPanel : UIPanel
         
     }
 
-    protected override void OnCloseProc()
+    public override void OnCloseProc()
     {
         this.gameObject.SetActive(false);
     }

@@ -25,7 +25,7 @@ public class LoadingPanel : OverrapUIPanel
         _description.text = log;
     }
 
-    protected override void OnCloseProc()
+    public override void OnCloseProc()
     {
         //プレハブとして生成されるため、閉じる際は自身を消す
         Destroy(this.gameObject);

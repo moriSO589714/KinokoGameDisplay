@@ -26,7 +26,7 @@ public class SortPanelManager : UIPanel
         _closeThisPanelButton.ClickAct += OnCloseProc;
     }
 
-    protected override void OnCloseProc()
+    public override void OnCloseProc()
     {
         //各項目の初期化
         _categorySortManager.InitSortElement();

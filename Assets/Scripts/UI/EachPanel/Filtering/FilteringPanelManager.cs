@@ -26,7 +26,7 @@ public class FilteringPanelManager : UIPanel
         base.InitPanel();
     }
 
-    protected override void OnCloseProc()
+    public override void OnCloseProc()
     {
         _statusManager.PanelCloseProc();
 

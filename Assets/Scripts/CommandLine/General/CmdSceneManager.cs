@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CmdSceneManager : BasedSingletonInMono<CmdSceneManager>
@@ -11,6 +12,4 @@ public class CmdSceneManager : BasedSingletonInMono<CmdSceneManager>
     public CmdInputFieldManager InputFieldManager { get { return _inputFieldManager; }}
     public OutputManager OutPutManager { get { return _outPutManager; }}
     //--------------------------------------------------------
-
-    
 }

@@ -1,5 +1,4 @@
 ﻿using Google.Apis.Sheets.v4;
-using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
@@ -25,8 +24,16 @@ public class OnNetGameInfoFromSpSt : OnNetGameInfo
 
         List<List<string>> getValues = new List<List<string>>();
         ValueRange response = null;
-        //リクエストの送信
-        response = request.Execute();
+        try
+        {
+            //リクエストの送信
+            response = request.Execute();
+        }
+        catch (Google.GoogleApiException ex)
+        {
+            throw new Exception("スプレッドシートの値の取得に失敗しました", ex);
+        }
+
         var responseValues = response.Values;
 
         //受け取ったリクエストをList<List<string>>の形に整形

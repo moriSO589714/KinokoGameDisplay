@@ -32,23 +32,26 @@ public class CommonStateManager : BasedSingletonInMono<CommonStateManager>
     //ロードから出る時に実行するメソッド
     private List<Func<CancellationToken, UniTask>> _outPanelFunc = new();
 
-    protected override void Awake()
-    {
-        base.Awake();
-        //シーン遷移で破壊されないようにする
-        DontDestroyOnLoad(this.gameObject);
-    }
-
     public async UniTask SetCurrentState(SceneStates state)
     {
         CancellationTokenSource cts = new CancellationTokenSource();
         
+        _inPanelFunc.Clear();
+        _outPanelFunc.Clear();
+
         //現在のステートの終了処理をする。
         await UniTask.WhenAll(_onChangeFuncs.Select(f => f(cts.Token)));
+        //パネルステートの初期化処理を行う
+        List<UIPanel> copyedCurrentPanels = new List<UIPanel>(_currentDisplayPanel);
+        foreach(UIPanel panel in copyedCurrentPanels)
+        {
+            panel.OnCloseProc();
+        }
+        _currentDisplayPanel.Clear();
+        
         //タスクの破棄
         cts.Cancel();
         _onChangeFuncs = new();
-
 
         //シーン遷移を伴うなら、シーンを遷移させる（シーン遷移はここ以外から行わない）
         switch (state)
@@ -64,6 +67,12 @@ public class CommonStateManager : BasedSingletonInMono<CommonStateManager>
         _currentState = state;
     }
 
+    protected override void Awake()
+    {
+        base.Awake();
+        DontDestroyOnLoad(gameObject);
+    }
+
     public async UniTask SetExistPanelState(PanelStates state, UIPanel panel)
     {
         CancellationTokenSource cts = new CancellationTokenSource();
@@ -71,7 +80,7 @@ public class CommonStateManager : BasedSingletonInMono<CommonStateManager>
         {
             case PanelStates.LargePanel:
                 //現在表示しているパネルとしてリストに追加しておく
-                _currentDisplayPanel.Add(panel);
+                _currentDisplayPanel.Add(panel);                
                 await UniTask.WhenAll(_inPanelFunc.Select(f => f(cts.Token)));
                 _currentPanelState = state;
                 break;

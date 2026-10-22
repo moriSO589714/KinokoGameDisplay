@@ -15,6 +15,7 @@ public class MainUIManager : MonoBehaviour
     [SerializeField] private UIActBase _filterDownTab;
     [SerializeField] private UIActBase _optionDownTab;
     [SerializeField] private UIActBase _sortDownTab;
+    [SerializeField] private UIActBase _reloadButton;
     [SerializeField] private GameObject _canvas;
 
     [SerializeField] private UIPanel _onNetPanel;
@@ -34,6 +35,8 @@ public class MainUIManager : MonoBehaviour
         //ソフトウェア起動時に必要なロードを行う==========================================
         new LoadFlexibleDir().SetFlexibleDirByJson();
         //================================================================================
+
+        Debug.Log("Flexibleデータのロードに成功しました(main)");
 
         //Wifiボタンのデリゲート設定======================================================
         _networkDownTab.ClickAct = () => CreatePanel(_onNetPanel.gameObject);
@@ -75,12 +78,22 @@ public class MainUIManager : MonoBehaviour
         }
         //================================================================================
 
+        Debug.Log("各デリゲートの割り当てに成功しました(main)");
+
         //ローカルで保存されているゲームをロードしてgameBoxを作成する=====================
         new SetGameBoxs(_gameBoxManager).SetAllGameBoxfromLocal();
         //================================================================================        
 
+        Debug.Log("ゲームデータのロードに成功しました(main)");
+
         //フィルタリングマークのアクティブ化確認をメイン画面に戻る度に行う
-        commonStateManager.AddOutPanelFunc(CheckFiltering);       
+        commonStateManager.AddOutPanelFunc(CheckFiltering);
+
+        //リロードボタンのAction代入
+        GameDatasSingleton gameDataSingleton = GameDatasSingleton.Instance;
+        _reloadButton.ClickAct = () => { _gameBoxManager.GenerateBoxs(gameDataSingleton.AllGameDatas); };
+
+        Debug.Log("メインシーンのロードに成功しました(main)");
     }
 
     private void Update()
@@ -95,14 +108,21 @@ public class MainUIManager : MonoBehaviour
 
     private void CheckFiltering()
     {
-        GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
-        if(gameDatasSingleton.CurrentFilterCondition == null)
+        try
         {
-            _onFilteringMrk.SetActive(false);
+            GameDatasSingleton gameDatasSingleton = GameDatasSingleton.Instance;
+            if(gameDatasSingleton.CurrentFilterCondition == null)
+            {
+                _onFilteringMrk.SetActive(false);
+            }
+            else
+            {
+                _onFilteringMrk.SetActive(true);
+            }
         }
-        else
+        catch (Exception e)
         {
-            _onFilteringMrk.SetActive(true);
+            Debug.LogException(e);
         }
     }
 }

@@ -22,7 +22,7 @@ public class DlProgressTabManager : UIPanel
     {
     }
 
-    protected override void OnCloseProc()
+    public override void OnCloseProc()
     {
     }
 

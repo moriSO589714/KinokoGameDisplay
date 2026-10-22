@@ -26,6 +26,13 @@ public class OnNetDeleteRowToSpSt : OnNetDeleteRow
         var request = _sheetsService.Spreadsheets.Values
                         .Clear(new ClearValuesRequest() ,_sheetId, clearRange);
 
-        var response = request.Execute();       
+        try
+        {
+            var response = request.Execute();       
+        }
+        catch (Google.GoogleApiException ex)
+        {
+            throw new System.Exception("スプレッドシートの行の削除に失敗しました", ex);
+        }
     }
 }

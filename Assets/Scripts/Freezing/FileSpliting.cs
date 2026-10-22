@@ -65,7 +65,7 @@ public class FileSpliting
             while ((bytesRead = fs.Read(buffer, 0,buffer.Length)) > 0)
             {
                 //保存先のパス string.Format()の使い方に注意
-                string chunkFileName = string.Format("{0}.{1:D3}", fileName, chunkIndex);
+                string chunkFileName = string.Format("{0}.{1:D5}", fileName, chunkIndex);
                 string chunkPath = Path.Combine(saveinPath, chunkFileName);
 
                 //分割ファイルを書き出し

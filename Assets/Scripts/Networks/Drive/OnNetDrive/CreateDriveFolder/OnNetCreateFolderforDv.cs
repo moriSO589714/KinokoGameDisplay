@@ -24,8 +24,16 @@ public class OnNetCreateFolderforDv : OnNetCreateFolder
         //作成したドライブフォルダのドライブIDを返す用リクエストに含める
         request.Fields = "id";
 
+        Google.Apis.Drive.v3.Data.File file = null;
+        try
+        {
+            file = request.Execute();
+        }
+        catch (Google.GoogleApiException ex)
+        {
+            throw new System.Exception("ドライブフォルダの作成に失敗しました", ex);
+        }
         //フォルダの作成
-        Google.Apis.Drive.v3.Data.File file = request.Execute();
 
         //ドライブIDを返して終了
         return file.Id;

@@ -13,9 +13,16 @@ public class OnNetDeleteforDv : OnNetDelete
     /// </summary>
     public void DeleteFolder(string driveId)
     {
-        //リクエストを作成
-        var request = _driveService.Files.Delete(driveId);
-        //リクエストを実行
-        request.Execute();
+        try
+        {
+            //リクエストを作成
+            var request = _driveService.Files.Delete(driveId);
+            //リクエストを実行
+            request.Execute();
+        }
+        catch (Google.GoogleApiException ex)
+        {
+            throw new System.Exception("Driveファイルの削除に失敗しました", ex);
+        }
     }
 }

@@ -23,12 +23,19 @@ public class OnNetDriveMetaDatafromDv : OnNetDriveMetaData
         request.Fields = "nextPageToken, files(id,name)"; //nextPageTokenは1度の取得上限に達した際、次の検索に利用する
 
         var files = new List<Google.Apis.Drive.v3.Data.File>();
-        do
+        try
         {
-            var result = request.Execute();
-            files.AddRange(result.Files);
-            request.PageToken = result.NextPageToken;
-        } while (!string.IsNullOrEmpty(request.PageToken));
+            do
+            {
+                var result = request.Execute();
+                files.AddRange(result.Files);
+                request.PageToken = result.NextPageToken;
+            } while (!string.IsNullOrEmpty(request.PageToken));
+        }
+        catch (Google.GoogleApiException ex)
+        {
+            throw new System.Exception("メタデータの取得に失敗しました", ex);
+        }
 
         Dictionary<string, string> jsonDatas = new Dictionary<string, string>();
         //Drive APIのFile形式から(string,string)のディクショナリ形式に変換する

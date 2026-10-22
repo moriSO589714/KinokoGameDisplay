@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class GameUploadProc
 {
-    private readonly int goalDividePiecies = 50;
+    private readonly long _onePartDivideSize = 3000000;
     //アップロード時の最大データサイズ(圧縮時)。単位はbyte
     private readonly long limitUploadSize = 3221225472;
 
@@ -50,6 +50,7 @@ public class GameUploadProc
             //エラーで終了した場合はアップロード途中の部分の削除を行う
             if(_driveId != "")
             {
+                Debug.LogException(e);
 
                 //アップロード済みのデータやスプシデータの削除
                 try
@@ -59,12 +60,21 @@ public class GameUploadProc
                     string tempGamePath = CreateDirPath.TempGamePathForUpload(tempDirPath, _gameOriginalId);
                     
                     DirectoryActs.CompleteDirDelete(tempGamePath);
-                    DeleteProc deleteProc = new DeleteProc(_onNetDelete, _onNetGetParentId, _onNetDriveGetName);
-                    await deleteProc.UniDeleteDriveGame(_driveId, _gameOriginalId, new CancellationTokenSource().Token);
                 }
                 catch(System.Exception e2)
                 {
                     Debug.LogException(e2);
+                }
+
+                try
+                {
+                    DeleteProc deleteProc = new DeleteProc(_onNetDelete, _onNetGetParentId, _onNetDriveGetName);
+                    await deleteProc.UniDeleteDriveGame(_driveId, _gameOriginalId, new CancellationTokenSource().Token);
+
+                }
+                catch(System.Exception e3)
+                {
+                    Debug.LogException(e3);
                 }
             }
 
@@ -137,7 +147,6 @@ public class GameUploadProc
 
         //ファイルの容量から目標分割数を参考に分割するバイト数を算出する
         long zipFileByte = new System.IO.FileInfo(zipFilePath).Length;
-        long splicedBite = (long)Mathf.Floor(zipFileByte / goalDividePiecies);
 
         //制限容量を超えている場合は処理を終了する
         if(zipFileByte >= limitUploadSize)
@@ -149,7 +158,7 @@ public class GameUploadProc
         }
 
         //ゲームデータの分割を行う
-        fileSpliting.DivideZipFile(splicedBite, zipFilePath, tempSlicedGamePath);
+        fileSpliting.DivideZipFile(_onePartDivideSize, zipFilePath, tempSlicedGamePath);
 
         //分割したゲームデータのパスをリストで取得
         string[] uploadFilesPaths = Directory.GetFiles(tempSlicedGamePath);

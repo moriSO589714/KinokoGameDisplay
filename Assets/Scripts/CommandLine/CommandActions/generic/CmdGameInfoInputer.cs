@@ -218,6 +218,7 @@ public class CmdGameInfoInputer
                 registerVal => { _currentGameData.GameSoftwareType = registerVal; });
 
         _sceneManager.OutPutManager.SendLogMessage(systemReply.replyMessage, systemReply.logColor);
+        returnStartInputData.ForceDoingAction();
     }
 
     private void ReceiveAddDeveroppers(string message, CmdReturn returnStartInputData)

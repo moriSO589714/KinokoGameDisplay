@@ -64,7 +64,7 @@ public class NetworksSingleton : BasedSingleton<NetworksSingleton>
         if(_sheetsService == null)
         {
             AllDirs allDirs = AllDirs.GetInstance();
-            _sheetsService = new CreateAPIService(allDirs.JsonPathKey).CreateSheetAPIService();
+            _sheetsService = new CreateAPIService(allDirs.ActivationCodePath).CreateSheetAPIService();
         }
 
         return _sheetsService;
@@ -75,7 +75,7 @@ public class NetworksSingleton : BasedSingleton<NetworksSingleton>
         if(_driveService == null)
         {
             AllDirs allDirs = AllDirs.GetInstance();
-            _driveService = new CreateAPIService(allDirs.JsonPathKey).CreateDriveAPIService();
+            _driveService = new CreateAPIService(allDirs.ActivationCodePath).CreateDriveAPIService();
         }
 
         return _driveService;

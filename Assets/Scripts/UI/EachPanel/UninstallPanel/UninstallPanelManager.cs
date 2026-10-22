@@ -34,7 +34,7 @@ public class UninstallPanelManager : UIPanel
         _yesButton.ClickAct = () => DoUninstall().Forget();
     }
 
-    protected override void OnCloseProc()
+    public override void OnCloseProc()
     {
         SetInitMode();
         base.OnCloseProc();

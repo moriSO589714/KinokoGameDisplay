@@ -40,7 +40,7 @@ public class WifiPanelManager : UIPanel
         _yesMark.ClickAct = () => SetGameObjectProc().Forget();
     }
 
-    protected override void OnCloseProc()
+    public override void OnCloseProc()
     {
         SetInitMode();
         base.OnCloseProc();

@@ -24,7 +24,7 @@ public class UIPanel : MonoBehaviour
     }
 
     //パネルを閉じる際に行う処理
-    protected virtual void OnCloseProc()
+    public virtual void OnCloseProc()
     {
         //ロードステートを変更する
         stateManager.SetExistPanelState(PanelStates.NoPanel, this);

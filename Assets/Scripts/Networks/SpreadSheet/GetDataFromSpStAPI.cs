@@ -20,7 +20,7 @@ public class GetDataFromSpStAPI
     private void Init()
     {
         _allDirs = AllDirs.GetInstance();
-        string jsonPathKey = _allDirs.JsonPathKey;
+        string jsonPathKey = _allDirs.ActivationCodePath;
         _sheetsService = NetworksSingleton.Instance.ReturnSheetsService();
         _onNetGameInfo = createOnNetGameInfo();
     }

@@ -42,7 +42,6 @@ public class BasedSingletonInMono<T> : MonoBehaviour where T : MonoBehaviour
         {
             string typeName = typeof(T).Name;
             instance = this as T;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {

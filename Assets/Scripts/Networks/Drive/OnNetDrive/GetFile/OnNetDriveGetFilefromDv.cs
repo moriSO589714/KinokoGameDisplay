@@ -1,4 +1,6 @@
-﻿using Google.Apis.Drive.v3;
+﻿using Google.Apis.Download;
+using Google.Apis.Drive.v3;
+using Google.Apis.Drive.v3.Data;
 using System.IO;
 
 /// <summary>
@@ -21,9 +23,15 @@ public class OnNetDriveGetFilefromDv : OnNetDriveGetFile
         //リクエストの作成
         var request = _driveService.Files.Get(driveId);
         string filePath = Path.Combine(dledPath, fileName);
+        IDownloadProgress progress;
         using (FileStream stream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
         {
-            request.Download(stream);
+             progress = request.DownloadWithStatus(stream);
+        }
+
+        if(progress.Status != DownloadStatus.Completed)
+        {
+            throw new System.Exception("ダウンロードに失敗しました。", progress.Exception);
         }
     }
 }

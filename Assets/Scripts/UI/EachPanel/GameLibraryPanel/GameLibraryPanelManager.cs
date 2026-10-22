@@ -35,7 +35,7 @@ public class GameLibraryPanelManager : UIPanel
         _libraryCellsManager.GenerateBoxs(currentAllGameDatas, firstSelectIndex);
     }
 
-    protected override void OnCloseProc()
+    public override void OnCloseProc()
     {
         //マウススクロール割り当てを外す
         _monitorPlayerInput.OnMouseScroll -= _libraryCellsManager.OnScroll;

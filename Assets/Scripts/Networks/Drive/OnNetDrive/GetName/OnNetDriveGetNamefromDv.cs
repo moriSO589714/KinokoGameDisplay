@@ -13,8 +13,16 @@ public class OnNetDriveGetNamefromDv : OnNetDriveGetName
     {
         var request = _driveService.Files.Get(driveId);
 
-        var result = request.Execute();
-        string folderName = result.Name;
+        string folderName = "";
+        try
+        {
+            var result = request.Execute();
+            folderName = result.Name;
+        }
+        catch (Google.GoogleApiException ex)
+        {
+            throw new System.Exception("ドライブ上のフォルダ名取得に失敗しました", ex);
+        }
         return folderName;
     }
 }
